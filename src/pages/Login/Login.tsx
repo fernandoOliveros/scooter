@@ -18,7 +18,7 @@ import { createUser } from '../../redux/auth/authSlicer';
 function Login() {
   //Form
   const [FormLogin, SetFormLogin] = useState<loginModel>({} as loginModel);
-  const { loading, callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
+  const { callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
   const dispatch = useDispatch();
 
   //Functions
