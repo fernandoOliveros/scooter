@@ -14,6 +14,7 @@ export const UserEmptyState: userModel = {
 
 //Le ponemos <T,> porque es cualquier tipo de dato que manden desde la llamada de la funcion
 export const persistLocalStorage = <T>(key: string, value: T) => {
+    console.log(value);
     localStorage.setItem(key, JSON.stringify({ ...value }));
 };
   

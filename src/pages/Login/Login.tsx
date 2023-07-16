@@ -14,25 +14,25 @@ import { useDispatch } from 'react-redux';
 import loginService from '../../services/login/login.service';
 import { loginModel } from '../../models/login/login.model';
 import { createUser } from '../../redux/auth/authSlicer';
+import { useNavigate } from 'react-router-dom';
 
-function Login() {
-  //Form
-  const [FormLogin, SetFormLogin] = useState<loginModel>({} as loginModel);
+const Login = () => {
+  //field
+  const [FormLogin, SetFormLogin] = useState<loginModel>({st_Email: '', st_Password: ''});
   const { callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   //Functions
-  const onChange = (e: ChangeEvent<HTMLFormElement | HTMLInputElement | HTMLTextAreaElement>): void => {
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     SetFormLogin({...FormLogin, [ e.target.id] : e.target.value});
   }
 
   const onSubmit = async (e: any) => {
-    e.preventDefault();
-    const result = await callEndpoint(loginService(FormLogin));
-    console.log(result);
-
-
-    dispatch(createUser(result));
+    e.preventDefault(); //Disabled default action (button)
+    const result = await callEndpoint(loginService(FormLogin)); // injection service login
+    dispatch(createUser(result.data.data)); //Save user in storage root
+    navigate("/home"); //navigate to home
   }
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
@@ -74,4 +74,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Login;
