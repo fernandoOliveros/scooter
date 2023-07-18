@@ -28,7 +28,7 @@ const CreateUnidad = () => {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <UnidadForms />
+                                <UnidadForms id_Documento={undefined} />
                             </div>
                         </div>
                     </div>

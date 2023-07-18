@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEventHandler, useEffect, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { ITipoUnidad } from '../../../models/shared/tipo-unidad.model';
 import { getTipoUnidad } from '../../../services/public.service';
 import { IUnidadForm } from '../../../models/unidades/unidad-form.model';
@@ -16,7 +16,7 @@ export interface Props {
   id_Documento: string | undefined
 }
 
-const UnidadForm = ({ id_Documento }: Props) => {
+const UnidadForm = ({ id_Documento = undefined }: Props) => {
   //Variables globales
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
@@ -63,7 +63,14 @@ const UnidadForm = ({ id_Documento }: Props) => {
   const onchangeDocumentos = (e: ChangeEvent<HTMLInputElement>) => {
     const MAX_FILE_SIZE = 5002400;
     let doc = e.target.id;
-    console.log(e.target.files[0]);
+    let sizeFile = e.target.files?.[0].size;
+    console.log(e.target.files?.[0]);
+    if( doc === "url_TarjetaCirculacion"){
+      if(sizeFile > MAX_FILE_SIZE){
+        setDocumentos({...documentos, url_TarjetaCirculacion: null});
+        const selectId = document.getElementById("file-url_TarjetaCirculacion");
+      }
+    }
   }
 
   const onChangeTipoUnidad = (arreglo: any) => {
