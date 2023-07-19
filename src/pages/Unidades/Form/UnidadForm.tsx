@@ -65,12 +65,6 @@ const UnidadForm = ({ id_Documento = undefined }: Props) => {
     let doc = e.target.id;
     let sizeFile = e.target.files?.[0].size;
     console.log(e.target.files?.[0]);
-    if( doc === "url_TarjetaCirculacion"){
-      if(sizeFile > MAX_FILE_SIZE){
-        setDocumentos({...documentos, url_TarjetaCirculacion: null});
-        const selectId = document.getElementById("file-url_TarjetaCirculacion");
-      }
-    }
   }
 
   const onChangeTipoUnidad = (arreglo: any) => {
