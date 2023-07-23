@@ -9,6 +9,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DateFormatFix from '../../utils/DateFormatFix';
 import { useSelector } from "react-redux";
 import { RootStore } from "../../redux/store";
+import ModalDocumentos from '../../components/Unidades/ModalDocumentos';
 
 
 function Unidades () {
@@ -16,6 +17,9 @@ function Unidades () {
     const userState = useSelector((store: RootStore) => store.user);
     const [ unidades, setUnidades ] = useState<UnidadModel[]>([])
     const loadUnidad = getUnidades(userState.user.id_Empresa);
+
+    const [openModal, setOpenModal] = useState<boolean>(false);
+
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -26,25 +30,23 @@ function Unidades () {
         };
         useGet();
         // Desmontamos componente
-        return( loadUnidad.controller.abort() );
+        return() => { loadUnidad.controller.abort() };
     },[]);
     
 
-    const crearUnidad = () => {
-        navigate("crear");
-    }
+    const crearUnidad = () => navigate("crear");
 
+    const EditarUnidad = (id: number) => navigate("editar/" + id);
 
-    const EditarUnidad = (id: number) => {
-        console.log(id);
-    }
+    const EliminarUnidad = (id: number) => console.log(id);
 
-    const EliminarUnidad = (id: number) => {
-        console.log(id);
+    const viewDocuments = () => {
+        setOpenModal(true);
     }
 
     return (
     <Fragment>
+        <ModalDocumentos open={openModal}/>
         <div className="container-fluid">
             <div className="row page-titles">
                 <div className="col-md-5 col-sm-12 col-xs-12">
@@ -79,13 +81,13 @@ function Unidades () {
                         <div className="card">
                             <div className="card-body">
                                 <div className='row'>
-                                    <div className='col-md-6 col-sm-12 col-xs-12'>
+                                    <div className='col-md-12 col-sm-12 col-xs-12'>
                                         <h3 className="card-title">Eco: {unidad.st_Economico}</h3>
                                     </div>
-                                    <div className='col-md-6 col-sm-12 col-xs-12'>
+                                    <div className='mr-5 col-md-12 col-sm-12 col-xs-12'>
                                         <ul className="list-inline">
                                             <li>
-                                                <button className="btn btn-sm btn-outline-success btn-rounded" type="button" onClick={() => EditarUnidad(unidad.id_Unidad)}><VisibilityIcon /> Ver</button>
+                                                <button className="btn btn-sm btn-outline-success btn-rounded" type="button" onClick={() => viewDocuments()}><VisibilityIcon /> Ver</button>
                                             </li>
                                             <li>
                                                 <button className="btn btn-sm btn-outline-info btn-rounded" type="button" onClick={() => EditarUnidad(unidad.id_Unidad)}><MiscellaneousServicesIcon /> Editar</button>

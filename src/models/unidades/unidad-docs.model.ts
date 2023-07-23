@@ -1,5 +1,5 @@
 export interface IUnidadDocumentos{
-    url_TarjetaCirculacion: FileList | null,
-    url_Factura: FileList | null,
-    url_PermisoSCT: FileList | null
+    url_TarjetaCirculacion: string | Blob,
+    url_Factura: string | Blob,
+    url_PermisoSCT: string | Blob
 }

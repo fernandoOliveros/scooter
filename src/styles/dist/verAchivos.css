@@ -1,0 +1,15 @@
+.documentos-btn{
+    padding: 5px 15px;
+    border: 2px solid #0346CB;
+    background-color: transparent;
+    border-radius: 15px;
+    transition: all .5s ease-in-out;
+    width: 100%;
+    min-height: 70px;
+}
+
+.documentos-btn:hover {
+    background-color: #042971;
+    color: #f5f5f5;
+    border-color: #042971;
+}

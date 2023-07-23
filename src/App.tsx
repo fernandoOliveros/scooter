@@ -5,8 +5,11 @@ import AuthGuard from './guards/guard-routes';
 
 const LoginScreen = lazy( () => import('./pages/Login/Login'));
 const HomeScreen = lazy( () => import('./pages/Home/Home'));
+
+//* UNIDADES
 const UnidadesScreen = lazy( () => import('./pages/Unidades/Unidades'));
 const CreateUnidadScreen = lazy( () => import('./pages/Unidades/CreateUnidad'));
+const EditUnidadScreen = lazy( () => import('./pages/Unidades/EditUnidad'));
 
 
 function App() {
@@ -21,6 +24,7 @@ function App() {
           <Route path={PrivateRoutes.home} element={<HomeScreen />} />
           <Route path={PrivateRoutes.unidades} element={<UnidadesScreen />} />
           <Route path={PrivateRoutes.newUnidad} element={<CreateUnidadScreen />} />
+          <Route path={PrivateRoutes.editUnidad} element={<EditUnidadScreen />} />
         </Route>
       </Routes>
     </Suspense>
