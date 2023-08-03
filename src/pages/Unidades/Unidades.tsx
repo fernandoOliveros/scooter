@@ -11,29 +11,31 @@ import { useSelector } from "react-redux";
 import { RootStore } from "../../redux/store";
 import ModalDocumentos from '../../components/Unidades/ModalDocumentos';
 
-
 function Unidades () {
     //Store
     const userState = useSelector((store: RootStore) => store.user);
     const [ unidades, setUnidades ] = useState<UnidadModel[]>([])
     const loadUnidad = getUnidades(userState.user.id_Empresa);
-
     const [openModal, setOpenModal] = useState<boolean>(false);
 
     let navigate = useNavigate();
 
     useEffect(() => {
         const useGet = async() => {
-            const response = await loadUnidad.call;
-            if(response.data.success)
-                setUnidades(response.data.data);
+            try{
+                const response = await loadUnidad.call;
+                console.log(response.data);
+                if(response.data.success)
+                    setUnidades(response.data.data);
+            }catch(error){
+                alert("error");
+            }
         };
         useGet();
         // Desmontamos componente
         return() => { loadUnidad.controller.abort() };
     },[]);
     
-
     const crearUnidad = () => navigate("crear");
 
     const EditarUnidad = (id: number) => navigate("editar/" + id);

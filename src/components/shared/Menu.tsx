@@ -30,9 +30,8 @@ const Menu = () => {
   const Navegar = (e: string) => {
     if ( e === "salir" ){
       //Limpiamos localSotrage
-      localStorage.clear();
       dispatch(resetUser());
-
+      localStorage.clear();
       Swal.fire({ icon: 'success', title: 'Cerrando Sesión' , text: 'Saliendo del Sistema ...', timer: 1500, showConfirmButton:false});
       setTimeout(function () {
         navigate("/", { replace : true });

@@ -29,10 +29,11 @@ const Login = () => {
   }
 
   const onSubmit = async (e: any) => {
-    e.preventDefault(); //Disabled default action (button)
-    const result = await callEndpoint(loginService(FormLogin)); // injection service login
-    dispatch(createUser(result.data.data)); //Save user in storage root
-    navigate("/home"); //navigate to home
+    e.preventDefault();
+    const result = await callEndpoint(loginService(FormLogin));
+    console.log(result);
+    dispatch(createUser(result.data.data));
+    navigate("/home",  { replace : true });
   }
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>

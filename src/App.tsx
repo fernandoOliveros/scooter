@@ -6,10 +6,14 @@ import AuthGuard from './guards/guard-routes';
 const LoginScreen = lazy( () => import('./pages/Login/Login'));
 const HomeScreen = lazy( () => import('./pages/Home/Home'));
 
-//* UNIDADES
+//todo:  UNIDADES
 const UnidadesScreen = lazy( () => import('./pages/Unidades/Unidades'));
 const CreateUnidadScreen = lazy( () => import('./pages/Unidades/CreateUnidad'));
 const EditUnidadScreen = lazy( () => import('./pages/Unidades/EditUnidad'));
+
+//todo: OPERADORES
+const OperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
+const createOperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
 
 
 function App() {
@@ -21,10 +25,19 @@ function App() {
         <Route path='login' element={<LoginScreen />} />
         
         <Route element={<AuthGuard />}>
+          {/* HOME */}
           <Route path={PrivateRoutes.home} element={<HomeScreen />} />
+
+          {/* UNIDADES*/}
           <Route path={PrivateRoutes.unidades} element={<UnidadesScreen />} />
           <Route path={PrivateRoutes.newUnidad} element={<CreateUnidadScreen />} />
           <Route path={PrivateRoutes.editUnidad} element={<EditUnidadScreen />} />
+
+
+          {/* OPERADORES*/}
+          <Route path={PrivateRoutes.operadores} element={<OperadoresScreen />} />
+          <Route path={PrivateRoutes.newOperador} element={<CreateUnidadScreen />} />
+          <Route path={PrivateRoutes.editOperador} element={<EditUnidadScreen />} />
         </Route>
       </Routes>
     </Suspense>

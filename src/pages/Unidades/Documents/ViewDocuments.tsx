@@ -6,7 +6,7 @@ export interface Props {
     id_Documento: number
 }
 
-const ViewDocuments = ({id_Documento}: Props) => {
+const ViewDocuments = ({id_Documento = 0}: Props) => {
     const [docs, setDocs] = useState({url_TarjetaCirculacion: "", url_Factura: "", url_PermisoSCT: ""});
     const loadDocumentos = getDocumentsUnidad(id_Documento);
 
