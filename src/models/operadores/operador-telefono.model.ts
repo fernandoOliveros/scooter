@@ -1,6 +1,5 @@
-export interface operadorTelefono
-{
-    id_Categoria: number;
-    id_Operador: number;
+export interface IOperadorTelefono{
+    id_Categoria: number | null;
+    id_Operador: number  |   null;
     st_NumTelefono: string;
 }

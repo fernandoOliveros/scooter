@@ -1,13 +1,12 @@
-export interface OperadorDireccion 
-{
-    id_Operador:number;
-    c_codigoPostal:string;
-    id_Estado: number;
-    id_Localidad: number;
-    id_Municipio: number;
-    id_Colonia: number;
-    st_Calle: string;
-    st_NoExterio: string;
-    st_NoInterior: string;
-    st_RefDomicilio: string;
+export interface IOperadorDireccion {
+    id_Operador?: number | null;
+    c_codigoPostal?: string;
+    id_Estado?: number | null;
+    id_Localidad?: number | null;
+    id_Municipio?: number | null;
+    id_Colonia?: number | null;
+    st_Calle?: string;
+    st_NoExterior?: string;
+    st_NoInterior?: string;
+    st_RefDomicilio?: string;
 }

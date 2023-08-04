@@ -11,3 +11,12 @@ export const getTipoUnidad = () => {
         controller
     }
 }
+
+export const getColoniasByCodigoPostal = (codigo_postal : string) => {
+    const controller = loadAbort();
+    const url = baseUrl + "direccionOperadores/getByCP/" + codigo_postal;
+    return {
+        call: axios.get(url, {signal: controller.signal} ),
+        controller
+    }
+}

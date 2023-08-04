@@ -1,4 +1,4 @@
-export interface OperadorModel {
+export interface IOperadorModel {
     id_Operador: number;
     st_Nombre: string;
     st_ApellidoPaterno: string;

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { RootStore } from '../../redux/store';
 import { getOperadoresByEmpresa } from '../../services/operadores/operadores.service';
-import { OperadorModel } from '../../models/operadores/operador.model';
+import { IOperadorModel } from '../../models/operadores/operador.model';
 import MenuBar from "../../components/shared/Menu"
 import DateFormatFix from '../../utils/DateFormatFix';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -14,7 +14,7 @@ function Operadores() {
     //todo: VARIABLES
     const navigate = useNavigate();
 
-    const [operadores, setOperadores] = useState<OperadorModel[]>([]);
+    const [operadores, setOperadores] = useState<IOperadorModel[]>([]);
 
     //todo: STORE
     const userState = useSelector((store: RootStore) => store.user);
