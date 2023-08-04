@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate} from 'react-router-dom';
-import {  PrivateRoutes, PublicRoutes } from './routes/routes';
+import {  PrivateRoutes } from './routes/routes';
 import AuthGuard from './guards/guard-routes';
 
 const LoginScreen = lazy( () => import('./pages/Login/Login'));
@@ -13,7 +13,7 @@ const EditUnidadScreen = lazy( () => import('./pages/Unidades/EditUnidad'));
 
 //todo: OPERADORES
 const OperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
-const createOperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
+const CreateOperadoresScreen = lazy( () => import('./pages/Operadores/CreateOperador'));
 
 
 function App() {
@@ -36,7 +36,7 @@ function App() {
 
           {/* OPERADORES*/}
           <Route path={PrivateRoutes.operadores} element={<OperadoresScreen />} />
-          <Route path={PrivateRoutes.newOperador} element={<CreateUnidadScreen />} />
+          <Route path={PrivateRoutes.newOperador} element={<CreateOperadoresScreen />} />
           <Route path={PrivateRoutes.editOperador} element={<EditUnidadScreen />} />
         </Route>
       </Routes>
