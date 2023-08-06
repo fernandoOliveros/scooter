@@ -10,8 +10,9 @@ import { getColoniasByCodigoPostal } from '../../../services/public.service';
 import { IColonia } from '../../../models/shared/colonias.model';
 import { IAutoComplete } from '../../../models/shared/autocomplete.model';
 import { Autocomplete, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { createOperador, getIdOperador, insertContacto, insertDireccion, insertTelefono } from '../../../services/operadores/operadores.service';
+import { createOperador, getContactoOperador, getDireccionOperador, getIdOperador, getTelefonoOperador, insertContacto, insertDireccion, insertTelefono, updateFilesOperador, uploadFilesOperador } from '../../../services/operadores/operadores.service';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
+import ViewDocumentsOperador from '../Documents/ViewDocumentsOperador';
 
 // todo: VARIABLES GLOBALES
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -39,18 +40,25 @@ const OperadorForm = ({id_Operador = ''}) =>{
   const [telefono, setTelefono] = useState<IOperadorTelefono>({id_Operador: null, id_Categoria: 2, st_NumTelefono: ''});
   const [contacto, setContacto] = useState<IOperadorContactos>({id_Operador: null, st_Nombre:'', st_NumTelefono:'', st_Parentesco:''});
   const [colonias, setColinas] = useState<IAutoComplete[]>([]);
-  const [selectColonia, setSelectColonia] = useState(null);
+  const [selectColonia, setSelectColonia] = useState<any>(null);
   const [formDireccion, setFormDireccion] = useState({st_Colonia: '', st_Municipio: '', st_Localidad:'', st_Estado: ''});
-  const [idDocumento, setIdDocumento] = useState<number>(0);
 
+  //todo: VARIABLES GLOBALES PARA 
+  const [idDocumento, setIdDocumento] = useState<number>(0);
+  const [id_Dir_Operador, setId_Dir_Operador] = useState<number>(0);
+  const [id_ContactoEm, setId_ContactoEm] = useState<number>(0);
+  const [id_NumTelefono, setId_NumTelefono] = useState<number>(0);
 
   //todo: INITIAL FUNCTION
   useEffect( () => {
     if(id_Operador.trim() !== ''){
       getOperadorWithId();
+      getDireccionOperadorId();
+      getOperadorTelefono();
+      getContactoOperadorId();
     }
     return() => {
-      loadEspecificOperador.controller.abort();
+      if(id_Operador.trim() !== ''){ loadEspecificOperador.controller.abort(); } 
     }
   },[id_Operador]);
 
@@ -61,12 +69,126 @@ const OperadorForm = ({id_Operador = ''}) =>{
     try {
       const result = await loadEspecificOperador.call;
       let response = result.data;
-      console.log("response");
+      const dataOperador = response.data[0];
+      const validate = validateSameEmpresa(dataOperador.id_Empresa);
+      if(validate){
+        setIdDocumento(dataOperador.id_Documento);
+        let tempOperadorForm = {
+          id_Empresa: dataOperador.id_Empresa , 
+          st_Nombre: dataOperador.st_Nombre, 
+          st_ApellidoP: dataOperador.st_ApellidoP, 
+          st_ApellidoM: dataOperador.st_ApellidoM, 
+          st_NumIMSS: dataOperador.st_NumIMSS, 
+          st_CURP: dataOperador.st_CURP, 
+          st_RFC: dataOperador.st_RFC, 
+          st_NumLicencia: dataOperador.st_NumLicencia, 
+          date_Nacimiento: dataOperador.date_Nacimiento, 
+          date_LicenciaVigencia: dataOperador.date_LicenciaVigencia, 
+          id_TipoPuesto: dataOperador.id_TipoPuesto,
+          i_Status: dataOperador.i_Status
+        };
+        setOperadorForm({...operadorForm, ...tempOperadorForm});
+      }else{
+        alert("El operador no pertenece a su empresa.");
+        console.log("Error, no pertenece el operador a la empresa");
+      }
     } catch (error) {
       alert("Error- al obtener información del operador");
       console.log(error);
     }
-    
+  }
+  const validateSameEmpresa = (idEmpresa : number) => {
+    if(id_Empresa === idEmpresa)
+      return true;
+    else
+      return false;
+  }
+
+  //todo: SERVICE LOAD DIRECCION OPERADOR WIDTH ID
+  const loadDireccion = getDireccionOperador(id_Operador);
+  const getDireccionOperadorId = async() => {
+    console.log("OBTENER LA DIRECCIÓN DEL OPERADOR");
+    try {
+      let result = await loadDireccion.call;
+      let response = result.data;
+      
+      //* Asignamos el id dirección del operador
+      setId_Dir_Operador(response.data.id_Dir_Operador);
+      let tempDirec = {
+        id_Operador: response.data.id_Operador,
+        st_Calle: response.data.st_Calle, 
+        st_NoExterior: response.data.st_NoExterior, 
+        st_NoInterior: response.data.st_NoInterior, 
+        st_RefDomicilio: response.data.st_RefDomicilio, 
+        c_codigoPostal: response.data.c_codigoPostal, 
+        id_Estado: response.data.id_Estado, 
+        id_Localidad: response.data.id_Localidad, 
+        id_Municipio: response.data.id_Municipio, 
+        id_Colonia: response.data.id_Colonia
+      }
+      setDireccion({...direccion, ...tempDirec});
+
+      //* llenamos los campos del formulario de dirección
+      let FormDire = {
+        st_Colonia:  '', 
+        st_Municipio:  response.data.st_Municipio, 
+        st_Localidad: response.data.st_Localidad, 
+        st_Estado:  response.data.st_Estado
+      }
+      setFormDireccion({...formDireccion, ...FormDire});
+
+      //* Seleccionamos la colonia
+      let tempColonia: IAutoComplete = {
+        id: response.data.id_Colonia, 
+        label: response.data.st_Colonia
+      };
+      setSelectColonia(tempColonia);      
+    } catch (error) {
+      alert("Error, al obtener la dirección del operador");
+      console.log(error);
+    }
+  }
+
+  //todo: SERVICE TO LOAD TELEFONOS WITH ID OPERADOR
+  const loadSpecificTelefono = getTelefonoOperador(id_Operador);
+  const getOperadorTelefono = async () => {
+    console.log("Obtener el telefono del operador");
+    try {
+      const result = await loadSpecificTelefono.call;
+      const response = result.data;
+      setId_NumTelefono(response.data.id_NumTelefono);
+      let TelefonoTemp = {
+        id_Operador: response.data.id_Operador, 
+        id_Categoria:response.data.id_Categoria, 
+        st_NumTelefono: response.data.st_NumTelefono
+      }
+      setTelefono({...telefono, ...TelefonoTemp});
+    } catch (error) {
+      alert("Error, al obtener el telefono del operador");
+      console.log(error);
+    }
+  }
+
+  //todo: SERVICE TO LOAD CONTACTO DE EMERGENCIA WITH ID OPERADOR
+  const loadContactEmergency = getContactoOperador(id_Operador);
+  const getContactoOperadorId = async() => {
+    console.log("Obtener contacto del operador");
+    try {
+      let result = await loadContactEmergency.call;
+      let response = result.data;
+      setId_ContactoEm( response.data.id_ContactoEm);
+      let ContactosEmer = {
+        id_Operador: response.data.id_Operador, 
+        st_Nombre: response.data.st_Nombre, 
+        st_NumTelefono: response.data.st_NumTelefono, 
+        st_Parentesco: response.data.st_Parentesco
+      }
+      setContacto({...contacto, ...ContactosEmer});
+    } catch (error) {
+      alert("Error, no se pudo obtener el contacto del operador");
+      console.log(error);
+    }
+
   }
 
   //todo: fORM FUNCTIONS
@@ -102,10 +224,10 @@ const OperadorForm = ({id_Operador = ''}) =>{
     try {
       const result = await serviceColonias.call;
       const response = result.data;
-      setSelectColonia(null);
+      setSelectColonia(null); //Seteamos el valor de la colonia
       let dataOkey = response.data.dataColonias.map( (item: IColonia) => ({
         id: item.id_colonia,
-        label: item.st_Colonia + " - " + item.st_Colonia
+        label: item.st_Colonia
       }));
       setColinas(dataOkey);
 
@@ -187,22 +309,35 @@ const OperadorForm = ({id_Operador = ''}) =>{
     let createrTelefono = null;
     let createrDireccion = null;
     let createrContacto = null;
-
     try {
       //todo: Creamos el registro del operador
       createrOperador = await callEndpoint(createOperador(operadorForm));
+      console.log(createrOperador.data);
       let id_OperadorTemp = createrOperador.data.data.id_Operador;
-      if(id_OperadorTemp !== '' || id_OperadorTemp !== null || id_OperadorTemp !== undefined){
 
+      //todo: ID DLE OPERADOR CORRECTO?
+      if(id_OperadorTemp !== '' || id_OperadorTemp !== null || id_OperadorTemp !== undefined){
         //todo: LLENAMOS TODOS LOS ARREGLO CON EL ID_OPERADOR DEL API
         setDireccion({...direccion, id_Operador: id_OperadorTemp});
         setTelefono({...telefono, id_Operador: id_OperadorTemp});
         setContacto({...contacto, id_Operador: id_OperadorTemp});
 
-        //todo: INSERT
+        //todo: INSERT DE DIRECCION, TELEFONO, CONTACTO DE EMERGENCIA
         createrDireccion = await callEndpoint(insertDireccion(direccion));
         createrTelefono = await callEndpoint(insertTelefono(telefono));
         createrContacto = await callEndpoint(insertContacto(contacto));
+        console.log(createrDireccion.data);
+        console.log(createrTelefono.data);
+        console.log(createrContacto.data);
+
+        //todo: CREAMOS EL REGISTRO DE LOS DOCUMENTOS
+        createrDocuments = await callEndpoint(uploadFilesOperador(documentos, id_OperadorTemp));
+        console.log(createrDocuments.data);
+
+        //todo: ACTUALIZAMOS EL REGISTRO DE LOS DOCUMENTOS
+        let DocumentoId = createrDocuments.data.data.id_Documento;
+        updaterDocuments = await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
+        console.log(updaterDocuments.data);
       }else{
         alert("No se pudo crear el operador (Falta el id retorno del API)");
       }
@@ -210,6 +345,10 @@ const OperadorForm = ({id_Operador = ''}) =>{
       alert("Error - al crear el operador");
       console.log(error);
     }
+  }
+
+  const HandleEditSubmit = (e: any) => {
+    e.preventDefault();
     console.log(operadorForm);
     console.log(direccion);
     console.log(telefono);
@@ -403,10 +542,15 @@ const OperadorForm = ({id_Operador = ''}) =>{
                     </div>
                 </div>
             </div>
+            {
+              idDocumento !== 0 ? ( <ViewDocumentsOperador id_Documento={idDocumento}/>) : void(0)
+            }
             <div className="row mt-4">
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                     <div className="form-group">
-                    <button className="btn btn-success btn-rounded btn-lg" onClick={HandleSubmit} type="button"><i className="fa fa-save"></i> Guardar</button>
+                      <button onClick={(idDocumento === 0 && id_Operador === '' ) ? HandleSubmit : HandleEditSubmit} className="btn btn-success" type="button"><i className="fa fa-save">  </i> 
+                          { (idDocumento === 0 && id_Operador === '' ) ? " Guardar" : " Editar"}
+                      </button>
                     </div>
                 </div>
             </div>

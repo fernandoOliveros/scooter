@@ -14,6 +14,7 @@ const EditUnidadScreen = lazy( () => import('./pages/Unidades/EditUnidad'));
 //todo: OPERADORES
 const OperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
 const CreateOperadoresScreen = lazy( () => import('./pages/Operadores/CreateOperador'));
+const EditOperadoresScreen = lazy( () => import('./pages/Operadores/EditOperador'));
 
 
 function App() {
@@ -37,7 +38,7 @@ function App() {
           {/* OPERADORES*/}
           <Route path={PrivateRoutes.operadores} element={<OperadoresScreen />} />
           <Route path={PrivateRoutes.newOperador} element={<CreateOperadoresScreen />} />
-          <Route path={PrivateRoutes.editOperador} element={<EditUnidadScreen />} />
+          <Route path={PrivateRoutes.editOperador} element={<EditOperadoresScreen />} />
         </Route>
       </Routes>
     </Suspense>

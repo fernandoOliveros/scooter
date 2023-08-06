@@ -115,13 +115,13 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
       return false;
   }
 
-  //todo: INITIAL FUNCTIONS
+  //todo: INITIAL'S FUNCTIONS
+
   //Se ejecuta solo cuando el id_Unidad cambia
   useEffect(() => {
-      if(id_Unidad.trim() !== '') {getUnidadWithId(); } // Preguntamos si vamos a editar?
+    if(id_Unidad.trim() !== '') {getUnidadWithId(); } // Preguntamos si vamos a editar?
     return () => {
       if(id_Unidad.trim() !== '') { loadSpecificUnidad.controller.abort(); } // Preguntamos si vamos a editar?
-      loadTipoUnidades.controller.abort();
     }
   },[id_Unidad]);
 

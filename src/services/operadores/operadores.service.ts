@@ -7,10 +7,9 @@ import { IOperadorTelefono } from "../../models/operadores/operador-telefono.mod
 import { IOperadorContactos } from "../../models/operadores/operador-contactos.model";
 import { IOperadorDocumentos } from "../../models/operadores/operador-docs.model";
 
-//FUNCION PARA BTENER LOS OPERADORES POR EMPRESA
+//todo: GETS TO DATABASE
 export const getOperadoresByEmpresa = (idEmpresa: number) => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
-    //Peticion
     const urlGet = baseUrl + "operadores/readByEmpresa/" + idEmpresa;
     return {
         call: axios.get(urlGet, {signal: controller.signal}),
@@ -27,14 +26,43 @@ export const getIdOperador = (idOperador: string) => {
     }
 }
 
-export const getDocumentsOperador = (idDocumento: number) => {
+export const getDireccionOperador = (idOperador: string) => {
     const controller = loadAbort();
-    const uri = baseUrl + "documentosOperadores/read/" + idDocumento;
+    const urlGet = baseUrl + "direccionOperadores/read/" + idOperador;
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const getTelefonoOperador = (idOperador: string) => {
+    const controller = loadAbort();
+    const urlGet = baseUrl + "telefonosOperadores/read/" + idOperador;
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const getContactoOperador = (idOperador: string) => {
+    const controller = loadAbort();
+    const urlGet = baseUrl + "contactosEmOperadores/read/" + idOperador;
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const getDocumentsOperador = (idOperador: number) => {
+    const controller = loadAbort();
+    const uri = baseUrl + "documentosOperadores/read/" + idOperador;
     return {
         call: axios.get(uri, {signal: controller.signal}),
         controller
     }
 }
+
+//todo: INSERT TO DATABASE
 
 export const createOperador = (operador: IOperadorForm) => {
     const controller = loadAbort();
@@ -80,7 +108,42 @@ export const uploadFilesOperador = (documentos: IOperadorDocumentos, idOperador:
     }
 }
 
-export const updateFilesUnidad = (documentos: IOperadorDocumentos, idDocumento: string, idOperador: string) => {
+
+//todo: UPDATE'S DATABASE
+
+export const updateOperador = (data: IOperadorForm, id: string) => {
+    const controller = loadAbort();
+    return {
+        call: axios.post(baseUrl + "operadores/update/" + id, data, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const updateTelefonoOperador = (data: IOperadorTelefono, id: string) => {
+    const controller = loadAbort();
+    return {
+        call: axios.post(baseUrl + "telefonosOperadores/update/" + id, data, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const updateDireccionOperador = (data: IOperadorDireccion, id: string) => {
+    const controller = loadAbort();
+    return {
+        call: axios.post(baseUrl + "direccionOperadores/update/" + id, data, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const updateContactoOperador = (data: IOperadorContactos, id: string) => {
+    const controller = loadAbort();
+    return {
+        call: axios.post(baseUrl + "contactosEmOperadores/update/" + id, data, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const updateFilesOperador = (documentos: IOperadorDocumentos, idDocumento: string, idOperador: string) => {
     let format = new FormData();
     format.append( "url_CURP", documentos.url_CURP);
     format.append( "url_RFC", documentos.url_RFC);
