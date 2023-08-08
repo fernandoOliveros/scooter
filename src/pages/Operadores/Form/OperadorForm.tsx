@@ -10,7 +10,7 @@ import { getColoniasByCodigoPostal } from '../../../services/public.service';
 import { IColonia } from '../../../models/shared/colonias.model';
 import { IAutoComplete } from '../../../models/shared/autocomplete.model';
 import { Autocomplete, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { createOperador, getContactoOperador, getDireccionOperador, getIdOperador, getTelefonoOperador, insertContacto, insertDireccion, insertTelefono, updateFilesOperador, uploadFilesOperador } from '../../../services/operadores/operadores.service';
+import { createOperador, getContactoOperador, getDireccionOperador, getIdOperador, getTelefonoOperador, insertContacto, insertDireccion, insertTelefono, updateContactoOperador, updateDireccionOperador, updateFilesOperador, updateOperador, updateTelefonoOperador, uploadFilesOperador } from '../../../services/operadores/operadores.service';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 import ViewDocumentsOperador from '../Documents/ViewDocumentsOperador';
 
@@ -347,13 +347,40 @@ const OperadorForm = ({id_Operador = ''}) =>{
     }
   }
 
-  const HandleEditSubmit = (e: any) => {
+  const HandleEditSubmit = async (e: any) => {
     e.preventDefault();
-    console.log(operadorForm);
-    console.log(direccion);
-    console.log(telefono);
-    console.log(contacto);
-    console.log(documentos);
+    let updaterOperador = null;
+    let updaterDocuments = null;
+    let updaterTelefono = null;
+    let updaterDireccion = null;
+    let updaterContacto = null;
+
+    try {
+      //todo: ACTUALIZAMOS DATOS GENERALES DEL OPERADOR
+      updaterOperador = await callEndpoint(updateOperador(operadorForm, id_Operador));
+      console.log(updaterOperador);
+
+      //todo: ACTUALIZAMOS TELEFONO
+      updaterTelefono = await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono.toString()));
+      console.log(updaterTelefono);
+
+      //todo: ACTUALIZAMOS CONTACTOS
+      updaterContacto = await callEndpoint(updateContactoOperador(contacto, id_ContactoEm.toString()));
+      console.log(updaterContacto);
+
+      //todo: ACTULIZAMOS DIRECIÓN
+      updaterDireccion = await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador.toString()));
+      console.log(updaterDireccion);
+
+      //todo: ACTUALIZAMOS DOCUMENTOACIÓN
+      if(documentos.url_CURP !== '' || documentos.url_ComprobanteDom !== '' || documentos.url_RFC !== ''){
+        updaterDocuments = await callEndpoint(updateFilesOperador(documentos, idDocumento.toString(), id_Operador));
+        console.log(updaterDocuments);
+      }
+    } catch (error) {
+      alert("Error, al actualizar los datos del operador")
+      console.log(error);
+    }
   }
 
   return (

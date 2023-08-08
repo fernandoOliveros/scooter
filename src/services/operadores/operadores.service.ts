@@ -114,7 +114,7 @@ export const uploadFilesOperador = (documentos: IOperadorDocumentos, idOperador:
 export const updateOperador = (data: IOperadorForm, id: string) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "operadores/update/" + id, data, { signal: controller.signal }),
+        call: axios.put(baseUrl + "operadores/update/" + id, data, { signal: controller.signal }),
         controller
     }
 }
@@ -122,7 +122,7 @@ export const updateOperador = (data: IOperadorForm, id: string) => {
 export const updateTelefonoOperador = (data: IOperadorTelefono, id: string) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "telefonosOperadores/update/" + id, data, { signal: controller.signal }),
+        call: axios.put(baseUrl + "telefonosOperadores/update/" + id, data, { signal: controller.signal }),
         controller
     }
 }
@@ -130,7 +130,7 @@ export const updateTelefonoOperador = (data: IOperadorTelefono, id: string) => {
 export const updateDireccionOperador = (data: IOperadorDireccion, id: string) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "direccionOperadores/update/" + id, data, { signal: controller.signal }),
+        call: axios.put(baseUrl + "direccionOperadores/update/" + id, data, { signal: controller.signal }),
         controller
     }
 }
@@ -138,7 +138,7 @@ export const updateDireccionOperador = (data: IOperadorDireccion, id: string) =>
 export const updateContactoOperador = (data: IOperadorContactos, id: string) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "contactosEmOperadores/update/" + id, data, { signal: controller.signal }),
+        call: axios.put(baseUrl + "contactosEmOperadores/update/" + id, data, { signal: controller.signal }),
         controller
     }
 }
