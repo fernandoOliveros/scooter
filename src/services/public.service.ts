@@ -12,6 +12,16 @@ export const getTipoUnidad = () => {
     }
 }
 
+
+export const getTipoRemolque = () => {
+    const controller = loadAbort();
+    const urlGet = baseUrl + "remolques/readTypes";
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+}
+
 export const getColoniasByCodigoPostal = (codigo_postal : string) => {
     const controller = loadAbort();
     const url = baseUrl + "direccionOperadores/getByCP/" + codigo_postal;

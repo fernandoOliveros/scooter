@@ -166,7 +166,7 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
     e.preventDefault();
     let result = null;
     let createDocuments = null;
-    let updateDocuments = null
+    let updateDocuments = null;
     setLoad(true);
     try {
       //todo: Creamos la unidad

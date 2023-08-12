@@ -17,6 +17,11 @@ const CreateOperadoresScreen = lazy( () => import('./pages/Operadores/CreateOper
 const EditOperadoresScreen = lazy( () => import('./pages/Operadores/EditOperador'));
 
 
+//todo: REMOLQUES
+const RemolquesScreen = lazy( () => import('./pages/Remolques/Remolque'));
+const CreateRemolquesScreen = lazy( () => import('./pages/Remolques/CreateRemolque'));
+const EditRemolquesScreen = lazy( () => import('./pages/Remolques/EditRemolque'));
+
 function App() {
   return (
     <Suspense fallback={<p>Loading ...</p>}>
@@ -39,6 +44,13 @@ function App() {
           <Route path={PrivateRoutes.operadores} element={<OperadoresScreen />} />
           <Route path={PrivateRoutes.newOperador} element={<CreateOperadoresScreen />} />
           <Route path={PrivateRoutes.editOperador} element={<EditOperadoresScreen />} />
+
+
+          {/* REMOLQUES*/}
+          <Route path={PrivateRoutes.remolques} element={<RemolquesScreen />} />
+          <Route path={PrivateRoutes.newRemolques} element={<CreateRemolquesScreen />} />
+          <Route path={PrivateRoutes.editRemolques} element={<EditRemolquesScreen />} />
+
         </Route>
       </Routes>
     </Suspense>
