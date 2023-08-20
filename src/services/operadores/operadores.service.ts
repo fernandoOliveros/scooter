@@ -17,7 +17,7 @@ export const getOperadoresByEmpresa = (idEmpresa: number) => {
     }
 }
 
-export const getIdOperador = (idOperador: string) => {
+export const getIdOperador = (idOperador: string | null = null) => {
     const controller = loadAbort();
     const urlGet = baseUrl + "operadores/read/" + idOperador;
     return {

@@ -41,12 +41,9 @@ const RemolqueForm = ({id_Remolque = ''}: Props) => {
   //todo: Custom Hooks
   const { callEndpoint } = useFetchAndLoad();
 
-  //todo: Servicio para el catálogo tipo de remolque
-  const loadTipoRemolques = getTipoRemolque();
-
   //todo: INITIAL FUNCTION
-  //Se ejecuta una vez, cuando el componente se renderiza
   useEffect(() => {
+    const loadTipoRemolques = getTipoRemolque();
     const catTipoRemolques = async () => {
       console.log("CAT- TIPO REMOLQUES");
       try {
@@ -65,48 +62,45 @@ const RemolqueForm = ({id_Remolque = ''}: Props) => {
     return () => loadTipoRemolques.controller.abort();
   },[]);
 
-
-  //todo: Servicio para obtener la información del remolque por su ID 
-  const loadSpecificRemolque = getIdRemolque(id_Remolque);
-
-  //todo: Funcion para Obtener remolque con Id
-  const getRemolqueWithId = async () => {
-    try {
-      console.log("GET id Remolque");
-      const result = await loadSpecificRemolque.call;
-      const response =  result.data;
-      setIdDocumento(response.data[0].id_Documento);
-      const tempRemolque ={
-        st_Marca: response.data[0].st_Marca, 
-        id_TipoRemolque: response.data[0].id_TipoRemolque, 
-        st_Economico: response.data[0].st_Economico, 
-        st_Placa: response.data[0].st_Placa, 
-        st_Anio: response.data[0].st_Anio, 
-        st_NumSerie: response.data[0].st_NumSerie, 
-        date_VigenciaFM: response.data[0].date_VigenciaFM, 
-        id_Empresa: response.data[0].id_Empresa
-      }
-      getSelectTipoRemolque(tempRemolque.id_TipoRemolque);
-      setRemolqueForm({...remolqueForm, ...tempRemolque});
-    } catch (error) { console.log(error); }
-  }
-
   //todo: Función para seleccionar
-  const getSelectTipoRemolque = async (id: number) => {
-    try {
-      const result = await loadTipoRemolques.call;
-      const response = result.data.data;
-      // todo:  Adaptamos al modelo de Autocomplete
-      let dataOkey = response.map( (item: ITipoRemolque) => ({
-        id: item.id_TipoRemolque,
-        label: item.st_ClaveRemolque + " - " + item.st_Descripcion
-      }));
-      let findOption = dataOkey.filter( (x: any) => x.id === id);
-      setSelectTipoRemolque(findOption[0]);
-    } catch (error) { console.log(error) }
-  }
+
 
   useEffect( () => {
+    const loadSpecificRemolque = getIdRemolque(id_Remolque);
+    const apiTipoRemolques = getTipoRemolque();
+    const getRemolqueWithId = async () => {
+      try {
+        console.log("GET id Remolque");
+        const result = await loadSpecificRemolque.call;
+        const response =  result.data;
+        setIdDocumento(response.data[0].id_Documento);
+        const tempRemolque ={
+          st_Marca: response.data[0].st_Marca, 
+          id_TipoRemolque: response.data[0].id_TipoRemolque, 
+          st_Economico: response.data[0].st_Economico, 
+          st_Placa: response.data[0].st_Placa, 
+          st_Anio: response.data[0].st_Anio, 
+          st_NumSerie: response.data[0].st_NumSerie, 
+          date_VigenciaFM: response.data[0].date_VigenciaFM, 
+          id_Empresa: response.data[0].id_Empresa
+        }
+        getSelectTipoRemolque(tempRemolque.id_TipoRemolque);
+        setRemolqueForm({...remolqueForm, ...tempRemolque});
+      } catch (error) { console.log(error); }
+    }
+    const getSelectTipoRemolque = async (id: number) => {
+      try {
+        const result = await apiTipoRemolques.call;
+        const response = result.data.data;
+        // todo:  Adaptamos al modelo de Autocomplete
+        let dataOkey = response.map( (item: ITipoRemolque) => ({
+          id: item.id_TipoRemolque,
+          label: item.st_ClaveRemolque + " - " + item.st_Descripcion
+        }));
+        let findOption = dataOkey.filter( (x: any) => x.id === id);
+        setSelectTipoRemolque(findOption[0]);
+      } catch (error) { console.log(error) }
+    }
     if(id_Remolque.trim() !== ""){  getRemolqueWithId(); }
     return() => {loadSpecificRemolque.controller.abort()}
   },[id_Remolque]); 

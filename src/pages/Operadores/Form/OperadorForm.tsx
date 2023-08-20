@@ -26,6 +26,7 @@ export interface Props {
 }
 
 const OperadorForm = ({id_Operador = ''}) =>{
+  console.log("render operador form");
   //todo: Store
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
@@ -51,144 +52,151 @@ const OperadorForm = ({id_Operador = ''}) =>{
 
   //todo: INITIAL FUNCTION
   useEffect( () => {
-    if(id_Operador.trim() !== ''){
+    console.log("useffect with operador");
+
+    const loadEspecificOperador = getIdOperador(id_Operador);
+    const getOperadorWithId = async () => {
+      console.log("Obtener Info de un Operador Especifico");
+      try {
+        const result = await loadEspecificOperador.call;
+        let response = result.data;
+        const dataOperador = response.data[0];
+        const validate = validateSameEmpresa(dataOperador.id_Empresa);
+        if(validate){
+          setIdDocumento(dataOperador.id_Documento);
+          let tempOperadorForm = {
+            id_Empresa: dataOperador.id_Empresa , 
+            st_Nombre: dataOperador.st_Nombre, 
+            st_ApellidoP: dataOperador.st_ApellidoP, 
+            st_ApellidoM: dataOperador.st_ApellidoM, 
+            st_NumIMSS: dataOperador.st_NumIMSS, 
+            st_CURP: dataOperador.st_CURP, 
+            st_RFC: dataOperador.st_RFC, 
+            st_NumLicencia: dataOperador.st_NumLicencia, 
+            date_Nacimiento: dataOperador.date_Nacimiento, 
+            date_LicenciaVigencia: dataOperador.date_LicenciaVigencia, 
+            id_TipoPuesto: dataOperador.id_TipoPuesto,
+            i_Status: dataOperador.i_Status
+          };
+          setOperadorForm({...operadorForm, ...tempOperadorForm});
+        }else{
+          alert("El operador no pertenece a su empresa.");
+          console.log("Error, no pertenece el operador a la empresa");
+        }
+      } catch (error) {
+        alert("Error- al obtener información del operador");
+        console.log(error);
+      }
+    }
+
+    //todo: SERVICE LOAD DIRECCION OPERADOR WIDTH ID
+    const loadDireccion = getDireccionOperador(id_Operador);
+    const getDireccionOperadorId = async() => {
+      console.log("OBTENER LA DIRECCIÓN DEL OPERADOR");
+      try {
+        let result = await loadDireccion.call;
+        let response = result.data;
+        
+        //* Asignamos el id dirección del operador
+        setId_Dir_Operador(response.data.id_Dir_Operador);
+        let tempDirec = {
+          id_Operador: response.data.id_Operador,
+          st_Calle: response.data.st_Calle, 
+          st_NoExterior: response.data.st_NoExterior, 
+          st_NoInterior: response.data.st_NoInterior, 
+          st_RefDomicilio: response.data.st_RefDomicilio, 
+          c_codigoPostal: response.data.c_codigoPostal, 
+          id_Estado: response.data.id_Estado, 
+          id_Localidad: response.data.id_Localidad, 
+          id_Municipio: response.data.id_Municipio, 
+          id_Colonia: response.data.id_Colonia
+        }
+        setDireccion({...direccion, ...tempDirec});
+
+        //* llenamos los campos del formulario de dirección
+        let FormDire = {
+          st_Colonia:  '', 
+          st_Municipio:  response.data.st_Municipio, 
+          st_Localidad: response.data.st_Localidad, 
+          st_Estado:  response.data.st_Estado
+        }
+        setFormDireccion({...formDireccion, ...FormDire});
+
+        //* Seleccionamos la colonia
+        let tempColonia: IAutoComplete = {
+          id: response.data.id_Colonia, 
+          label: response.data.st_Colonia
+        };
+        setSelectColonia(tempColonia);      
+      } catch (error) {
+        alert("Error, al obtener la dirección del operador");
+        console.log(error);
+      }
+    }
+
+    //todo: SERVICE TO LOAD TELEFONOS WITH ID OPERADOR
+    const loadSpecificTelefono = getTelefonoOperador(id_Operador);
+    const getOperadorTelefono = async () => {
+      console.log("Obtener el telefono del operador");
+      try {
+        const result = await loadSpecificTelefono.call;
+        const response = result.data;
+        setId_NumTelefono(response.data.id_NumTelefono);
+        let TelefonoTemp = {
+          id_Operador: response.data.id_Operador, 
+          id_Categoria:response.data.id_Categoria, 
+          st_NumTelefono: response.data.st_NumTelefono
+        }
+        setTelefono({...telefono, ...TelefonoTemp});
+      } catch (error) {
+        alert("Error, al obtener el telefono del operador");
+        console.log(error);
+      }
+    }
+
+    //todo: SERVICE TO LOAD CONTACTO DE EMERGENCIA WITH ID OPERADOR
+    const loadContactEmergency = getContactoOperador(id_Operador);
+    const getContactoOperadorId = async() => {
+      console.log("Obtener contacto del operador");
+      try {
+        let result = await loadContactEmergency.call;
+        let response = result.data;
+        setId_ContactoEm( response.data.id_ContactoEm);
+        let ContactosEmer = {
+          id_Operador: response.data.id_Operador, 
+          st_Nombre: response.data.st_Nombre, 
+          st_NumTelefono: response.data.st_NumTelefono, 
+          st_Parentesco: response.data.st_Parentesco
+        }
+        setContacto({...contacto, ...ContactosEmer});
+      } catch (error) {
+        alert("Error, no se pudo obtener el contacto del operador");
+        console.log(error);
+      }
+
+    }
+
+    if(id_Operador !== ''){
       getOperadorWithId();
       getDireccionOperadorId();
       getOperadorTelefono();
       getContactoOperadorId();
     }
     return() => {
-      if(id_Operador.trim() !== ''){ loadEspecificOperador.controller.abort(); } 
+      if(id_Operador !== ''){ 
+        loadEspecificOperador.controller.abort(); 
+        loadDireccion.controller.abort();
+        loadSpecificTelefono.controller.abort();
+        loadContactEmergency.controller.abort();
+      } 
     }
   },[id_Operador]);
 
-  //todo: SERVICE LOAD A SPECIFIC OPERADOR WITH ID_OPERADOR
-  const loadEspecificOperador = getIdOperador(id_Operador);
-  const getOperadorWithId = async () => {
-    console.log("Obtener Info de un Operador Especifico");
-    try {
-      const result = await loadEspecificOperador.call;
-      let response = result.data;
-      const dataOperador = response.data[0];
-      const validate = validateSameEmpresa(dataOperador.id_Empresa);
-      if(validate){
-        setIdDocumento(dataOperador.id_Documento);
-        let tempOperadorForm = {
-          id_Empresa: dataOperador.id_Empresa , 
-          st_Nombre: dataOperador.st_Nombre, 
-          st_ApellidoP: dataOperador.st_ApellidoP, 
-          st_ApellidoM: dataOperador.st_ApellidoM, 
-          st_NumIMSS: dataOperador.st_NumIMSS, 
-          st_CURP: dataOperador.st_CURP, 
-          st_RFC: dataOperador.st_RFC, 
-          st_NumLicencia: dataOperador.st_NumLicencia, 
-          date_Nacimiento: dataOperador.date_Nacimiento, 
-          date_LicenciaVigencia: dataOperador.date_LicenciaVigencia, 
-          id_TipoPuesto: dataOperador.id_TipoPuesto,
-          i_Status: dataOperador.i_Status
-        };
-        setOperadorForm({...operadorForm, ...tempOperadorForm});
-      }else{
-        alert("El operador no pertenece a su empresa.");
-        console.log("Error, no pertenece el operador a la empresa");
-      }
-    } catch (error) {
-      alert("Error- al obtener información del operador");
-      console.log(error);
-    }
-  }
   const validateSameEmpresa = (idEmpresa : number) => {
     if(id_Empresa === idEmpresa)
       return true;
     else
       return false;
-  }
-
-  //todo: SERVICE LOAD DIRECCION OPERADOR WIDTH ID
-  const loadDireccion = getDireccionOperador(id_Operador);
-  const getDireccionOperadorId = async() => {
-    console.log("OBTENER LA DIRECCIÓN DEL OPERADOR");
-    try {
-      let result = await loadDireccion.call;
-      let response = result.data;
-      
-      //* Asignamos el id dirección del operador
-      setId_Dir_Operador(response.data.id_Dir_Operador);
-      let tempDirec = {
-        id_Operador: response.data.id_Operador,
-        st_Calle: response.data.st_Calle, 
-        st_NoExterior: response.data.st_NoExterior, 
-        st_NoInterior: response.data.st_NoInterior, 
-        st_RefDomicilio: response.data.st_RefDomicilio, 
-        c_codigoPostal: response.data.c_codigoPostal, 
-        id_Estado: response.data.id_Estado, 
-        id_Localidad: response.data.id_Localidad, 
-        id_Municipio: response.data.id_Municipio, 
-        id_Colonia: response.data.id_Colonia
-      }
-      setDireccion({...direccion, ...tempDirec});
-
-      //* llenamos los campos del formulario de dirección
-      let FormDire = {
-        st_Colonia:  '', 
-        st_Municipio:  response.data.st_Municipio, 
-        st_Localidad: response.data.st_Localidad, 
-        st_Estado:  response.data.st_Estado
-      }
-      setFormDireccion({...formDireccion, ...FormDire});
-
-      //* Seleccionamos la colonia
-      let tempColonia: IAutoComplete = {
-        id: response.data.id_Colonia, 
-        label: response.data.st_Colonia
-      };
-      setSelectColonia(tempColonia);      
-    } catch (error) {
-      alert("Error, al obtener la dirección del operador");
-      console.log(error);
-    }
-  }
-
-  //todo: SERVICE TO LOAD TELEFONOS WITH ID OPERADOR
-  const loadSpecificTelefono = getTelefonoOperador(id_Operador);
-  const getOperadorTelefono = async () => {
-    console.log("Obtener el telefono del operador");
-    try {
-      const result = await loadSpecificTelefono.call;
-      const response = result.data;
-      setId_NumTelefono(response.data.id_NumTelefono);
-      let TelefonoTemp = {
-        id_Operador: response.data.id_Operador, 
-        id_Categoria:response.data.id_Categoria, 
-        st_NumTelefono: response.data.st_NumTelefono
-      }
-      setTelefono({...telefono, ...TelefonoTemp});
-    } catch (error) {
-      alert("Error, al obtener el telefono del operador");
-      console.log(error);
-    }
-  }
-
-  //todo: SERVICE TO LOAD CONTACTO DE EMERGENCIA WITH ID OPERADOR
-  const loadContactEmergency = getContactoOperador(id_Operador);
-  const getContactoOperadorId = async() => {
-    console.log("Obtener contacto del operador");
-    try {
-      let result = await loadContactEmergency.call;
-      let response = result.data;
-      setId_ContactoEm( response.data.id_ContactoEm);
-      let ContactosEmer = {
-        id_Operador: response.data.id_Operador, 
-        st_Nombre: response.data.st_Nombre, 
-        st_NumTelefono: response.data.st_NumTelefono, 
-        st_Parentesco: response.data.st_Parentesco
-      }
-      setContacto({...contacto, ...ContactosEmer});
-    } catch (error) {
-      alert("Error, no se pudo obtener el contacto del operador");
-      console.log(error);
-    }
-
   }
 
   //todo: fORM FUNCTIONS

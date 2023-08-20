@@ -23,6 +23,7 @@ const MAX_FILE_SIZE = 5002400;
 const nameDocumentsUnidad = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
 const UnidadForm = ({ id_Unidad = '' }: Props) => {
+  console.log("RENDER");
   //Variables globales
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
@@ -42,72 +43,7 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
   //todo: Custom Hooks
   const { callEndpoint } = useFetchAndLoad();
 
-  //todo: Servicio para catálogo tipo de unidad
-  const loadTipoUnidades = getTipoUnidad(); // SERVICE
-  const catTipoUnidades = async () => {
-    console.log("CAT - TIPO UNIDADES");
-    let result = await loadTipoUnidades.call
-    if(result.data.success){
-      let info = result.data.data;
-      let dataOkey = info.map( (item: ITipoUnidad) => ({
-        id: item.id_TipoUnidad,
-        label: item.st_ClaveTransporte + " - " + item.st_Descripcion
-      }));
-      setTipoUnidades(dataOkey);
-    }
-  }
   //Todo: Servicios para hacer funcionar el formulario para editar una unidad
-  const loadSpecificUnidad = getIdUnidad(id_Unidad); //Service
-  const getUnidadWithId = async () => {
-    console.log("OBTENEMOS INFO DE LA UNIDAD CON ID");
-    try {
-      const result = await loadSpecificUnidad.call;
-      if(result.status === 200){
-        const dataUnidad = result.data.data[0];
-        const validateEmpresa = validateUnidadEmpresa(dataUnidad.id_Empresa);
-        if(validateEmpresa){
-          setIdDocumento(dataUnidad.id_Documento);
-          const arregloUnidad = {
-            st_Marca: dataUnidad.st_Marca, 
-            st_SubMarca:dataUnidad.st_SubMarca,
-            id_TipoUnidad: dataUnidad.id_TipoUnidad, 
-            st_PermisoSCT:  dataUnidad.st_PermisoSCT,
-            st_Economico:dataUnidad.st_Economico, 
-            st_Placa: dataUnidad.st_Placa,
-            st_Anio: dataUnidad.st_Anio,
-            st_NumMotor: dataUnidad.st_NumMotor, 
-            st_NumSerie: dataUnidad.st_NumSerie, 
-            st_NumPoliza: dataUnidad.st_NumPoliza, 
-            date_Mecanico: dataUnidad.date_Mecanico, 
-            date_Ecologico: dataUnidad.date_Ecologico, 
-            id_Empresa: dataUnidad.id_Empresa, 
-            id_Candado: dataUnidad.id_Candado
-          };
-          getSelectTipoUnidad(arregloUnidad.id_TipoUnidad);
-          setUnidadForm({...unidadForm, ...arregloUnidad});
-        }else{
-          alert("Error, la unidad no corresponde a tu empresa");
-        }
-      }else{
-        alert("Error, no se encontró información de la unidad");
-      }
-    } catch (error) {
-      alert("Error al recuperar la información de la unidad");
-    }
-  }
-  const getSelectTipoUnidad = async(id: number) => {
-    let result = await loadTipoUnidades.call;
-    if(result.data.success){
-      let info = result.data.data;
-      // todo:  Adaptamos al modelo de Autocomplete
-      let dataOkey = info.map( (item: ITipoUnidad) => ({
-        id: item.id_TipoUnidad,
-        label: item.st_ClaveTransporte + " - " + item.st_Descripcion
-      }));
-      let findOption = dataOkey.filter( (x: any) => x.id === id);
-      setSelectTipoUnidad(findOption[0]);
-    }
-  }
   const validateUnidadEmpresa = (idEmpresa : number) => {
     if(id_Empresa === idEmpresa)
       return true;
@@ -119,7 +55,63 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
 
   //Se ejecuta solo cuando el id_Unidad cambia
   useEffect(() => {
-    if(id_Unidad.trim() !== '') {getUnidadWithId(); } // Preguntamos si vamos a editar?
+    console.log("USEFFECT ID_UNIDAD");
+    //Service to get Specific Unidad
+    const loadSpecificUnidad = getIdUnidad(id_Unidad);
+    const loadTipoUnidades = getTipoUnidad();
+
+    const getUnidadWithId = async () => {
+      try {
+        const result = await loadSpecificUnidad.call;
+        if(result.status === 200){
+          const dataUnidad = result.data.data[0];
+          const validateEmpresa = validateUnidadEmpresa(dataUnidad.id_Empresa);
+          if(validateEmpresa){
+            setIdDocumento(dataUnidad.id_Documento);
+            const arregloUnidad = {
+              st_Marca: dataUnidad.st_Marca, 
+              st_SubMarca:dataUnidad.st_SubMarca,
+              id_TipoUnidad: dataUnidad.id_TipoUnidad, 
+              st_PermisoSCT:  dataUnidad.st_PermisoSCT,
+              st_Economico:dataUnidad.st_Economico, 
+              st_Placa: dataUnidad.st_Placa,
+              st_Anio: dataUnidad.st_Anio,
+              st_NumMotor: dataUnidad.st_NumMotor, 
+              st_NumSerie: dataUnidad.st_NumSerie, 
+              st_NumPoliza: dataUnidad.st_NumPoliza, 
+              date_Mecanico: dataUnidad.date_Mecanico, 
+              date_Ecologico: dataUnidad.date_Ecologico, 
+              id_Empresa: dataUnidad.id_Empresa, 
+              id_Candado: dataUnidad.id_Candado
+            };
+            getSelectTipoUnidad(arregloUnidad.id_TipoUnidad);
+            setUnidadForm({...unidadForm, ...arregloUnidad});
+          }else{
+            alert("Error, la unidad no corresponde a tu empresa");
+          }
+        }else{
+          alert("Error, no se encontró información de la unidad");
+        }
+      } catch (error) {
+        alert("Error al recuperar la información de la unidad");
+      }
+    }
+
+    const getSelectTipoUnidad = async(id: number) => {
+      let result = await loadTipoUnidades.call;
+      if(result.data.success){
+        let info = result.data.data;
+        // todo:  Adaptamos al modelo de Autocomplete
+        let dataOkey = info.map( (item: ITipoUnidad) => ({
+          id: item.id_TipoUnidad,
+          label: item.st_ClaveTransporte + " - " + item.st_Descripcion
+        }));
+        let findOption = dataOkey.filter( (x: any) => x.id === id);
+        setSelectTipoUnidad(findOption[0]);
+      }
+    }
+    
+    if(id_Unidad.trim() !== '') { getUnidadWithId(); } // Preguntamos si vamos a editar?
     return () => {
       if(id_Unidad.trim() !== '') { loadSpecificUnidad.controller.abort(); } // Preguntamos si vamos a editar?
     }
@@ -127,9 +119,23 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
 
   //Se ejecuta una vez, cuando el componente se renderiza
   useEffect(() => {
+    const apiTipoUnidades = getTipoUnidad(); // SERVICE
+    console.log("USEFFECT TO LOAD PAGE");
+    //todo: Servicio para catálogo tipo de unidad
+    const catTipoUnidades = async () => {
+      let result = await apiTipoUnidades.call
+      if(result.data.success){
+        let info = result.data.data;
+        let dataOkey = info.map( (item: ITipoUnidad) => ({
+          id: item.id_TipoUnidad,
+          label: item.st_ClaveTransporte + " - " + item.st_Descripcion
+        }));
+        setTipoUnidades(dataOkey);
+      }
+    }
     catTipoUnidades();
     return () => {
-      loadTipoUnidades.controller.abort();
+      apiTipoUnidades.controller.abort();
     }
   },[]);
 
@@ -171,15 +177,10 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
     try {
       //todo: Creamos la unidad
       result = await callEndpoint(createUnidad(unidadForm));
-      //console.log(result.data);
-
       //Todo: Creamos el registro de los documentos
       createDocuments = await callEndpoint(uploadFilesUnidad(documentos,result.data.data.id_Unidad));
-      //console.log(createDocuments.data);
-
       //Todo: Actualizamos nombre de los archivos con la unidad y los documentos
       updateDocuments = await callEndpoint(updateFilesUnidad(documentos, createDocuments.data.data.id_Documento, result.data.data.id_Unidad));
-      //console.log(updateDocuments.data);
     } catch (error) {
       console.log(error);
       alert("Error, al crear la unidad");
@@ -195,11 +196,8 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
     try {
       //Editamos la unidad
       responseEdit = await callEndpoint(editUnidad(id_Unidad,unidadForm));
-      //console.log(responseEdit.data);
-
       //actualizamos los archivos
       updateDocuments = await callEndpoint(updateFilesUnidad(documentos, idDocumento.toString(), id_Unidad));
-      //console.log(updateDocuments.data);
     } catch (error) {
       alert("Error, al actualizar la unidad");
       console.log(error);
