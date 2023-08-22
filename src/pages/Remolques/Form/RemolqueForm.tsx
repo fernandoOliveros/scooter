@@ -135,28 +135,24 @@ const RemolqueForm = ({id_Remolque = ''}: Props) => {
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    let result = null;
-    let createrDocuments = null;
-    let updaterDocuments = null;
     try {
       //todo: Damos de alta el proveedor
-      result = await callEndpoint(createRemolque(remolqueForm));
+      let result = await callEndpoint(createRemolque(remolqueForm));
       //todo: creamos el registro de los documentos del remolque
-      createrDocuments = await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
+      let createrDocuments = await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
       //todo: Actualizamos el registro de los documentos del remolque
-      updaterDocuments = await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));      
+      await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));      
+      
     } catch (error) { console.log(error); alert("Error, al crear el remolque")}
   }
 
   const onSubmitEdit =  async(e: any) => {
     e.preventDefault();
-    let edit = null;
-    let updateDocuments = null;
     try {
       //* Editamos la unidad
-      edit = await callEndpoint(editRemolque(id_Remolque, remolqueForm));
+      await callEndpoint(editRemolque(id_Remolque, remolqueForm));
       //* Actualizamos los archivos
-      updateDocuments = await callEndpoint(updateFilesRemolque(documentos, idDocumento.toString(), id_Remolque));
+      await callEndpoint(updateFilesRemolque(documentos, idDocumento.toString(), id_Remolque));
     } catch (error) {
       alert("Error, al actualizar la unidad");
       console.log(error);
@@ -199,7 +195,7 @@ const RemolqueForm = ({id_Remolque = ''}: Props) => {
                       id="id_TipoRemolque"
                       value={selectTipoRemolque}
                       options={tipoRemolques}
-                      onChange={(option, value) => onChangeTipoRemolque(value)}
+                      onChange={(_option, value) => onChangeTipoRemolque(value)}
                       getOptionLabel={(option) => option.id + " - " + option.label}
                       isOptionEqualToValue={(option, value) => option.id === value.id}
                       renderInput={(params) => <TextField {...params} label="Tipo Remolques" variant="outlined" />}

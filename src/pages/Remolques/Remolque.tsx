@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../redux/store';
 import { IRemolqueModel } from '../../models/remolques/remolque.model';

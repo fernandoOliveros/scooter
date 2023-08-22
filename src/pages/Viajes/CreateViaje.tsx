@@ -24,11 +24,7 @@ const CreateViaje = () => {
             <div className="row">
                 <div className="card">
                     <div className="card-body">
-                        <div className='row'>
-                            <div className='col-12'>
-                                <ViajeForm />
-                            </div>
-                        </div>
+                        <ViajeForm />
                     </div>
                 </div>
             </div>

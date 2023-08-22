@@ -23,8 +23,7 @@ const CreateRemolquesScreen = lazy( () => import('./pages/Remolques/CreateRemolq
 const EditRemolquesScreen = lazy( () => import('./pages/Remolques/EditRemolque'));
 
 //todo: VIAJES
-const ViajesScreen = lazy(() => import('./pages/Viajes/Viajes'));
-const CreateViajesScreen = lazy(() => import('./pages/Viajes/createViaje'));
+const CreateViajesScreen = lazy(() => import('./pages/Viajes/CreateViaje'));
 
 
 function App() {

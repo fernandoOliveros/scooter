@@ -170,17 +170,14 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
  
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    let result = null;
-    let createDocuments = null;
-    let updateDocuments = null;
     setLoad(true);
     try {
       //todo: Creamos la unidad
-      result = await callEndpoint(createUnidad(unidadForm));
+      let result = await callEndpoint(createUnidad(unidadForm));
       //Todo: Creamos el registro de los documentos
-      createDocuments = await callEndpoint(uploadFilesUnidad(documentos,result.data.data.id_Unidad));
+      let createDocuments = await callEndpoint(uploadFilesUnidad(documentos,result.data.data.id_Unidad));
       //Todo: Actualizamos nombre de los archivos con la unidad y los documentos
-      updateDocuments = await callEndpoint(updateFilesUnidad(documentos, createDocuments.data.data.id_Documento, result.data.data.id_Unidad));
+      await callEndpoint(updateFilesUnidad(documentos, createDocuments.data.data.id_Documento, result.data.data.id_Unidad));
     } catch (error) {
       console.log(error);
       alert("Error, al crear la unidad");
@@ -190,14 +187,12 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
 
   const onSubmitEdit = async (e:any) => {
     e.preventDefault();
-    let responseEdit = null;
-    let updateDocuments = null;
     setLoad(true);
     try {
       //Editamos la unidad
-      responseEdit = await callEndpoint(editUnidad(id_Unidad,unidadForm));
+      await callEndpoint(editUnidad(id_Unidad,unidadForm));
       //actualizamos los archivos
-      updateDocuments = await callEndpoint(updateFilesUnidad(documentos, idDocumento.toString(), id_Unidad));
+      await callEndpoint(updateFilesUnidad(documentos, idDocumento.toString(), id_Unidad));
     } catch (error) {
       alert("Error, al actualizar la unidad");
       console.log(error);
@@ -220,7 +215,7 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
               <Autocomplete
                 value={selectTipoUnidad}
                 options={tipoUnidades}   
-                onChange={(option, value) => onChangeTipoUnidad(value)}
+                onChange={(_option, value) => onChangeTipoUnidad(value)}
                 getOptionLabel={(option) => option.label ? option.label : ''}
                 isOptionEqualToValue={(option: IAutoComplete, value: IAutoComplete) => option.id === value.id}
                 renderInput={(params) => <TextField {...params} label="Tipo Unidades" variant="outlined" />}

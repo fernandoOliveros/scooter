@@ -1,8 +1,8 @@
 export interface IOperadorModel {
     id_Operador: number;
     st_Nombre: string;
-    st_ApellidoPaterno: string;
-    st_ApellidoMaterno: string;
+    st_ApellidoP: string;
+    st_ApellidoM: string;
     date_Nacimiento: Date;
     st_NumIMSS?: string;
     st_CURP: string;
