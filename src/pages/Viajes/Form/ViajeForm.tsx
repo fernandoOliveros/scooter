@@ -17,7 +17,10 @@ const DialogForms = lazy( () => import('../../../components/shared/DialogForms')
 
 // todo: VARIABLES GLOBALES
 
+
 const ViajeForm = () => {
+    const TipoViaje = [{id_TipoViaje: 1, st_Descripcion: "Local"}, {id_TipoViaje: 2, st_Descripcion: "Foráneo"}];
+
     //todo: Variables globales
     const userState = useSelector((store: RootStore) => store.user);
     const id_Empresa = userState.user.id_Empresa;
@@ -126,6 +129,13 @@ const ViajeForm = () => {
         }
     }
 
+    const onChangeTipoViaje = (tipoViaje: any) => {
+        if(tipoViaje !== null){
+            setViajeForm({...viajeForm, id_TipoViaje : tipoViaje.id_TipoViaje});
+        }else{
+            setViajeForm({...viajeForm, id_TipoViaje : null});
+        }
+    }
     const openModal = (op: boolean, option: number) => {
         setOptionForm(option);
         setOpen(op);
@@ -146,12 +156,13 @@ const ViajeForm = () => {
                             <TextField id='folio_int_viaje' className="form-control" variant="outlined" label="Folio interno del viaje" type="text" name="st_Economico" disabled value={1} inputProps={{ autoComplete: "off" }} required/>
                         </div>
                     </div>
+                    <IconButton aria-label="Nueva Unidad" color='primary' onClick={ () => openModal(true, 1)}>
+                                <AddIcon />
+                            </IconButton>
                     <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                         <h4 className="card-title">
                             Selecciona la Unidad
-                            <IconButton aria-label="Nueva Unidad" color='primary' onClick={ () => openModal(true, 1)}>
-                                <AddIcon />
-                            </IconButton>
+                            
                         </h4>
                         <Autocomplete
                             value={selectUnidad}
@@ -193,6 +204,18 @@ const ViajeForm = () => {
                             isOptionEqualToValue={(option, value) => option.id === value.id}
                             renderInput={(params) => <TextField {...params} label="Selecciona al operador" variant="outlined" />}
                         />
+                    </div>
+                    <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <Autocomplete
+                                id="idTipoViaje"
+                                options={TipoViaje}
+                                onChange={(option,value) => onChangeTipoViaje(value)}
+                                getOptionLabel={(option) => option.st_Descripcion}
+                                isOptionEqualToValue={(option, value) => option.id_TipoViaje === value.id_TipoViaje}
+                                renderInput={(params) => <TextField {...params} label="Tipo de Viaje" variant="outlined" /> } 
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
