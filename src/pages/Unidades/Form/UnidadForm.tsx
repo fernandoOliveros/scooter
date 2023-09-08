@@ -14,7 +14,7 @@ import ViewDocuments from '../Documents/ViewDocuments';
 //todo: interfaz de Props
 export interface Props {
   id_Unidad?: string,
-  returnFormUnidad?: (success: boolean) => void
+  returnFormUnidad: (success: boolean) => void
 }
 
 // todo: VARIABLES GLOBALES
@@ -22,7 +22,7 @@ type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTM
 const MAX_FILE_SIZE = 5002400;
 const nameDocumentsUnidad = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
-const UnidadForm = ({ id_Unidad = '' }: Props) => {
+const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
   console.log("RENDER");
   //Variables globales
   const userState = useSelector((store: RootStore) => store.user);
@@ -178,7 +178,9 @@ const UnidadForm = ({ id_Unidad = '' }: Props) => {
       let createDocuments = await callEndpoint(uploadFilesUnidad(documentos,result.data.data.id_Unidad));
       //Todo: Actualizamos nombre de los archivos con la unidad y los documentos
       await callEndpoint(updateFilesUnidad(documentos, createDocuments.data.data.id_Documento, result.data.data.id_Unidad));
+      returnFormUnidad(true);
     } catch (error) {
+      returnFormUnidad(false);
       console.log(error);
       alert("Error, al crear la unidad");
     }

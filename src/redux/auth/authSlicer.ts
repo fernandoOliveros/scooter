@@ -2,14 +2,13 @@ import { userModel } from '../../models';
 import { createSlice } from '@reduxjs/toolkit';
 
 export const UserEmptyState: userModel = {
-    token: '',
+    token: null,
     user: {
-        id_User: 0,
-        id_Empresa: 0,
-        st_Nombre: '',
-        st_Email: '',
-    },
-    id_Empresa: 0
+        id_User: null,
+        id_Empresa: null,
+        st_Nombre: null,
+        st_Email: null,
+    }
 };
 
 //Le ponemos <T,> porque es cualquier tipo de dato que manden desde la llamada de la funcion

@@ -7,12 +7,14 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ArticleIcon from '@mui/icons-material/Article';
 import Swal from 'sweetalert2';
 import { useDispatch } from 'react-redux';
 import { resetUser }  from '../../redux/auth/authSlicer';
 const actions = [
     { icon: <LogoutIcon />, name: 'Cerrar Sesión' , id: 'salir'  },
     { icon: <ArchiveIcon />, name: 'Gastos', id: 'gastos' },
+    { icon: <ArticleIcon />, name: 'Carta Porte', id: 'cartaPorte' },
     { icon: <TelegramIcon />, name: 'Viajes' , id: 'viajes' },
     { icon: <GroupIcon />, name: 'Operadores' , id: 'operadores'  },
     { icon: <LocalShippingIcon />, name: 'Remolques' , id: 'remolques'  },
@@ -21,7 +23,7 @@ const actions = [
 
 
 const Menu = () => {
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const handleView = () => setOpen(!open);
   const navigate = useNavigate();
   //storage

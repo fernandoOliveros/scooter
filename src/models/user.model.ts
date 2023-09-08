@@ -1,12 +1,11 @@
 export interface userModel {
-    token: string,
+    token: string | null,
     user: {
-        id_User: number,
-        id_Empresa: number,
-        st_Nombre: string,
-        st_Email: string,
-        st_Password?: string,
-        updatedAt?: string
-    },
-    id_Empresa: number
+        id_User: number | null,
+        id_Empresa: number |null,
+        st_Nombre: string | null,
+        st_Email: string | null,
+        st_Password?: string | null,
+        updatedAt?: string |null
+    }
 }

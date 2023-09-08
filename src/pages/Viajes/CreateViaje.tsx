@@ -22,11 +22,7 @@ const CreateViaje = () => {
                 </div>
             </div>
             <div className="row">
-                <div className="card">
-                    <div className="card-body">
-                        <ViajeForm />
-                    </div>
-                </div>
+                <ViajeForm />
             </div>
         </div>
         <Menu />

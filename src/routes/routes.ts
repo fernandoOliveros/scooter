@@ -11,6 +11,9 @@ export const PrivateRoutes = {
     editOperador: 'operadores/editar/:idOperador',
     viajes: 'viajes',
     newViaje: 'viajes/crear',
+    cartaPorte: 'cartaPorte',
+    cartaPorteNew: 'cartaPorte/crear',
+    cartaPorteEdit: 'cartaPorte/editar',
     gastos: 'gastos',
 }
 

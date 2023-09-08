@@ -8,4 +8,5 @@ export interface IViajeForm {
     i_km_totales: number;
     id_Empresa : number | null;
     id_StatusViaje : number;
+    remolque?:number[];
 }

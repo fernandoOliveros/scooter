@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy } from 'react'
+import { useEffect, useState, lazy, ChangeEvent, Fragment } from 'react'
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
 import { UnidadModel } from '../../../models/unidades/unidad.model';
@@ -6,25 +6,34 @@ import { IRemolqueModel } from '../../../models/remolques/remolque.model';
 import { getUnidades } from '../../../services/unidades/unidades.service';
 import { getOperadoresByEmpresa } from '../../../services/operadores/operadores.service';
 import { getRemolques } from '../../../services/remolques/remolques.service';
-import { Autocomplete, IconButton, TextField } from '@mui/material';
+import { Autocomplete, Button, TextField } from '@mui/material';
 import { IAutoComplete } from '../../../models/shared/autocomplete.model';
 import { IViajeForm } from '../../../models/viajes/viaje-form.model';
 import { IOperadorModel } from '../../../models/operadores/operador.model';
 import AddIcon from '@mui/icons-material/Add';
 
 //Lazy
-const DialogForms = lazy( () => import('../../../components/shared/DialogForms'));
+const ModalUnidad = lazy( () => import('../../../components/Unidades/DialogUnidad'));
+const ModalRemolque = lazy( () => import('../../../components/Remolques/DialogRemolque'));
+const ModalOperador = lazy( () => import('../../../components/Operadores/DialogOperador'));
+
 
 // todo: VARIABLES GLOBALES
-
+type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
 const ViajeForm = () => {
     const TipoViaje = [{id_TipoViaje: 1, st_Descripcion: "Local"}, {id_TipoViaje: 2, st_Descripcion: "Foráneo"}];
 
+    //Button News
+    const optionsNew = ['Nueva unidad', 'Nuevo remolque', 'Nuevo operador', 'Nuevo cliente'];
+
     //todo: Variables globales
     const userState = useSelector((store: RootStore) => store.user);
     const id_Empresa = userState.user.id_Empresa;
-    const [optionForm, setOptionForm]= useState(0);
+
+    const[dialogUnidad, setDialogUnidad] = useState<boolean>(false);
+    const[dialogRemolque, setDialogRemolque] = useState<boolean>(false);
+    const[dialogOperador, setDialogOperador] = useState<boolean>(false);
 
     const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 0, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, id_Remolque: null, i_km_totales: 0, id_Empresa:  id_Empresa, id_StatusViaje: 0 });
     
@@ -39,11 +48,10 @@ const ViajeForm = () => {
     const [selectRemolque, setSelectRemolque] = useState(null);
     //const [selectCliente, setSelectCliente] = useState(null);
 
-    //const [newUnidad, setNewUnidad] = useState(false);
-    //const [newRemolque, setNewRemolque] = useState(false);
-    //const [newOperador, setNewOperador] = useState(false);
-
-    const [open, setOpen] = useState<boolean>(false);
+    const [newUnidad, setNewUnidad] = useState(false);
+    const [newRemolque, setNewRemolque] = useState(false);
+    const [newOperador, setNewOperador] = useState(false);
+    const [newCliente, setNewCliente] = useState(false);
 
     useEffect(() => {
         // CALL SERVICES TO CAT
@@ -98,6 +106,11 @@ const ViajeForm = () => {
             loadOperadores.controller.abort(); 
         };
     },[]);
+    
+
+    const onChangeViajeForm = ({ target: { name, value } }: handleChangeForm) => {
+        setViajeForm({...viajeForm, [name]: value});
+    }
 
     const onSelectUnidad  = (unidad: any) => {
         if(unidad !== null){
@@ -136,90 +149,127 @@ const ViajeForm = () => {
             setViajeForm({...viajeForm, id_TipoViaje : null});
         }
     }
-    const openModal = (op: boolean, option: number) => {
-        setOptionForm(option);
-        setOpen(op);
+
+    useEffect(() => {
+        const loadUnidad = getUnidades(id_Empresa);
+        const useGetUnidades = async() => {
+            console.log("Entro");
+            try{
+                const response = await loadUnidad.call;
+                let info = response.data.data;
+                let dataFormatter = info.map( (item: UnidadModel) => ({
+                    id: item.id_Unidad,
+                    label: "ECO: " + item.st_Economico
+                }));
+                setUnidades(dataFormatter);
+            }catch(error){ alert(error); }
+        };
+        useGetUnidades();
+
+        return() => { 
+            loadUnidad.controller.abort(); 
+        };
+
+    },[newUnidad]);
+
+    useEffect(() => {},[newRemolque]);
+    useEffect(() => {},[newOperador]);
+    useEffect(() => {},[newCliente]);
+
+    const refreshUnidades  = (set: boolean) => setNewUnidad(set);
+    const refreshRemolques  = (set: boolean) => setNewRemolque(set);
+    const refreshOperadores  = (set: boolean) => setNewOperador(set);
+
+    const onSubmit = (e: any) => {
+        e.preventDefault();
+        console.log(viajeForm);
     }
-    
+
     return (
-        <form className='form-horizontal'>
-            {
-                ( open && optionForm !== 0) 
-                ? ( <DialogForms open={open} returnCloseDialog={(e) => setOpen(e)} optionForm={optionForm} /> ) 
-                : void(0)
-            }
-            <div className='form-body'>
-                <div className='row'>
-                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <h4 className="card-title">Información general</h4>
-                            <TextField id='folio_int_viaje' className="form-control" variant="outlined" label="Folio interno del viaje" type="text" name="st_Economico" disabled value={1} inputProps={{ autoComplete: "off" }} required/>
+        <Fragment>
+            <ModalUnidad open={dialogUnidad} returnCloseDialog={(close) => setDialogUnidad(close)} returnUnidad={(success) => refreshUnidades(success)}/>
+            <ModalRemolque open={dialogRemolque} returnCloseDialog={(close) => setDialogRemolque(close)} returnRemolque={(success) => refreshRemolques(success)}/>
+            <ModalOperador open={dialogOperador} returnCloseDialog={(close) => setDialogOperador(close)} returnOperador={(success) => refreshOperadores(success)}/>
+
+            <div className="card">
+                <div className="card-body">
+                    <div className='row'>
+                        <h4 className="card-title">Información general</h4>
+                        <hr></hr>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-4">
+                            <div className="form-group">
+                                <TextField id='folio_int_viaje' className="form-control" variant="outlined" label="Folio interno del viaje" type="text" name="st_Economico" disabled value={1} inputProps={{ autoComplete: "off" }} required/>
+                            </div>
                         </div>
-                    </div>
-                    <IconButton aria-label="Nueva Unidad" color='primary' onClick={ () => openModal(true, 1)}>
-                                <AddIcon />
-                            </IconButton>
-                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                        <h4 className="card-title">
-                            Selecciona la Unidad
-                            
-                        </h4>
-                        <Autocomplete
-                            value={selectUnidad}
-                            options={unidades}
-                            onChange={(_option, value) => onSelectUnidad(value)}
-                            getOptionLabel={(option) => option.label ? option.label : ''}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            renderInput={(params) => <TextField {...params} label="Selecciona la unidad" variant="outlined" />}
-                        />
-                    </div>
-                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                        <h4 className="card-title">
-                            Selecciona el Remolque
-                            <IconButton aria-label="Nuevo Remolque" color='primary' onClick={ () => openModal(true, 2) }>
-                                <AddIcon />
-                            </IconButton>
-                        </h4>
-                        <Autocomplete
-                            value={selectRemolque}
-                            options={remolques}
-                            onChange={(_option, value) => onSelectRemolques(value)}
-                            getOptionLabel={(option) => option.label ? option.label : ''}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            renderInput={(params) => <TextField {...params} label="Selecciona el remolque" variant="outlined" />}
-                        />
-                    </div>
-                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                        <h4 className="card-title">
-                            Selecciona al Operador
-                            <IconButton aria-label="Nuevo Operador" color='primary' onClick={ () => openModal(true, 3) }>
-                                <AddIcon />
-                            </IconButton>
-                        </h4>
-                        <Autocomplete
-                            value={selectOperador}
-                            options={operadores}
-                            onChange={(_option, value) => onSelectOperador(value)}
-                            getOptionLabel={(option) => option.label ? option.label : ''}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            renderInput={(params) => <TextField {...params} label="Selecciona al operador" variant="outlined" />}
-                        />
-                    </div>
-                    <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            <Autocomplete
-                                id="idTipoViaje"
-                                options={TipoViaje}
-                                onChange={(option,value) => onChangeTipoViaje(value)}
-                                getOptionLabel={(option) => option.st_Descripcion}
-                                isOptionEqualToValue={(option, value) => option.id_TipoViaje === value.id_TipoViaje}
-                                renderInput={(params) => <TextField {...params} label="Tipo de Viaje" variant="outlined" /> } 
-                            />
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-4">
+                            <div className="input-group">
+                                <TextField id='i_km_totales' className="form-control" variant="outlined" label="Km totales" type="number" name="i_km_totales" value={viajeForm.i_km_totales} inputProps={{ autoComplete: "off", min: 1, max: 50000 }} required onChange={onChangeViajeForm}/>
+                            </div>
+                        </div>
+                        <div className="col-md-6 col-lg-4 col-sm-12 col-xs-12 mt-4">
+                            <div className="form-group">
+                                <Autocomplete
+                                    id="idTipoViaje"
+                                    options={TipoViaje}
+                                    onChange={(option,value) => onChangeTipoViaje(value)}
+                                    getOptionLabel={(option) => option.st_Descripcion}
+                                    isOptionEqualToValue={(option, value) => option.id_TipoViaje === value.id_TipoViaje}
+                                    renderInput={(params) => <TextField {...params} label="Tipo de Viaje" variant="outlined" /> } 
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
+            <div className='card'>
+                <div className="card-body">
+                    <div className='row'>
+                        <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
+                            <h4 className="card-title">Configura tu viaje</h4>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogUnidad(true) }>Nueva unidad</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogRemolque(true) }>Nuevo remolque</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogOperador(true) }>Nuevo operador</Button>
+                        </div>
+                        <hr></hr>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                            <div className="form-group">
+                                <Autocomplete
+                                    value={selectUnidad}
+                                    options={unidades}
+                                    onChange={(_option, value) => onSelectUnidad(value)}
+                                    getOptionLabel={(option) => option.label ? option.label : ''}
+                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    renderInput={(params) => <TextField {...params} label="Selecciona la unidad" variant="outlined" />}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                            <Autocomplete
+                                value={selectRemolque}
+                                options={remolques}
+                                onChange={(_option, value) => onSelectRemolques(value)}
+                                getOptionLabel={(option) => option.label ? option.label : ''}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                renderInput={(params) => <TextField {...params} label="Selecciona el remolque" variant="outlined" />}
+                            />
+                        </div>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                            <Autocomplete
+                                value={selectOperador}
+                                options={operadores}
+                                onChange={(_option, value) => onSelectOperador(value)}
+                                getOptionLabel={(option) => option.label ? option.label : ''}
+                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                renderInput={(params) => <TextField {...params} label="Selecciona al operador" variant="outlined" />}
+                            />
+                        </div>
+                        <div className='col-md-4 col-lg-4 col-sm-12 col-xs-12'>
+                            <Button onClick={(e) => onSubmit(e)} variant='contained' color='success' size='medium'> Crear Viaje</Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Fragment>
     )
 }
 

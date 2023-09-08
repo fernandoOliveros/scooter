@@ -22,10 +22,10 @@ const DocumentosOeprador = ["url_CURP", "url_RFC", "url_ComprobanteDom"];
 //todo: interfaz de Props
 export interface Props {
   id_Operador?: string,
-  returnFormUnidad?: (success: boolean) => void
+  returnFormOperador: (success: boolean) => void
 }
 
-const OperadorForm = ({id_Operador = ''}) =>{
+const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
   console.log("render operador form");
   //todo: Store
   const userState = useSelector((store: RootStore) => store.user);
@@ -349,7 +349,9 @@ const OperadorForm = ({id_Operador = ''}) =>{
       }else{
         alert("No se pudo crear el operador (Falta el id retorno del API)");
       }
+      returnFormOperador(true);
     } catch (error) {
+      returnFormOperador(false);
       alert("Error - al crear el operador");
       console.log(error);
     }

@@ -13,7 +13,8 @@ import ViewDocumentsRemolque from '../Documents/ViewDocumentsRemolque';
 
 //todo: interfaz de Props
 export interface Props {
-  id_Remolque?: string
+  id_Remolque?: string,
+  returnFormRemolque: (success: boolean) => void
 }
 
 // todo: VARIABLES GLOBALES
@@ -21,7 +22,7 @@ type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTM
 const MAX_FILE_SIZE = 5002400;
 const nameDocuments = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
-const RemolqueForm = ({id_Remolque = ''}: Props) => {
+const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
   //todo: variables globales
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
@@ -141,9 +142,9 @@ const RemolqueForm = ({id_Remolque = ''}: Props) => {
       //todo: creamos el registro de los documentos del remolque
       let createrDocuments = await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
       //todo: Actualizamos el registro de los documentos del remolque
-      await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));      
-      
-    } catch (error) { console.log(error); alert("Error, al crear el remolque")}
+      await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));
+      returnFormRemolque(true);
+    } catch (error) { returnFormRemolque(true);  console.log(error); alert("Error, al crear el remolque")}
   }
 
   const onSubmitEdit =  async(e: any) => {

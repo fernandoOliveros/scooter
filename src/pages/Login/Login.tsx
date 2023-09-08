@@ -8,13 +8,17 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import useFetchAndLoad from '../../hooks/useFetchAndLoad';
 import { useDispatch } from 'react-redux';
 import loginService from '../../services/login/login.service';
 import { loginModel } from '../../models/login/login.model';
 import { createUser } from '../../redux/auth/authSlicer';
 import { useNavigate } from 'react-router-dom';
+
+
+type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+
 
 const Login = () => {
   //field
@@ -24,16 +28,15 @@ const Login = () => {
   const navigate = useNavigate();
 
   //Functions
-  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    SetFormLogin({...FormLogin, [ e.target.id] : e.target.value});
+  const onChangeForm = ({ target: { name, value } }: handleChangeForm)=> {
+    SetFormLogin({...FormLogin, [ name ] : value});
   }
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
     const result = await callEndpoint(loginService(FormLogin));
-    console.log(result);
     dispatch(createUser(result.data.data));
-    navigate("/home",  { replace : true });
+    navigate("/home");
   }
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
@@ -58,8 +61,8 @@ const Login = () => {
                     Ingresa tus Credenciales
                 </Typography>
                 <Box component="form" onSubmit={e => onSubmit(e)} noValidate sx={{ mt: 1 }}>
-                    <TextField margin="normal" type="email" id="st_Email" label="Usuario" name="st_Email" autoFocus required fullWidth onChange={ e => onChange(e)} autoComplete="off" />
-                    <TextField margin="normal" name="st_Password" label="Contraseña" type="password" id="st_Password"  required fullWidth onChange={e => onChange(e)} autoComplete="off"/>
+                    <TextField margin="normal" type="email" id="st_Email" label="Usuario" name="st_Email" autoFocus required fullWidth onChange={onChangeForm} autoComplete="off" />
+                    <TextField margin="normal" name="st_Password" label="Contraseña" type="password" id="st_Password"  required fullWidth onChange={onChangeForm} autoComplete="off"/>
                     <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }} > Ingresar </Button>
                     <Grid container>
                         <Grid item xs>

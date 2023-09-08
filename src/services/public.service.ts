@@ -30,3 +30,12 @@ export const getColoniasByCodigoPostal = (codigo_postal : string) => {
         controller
     }
 }
+
+export const getCatRegimenFiscal = () => {
+    const controller = loadAbort();
+    const url = baseUrl + "regimenFiscal";
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}

@@ -16,15 +16,19 @@ const OperadoresScreen = lazy( () => import('./pages/Operadores/Operadores'));
 const CreateOperadoresScreen = lazy( () => import('./pages/Operadores/CreateOperador'));
 const EditOperadoresScreen = lazy( () => import('./pages/Operadores/EditOperador'));
 
-
 //todo: REMOLQUES
 const RemolquesScreen = lazy( () => import('./pages/Remolques/Remolque'));
 const CreateRemolquesScreen = lazy( () => import('./pages/Remolques/CreateRemolque'));
 const EditRemolquesScreen = lazy( () => import('./pages/Remolques/EditRemolque'));
 
 //todo: VIAJES
+const ViajesScreen = lazy(() => import('./pages/Viajes/Viajes'));
 const CreateViajesScreen = lazy(() => import('./pages/Viajes/CreateViaje'));
 
+
+//todo: CARTA PORTES
+const CartaPortesScreen = lazy( () => import('./pages/CartaPortes/CartaPortes'));
+const CreateCartaPorte = lazy(() => import('./pages/CartaPortes/CreateCartaPorte'));
 
 function App() {
   return (
@@ -43,23 +47,23 @@ function App() {
           <Route path={PrivateRoutes.newUnidad} element={<CreateUnidadScreen />} />
           <Route path={PrivateRoutes.editUnidad} element={<EditUnidadScreen />} />
 
-
           {/* OPERADORES*/}
           <Route path={PrivateRoutes.operadores} element={<OperadoresScreen />} />
           <Route path={PrivateRoutes.newOperador} element={<CreateOperadoresScreen />} />
           <Route path={PrivateRoutes.editOperador} element={<EditOperadoresScreen />} />
-
 
           {/* REMOLQUES*/}
           <Route path={PrivateRoutes.remolques} element={<RemolquesScreen />} />
           <Route path={PrivateRoutes.newRemolques} element={<CreateRemolquesScreen />} />
           <Route path={PrivateRoutes.editRemolques} element={<EditRemolquesScreen />} />
 
-
           {/* VIAJES */}
+          <Route path={PrivateRoutes.viajes} element={<ViajesScreen />} />
           <Route path={PrivateRoutes.viajes} element={<CreateViajesScreen />} />
 
-
+          {/* CARTA PORTE */}
+          <Route path={PrivateRoutes.cartaPorte} element={<CartaPortesScreen />}/>
+          <Route path={PrivateRoutes.cartaPorteNew} element={<CreateCartaPorte />}/>
         </Route>
       </Routes>
     </Suspense>

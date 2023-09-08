@@ -7,6 +7,6 @@ export interface IClienteForm {
     st_PersonaRepresenta: string;
     st_Celular: string;
     st_Correo: string;
-    id_Empresa: number;
-    id_Candado: number;
+    id_Empresa: number | null;
+    id_Candado: number | null;
 }
