@@ -39,3 +39,38 @@ export const getCatRegimenFiscal = () => {
         controller
     }
 }
+
+
+export const getProductosServicio = () =>{
+    const controller = loadAbort();
+    const url = baseUrl + "catalogos/readProdServicioCFDI";
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}
+
+
+export const getMaterialesPeligrosos = () =>{
+    const controller = loadAbort();
+    const url = baseUrl + "catalogos/readMaterialesPeligrosos";
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}
+
+
+export const getOrigenesCPEmpresa = (id_Empresa: string) => {
+    const controller = loadAbort();
+    const url = baseUrl + "complemento de la url" + id_Empresa;
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const getUnidadPeso = () => {
+    const controller = loadAbort();
+    const url = baseUrl + ""
+}

@@ -13,7 +13,7 @@ export interface Props {
 }
 
 //TODO: variables globales
-let ArrDestinoEmpty = { id_Estado: null, id_Localidad: null, id_Municipio: null, id_Colonia: null, c_codigoPostal: '', st_Calle: '', st_NoExterior: '', st_NoInterior: 'S/N', st_RefDomicilio: '', st_DestinatarioNombre: '', date_FechaLlegada: null, st_DestinatarioRFC: '', dec_DistRe: '', TipoUbicacion: 'Destino'};
+let ArrDestinoEmpty = { id_Estado: null, id_Localidad: null, id_Municipio: null, id_Colonia: null, c_codigoPostal: '', st_Calle: '', st_NoExterior: '', st_NoInterior: 'S/N', st_RefDomicilio: '', st_DestinatarioNombre: '', date_FechaLlegada: null, st_DestinatarioRFC: '', dec_DistRe: '', TipoUbicacion: 'Destino', DistanciaRecorrida: '', DistanciaRecorridaSpecified: false};
 let FormHtmlDireccion = {st_Colonia: '', st_Municipio: '', st_Localidad:'', st_Estado: ''};
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
@@ -30,14 +30,14 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
   const [countDestinos, setCountDestinos] = useState<number>(0);
 
   //todo: FUNCIONES PARA ORIGENES
-  const onChangeForm = ({ target: { name, value } }: handleChangeForm) => {
+  const onChangeDestino = ({ target: { name, value } }: handleChangeForm) => {
     if(name === "c_codigoPostal"){
-        setDestino({ ...destino, [name]: value});
-        let codigo_postal = value;
-        if(codigo_postal.length === 5) findColonias(codigo_postal);
-      }else{
-        setDestino({ ...destino, [name]: value});
-      } 
+      setDestino({ ...destino, [name]: value});
+      let codigo_postal = value;
+      if(codigo_postal.length === 5) findColonias(codigo_postal);
+    }else{
+      setDestino({ ...destino, [name]: value});
+    }
     setDestino({...destino, [name] : value});
   }
 
@@ -112,51 +112,57 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
   }
 
   const guardarDireccion = (e: any) => {
-      e.preventDefault();
-      retornaDestino(destino);
-      setDestino(ArrDestinoEmpty)
-      setCountDestinos(countDestinos + 1);
+    e.preventDefault();
+    retornaDestino(destino);
+    setDestino(ArrDestinoEmpty)
+    setSelectColonia(null);
+    setCountDestinos(countDestinos + 1);
   }
 
   return (
     <Fragment>
-      <h4 className="card-title">Origenes (Regitrados: {countDestinos})</h4>
-      <Button variant='contained' onClick={() => retornaVerDestinos(true)} startIcon={<VisibilityIcon />} size='small'>Ver Origenes</Button>
+      <h4 className="card-title">Destinos (registrados: {countDestinos})</h4>
+      <Button variant='contained' startIcon={<VisibilityIcon />} size='small'>Mostrar destinos</Button>
       <hr></hr>
       <div className='row'>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_Remitenst_DestinatarioNombreteNombre' className="form-control" variant="outlined" label="Nombre Destinatario"  type="text" name="st_DestinatarioNombre" onChange={onChangeForm} value={destino.st_DestinatarioNombre || ''} inputProps={{ autoComplete: "off" }} required/>
+                  <TextField id='st_Remitenst_DestinatarioNombreteNombre' className="form-control" variant="outlined" label="Nombre Destinatario"  type="text" name="st_DestinatarioNombre" onChange={onChangeDestino} value={destino.st_DestinatarioNombre || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_DestinatarioRFC' className="form-control" variant="outlined" label="RFC destinatario"  type="text" name="st_DestinatarioRFC" onChange={onChangeForm} value={destino.st_DestinatarioRFC || ''} inputProps={{ autoComplete: "off" }} required/>
+                  <TextField id='st_DestinatarioRFC' className="form-control" variant="outlined" label="RFC destinatario"  type="text" name="st_DestinatarioRFC" onChange={onChangeDestino} value={destino.st_DestinatarioRFC || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField fullWidth id='date_FechaLlegada' className="form-control" variant="outlined" label="Fecha de llegada" InputLabelProps={{ shrink: true }}  type="datetime-local" name="date_FechaLlegada" onChange={onChangeForm} value={destino.date_FechaLlegada || ''} inputProps={{ autoComplete: "off" }} required/>
+                <TextField fullWidth id='dec_DistRe' className="form-control" variant="outlined" label="Distancia Recorrida" type="text" name="dec_DistRe" onChange={onChangeDestino} value={destino.dec_DistRe || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_Calle' className="form-control" variant="outlined" label="Calle"  type="text" name="st_Calle" onChange={onChangeForm} value={destino.st_Calle || ''} inputProps={{ autoComplete: "off" }} required/>
+                  <TextField fullWidth id='date_FechaLlegada' className="form-control" variant="outlined" label="Fecha de llegada" InputLabelProps={{ shrink: true }}  type="datetime-local" name="date_FechaLlegada" onChange={onChangeDestino} value={destino.date_FechaLlegada || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_NoExterior' className="form-control" variant="outlined" label="Número Exterior"  type="text" name="st_NoExterior" onChange={onChangeForm} value={destino.st_NoExterior || ''} inputProps={{ autoComplete: "off" }} required/>
+                  <TextField id='st_Calle' className="form-control" variant="outlined" label="Calle"  type="text" name="st_Calle" onChange={onChangeDestino} value={destino.st_Calle || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_NoInterior' className="form-control" variant="outlined" label="Número Interior"  type="text" name="st_NoInterior" onChange={onChangeForm} value={destino.st_NoInterior || ''} inputProps={{ autoComplete: "off" }} required/>
+                  <TextField id='st_NoExterior' className="form-control" variant="outlined" label="Número Exterior"  type="text" name="st_NoExterior" onChange={onChangeDestino} value={destino.st_NoExterior || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='c_codigoPostal' className="form-control" variant="outlined" label="Código Postal"  type="text" name="c_codigoPostal" onChange={onChangeForm} value={destino.c_codigoPostal || ''} inputProps={{ autoComplete: "off", maxLength:"5" }} required InputLabelProps={{ shrink: true }}/>
+                  <TextField id='st_NoInterior' className="form-control" variant="outlined" label="Número Interior"  type="text" name="st_NoInterior" onChange={onChangeDestino} value={destino.st_NoInterior || ''} inputProps={{ autoComplete: "off" }} required/>
+              </div>
+          </div>
+          <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+              <div className="form-group">
+                  <TextField id='c_codigoPostal' className="form-control" variant="outlined" label="Código Postal"  type="text" name="c_codigoPostal" onChange={onChangeDestino} value={destino.c_codigoPostal || ''} inputProps={{ autoComplete: "off", maxLength:"5" }} required InputLabelProps={{ shrink: true }}/>
               </div>
           </div>
           <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
@@ -187,7 +193,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
           </div>
           <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
               <div className="form-group">
-                  <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia"  type="text" name="st_RefDomicilio" onChange={onChangeForm} value={destino.st_RefDomicilio || ''} inputProps={{ autoComplete: "off"}} required/>
+                  <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia"  type="text" name="st_RefDomicilio" onChange={onChangeDestino} value={destino.st_RefDomicilio || ''} inputProps={{ autoComplete: "off"}} required/>
               </div>
           </div>
           <div className="col-12 text-end">

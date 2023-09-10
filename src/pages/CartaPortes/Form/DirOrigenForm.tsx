@@ -121,7 +121,7 @@ function DirOrigenForm({retornaOrigen, retornaVerOrigenes}: Props) {
 
   return (
     <Fragment>
-      <h4 className="card-title">Origenes (Regitrados: {countOrigenes})</h4>
+      <h4 className="card-title">Origenes (registrados: {countOrigenes})</h4>
       <Button variant='contained' onClick={() => retornaVerOrigenes(true)} startIcon={<VisibilityIcon />} size='small'>Ver Origenes</Button>
       <hr></hr>
       <div className='row'>
