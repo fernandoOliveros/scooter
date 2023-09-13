@@ -30,6 +30,7 @@ function ProductoServicioForm() {
   const [opMatPeligrsos, setOpMatPeligroso] = useState<boolean>(false);
   const [productoServicio, setProductoServicio] = useState<ICartaPorteProductoServicioForm>(productoServicioEmpty);
   const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligroso);
+  const [optionPeligroso, setOptionPeligroso] = useState<boolean>(false);
 
   //todo: Catálogo
   const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
@@ -91,12 +92,18 @@ function ProductoServicioForm() {
 
   //todo: funciones para seleccionar productos servicio y (si existe) material peligroso
   const onChangeProducto = (item: any) => {
+    console.log(item);
     if(item !== null){
       catProducServicio.forEach((element) => {
         if(element.id_ClaveProducto === item.id_ClaveProducto){
           setProductoServicio({...productoServicio, id_ClaveProducto: element.id_ClaveProducto});
         }
       });
+      let posiblePeligroso = item.st_MaterialPeligroso.search(",");
+      let posiblePeligroso2 = item.st_MaterialPeligroso.search("1");
+      if(posiblePeligroso !== -1 || posiblePeligroso2 !== -1){
+        setOptionPeligroso(true);
+      }
     }
   }
 
@@ -137,28 +144,42 @@ function ProductoServicioForm() {
             />
           </div>
         </div>
+        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField id='PesoEnKg' className="form-control" variant="outlined" label="Peso en KG"  type="text" name="PesoEnKg" value={productoServicio.PesoEnKg || ''} inputProps={{ autoComplete: "off" }} required/>
+          </div>
+        </div>
+        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField id='deci_ValoeUnitario' className="form-control" variant="outlined" label="Valor de la mercancia"  type="text" name="deci_ValoeUnitario" value={productoServicio.deci_ValoeUnitario || ''} inputProps={{ autoComplete: "off" }} required/>
+          </div>
+        </div>
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
             <Autocomplete
-              options={catUnidadPeso}   
+              options={catUnidadPeso}
               onChange={(_option, value) => onChangeUnidadPeso(value)}
               getOptionLabel={(option) => option.st_ClaveUnidad + " - " + option.st_NombreClave}
               isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPeso === value.id_ClaveUnidadPeso}
-              renderInput={(params) => <TextField {...params} label="Selecciona unidad peso" variant="outlined" />}
-            />
+              renderInput={(params) => <TextField {...params} label="Selecciona unidad peso" variant="outlined" />} />
           </div>
         </div>
-        <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-          <div className="form-group">
-            <Autocomplete
-              options={catMatPeligroso}
-              onChange={(_option, value) => onChangeMaterialPeligroso(value)}
-              getOptionLabel={(option) => option.c_MaterialesPeligrosos + " - " + option.st_descripcion}
-              isOptionEqualToValue={(option, value) => option.id_MaterialesPeligrosos === value.id_MaterialesPeligrosos}
-              renderInput={(params) => <TextField {...params} label="Selecciona el material peligroso" variant="outlined" />}
-            />
-          </div>
-        </div>
+        {
+          optionPeligroso ? (
+          <>
+            <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                <div className="form-group">
+                  <Autocomplete
+                    options={catMatPeligroso}
+                    onChange={(_option, value) => onChangeMaterialPeligroso(value)}
+                    getOptionLabel={(option) => option.c_MaterialesPeligrosos + " - " + option.st_descripcion}
+                    isOptionEqualToValue={(option, value) => option.id_MaterialesPeligrosos === value.id_MaterialesPeligrosos}
+                    renderInput={(params) => <TextField {...params} label="Selecciona el material peligroso" variant="outlined" />} />
+                </div>
+              </div>
+          </>
+          ) : void(0)
+        }
       </div>
     </Fragment>
   )
