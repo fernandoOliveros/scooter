@@ -1,10 +1,11 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { ICartaPorteProductoServicioForm } from '../../../models/cartaportes/cartaPorte-produtoServicio-form.model';
 import { ICartaPorteMaterialPeligroso } from '../../../models/cartaportes/cartaPorte-MaterialPeligro.model';
 import { IAutoComplete } from '../../../models/shared/autocomplete.model';
-import { getMaterialesPeligrosos, getProductosServicio } from '../../../services/public.service';
+import { getMaterialesPeligrosos, getProductosServicioCP, getUnidadPesoCP } from '../../../services/public.service';
 import { Autocomplete, Button, TextField } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPeso } from '../../../models/cartaportes/cartaPorte.model';
 
 export interface Props {}
 
@@ -30,51 +31,57 @@ function ProductoServicioForm() {
   const [productoServicio, setProductoServicio] = useState<ICartaPorteProductoServicioForm>(productoServicioEmpty);
   const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligroso);
 
-  //todo: variable para seleccionar el producto servicio
-  const [selectProServicio, setSelectProServicio] = useState(null);
-  const [selecMatPeligroso, setSelectMatPeligroso] = useState(null);
-  const [ selectUnidadPeso, setSelectUnidadPeso] = useState(null);
-
   //todo: Catálogo
-  const [catProducServicio, setCatProducServicio] = useState<IAutoComplete[]>([]);
-  const [carMatPeligroso, setCatMatPeligroso] = useState<IAutoComplete[]>([]);
-  const [catUnidadPeso, setCatUnidadPeso] = useState<IAutoComplete[]>([]);
+  const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
+  const [catMatPeligroso, setCatMatPeligroso] = useState<IMaterialPeligroso[]>([]);
+  const [catUnidadPeso, setCatUnidadPeso] = useState<IUnidadPeso[]>([]);
+  const [catEmbalajes, setCatEmbalajes] = useState<IEmbalaje[]>([]);
 
   //todo: INITIAL FUNCTION
   useEffect(() => {
-
     //services
-    const loadProductoServicio = getProductosServicio();
+    const loadProductoServicio = getProductosServicioCP();
     const loadMatPeligroso = getMaterialesPeligrosos();
+    const loadUnidadPeso = getUnidadPesoCP();
 
     //functions
     const _ProductosServicio = async () => {
       let result = await loadProductoServicio.call;
       if(result.data.success){
-        let info = result.data.data;
-        let cleanData = info.map( (item: any) => ({
-          id: item.id_ClaveProdServCFDI,
-          label: item.c_ClaveProdServ + " - " + item.Descripcion
-        }));
-        setCatProducServicio(cleanData);
+        let response = result.data;
+        setCatProducServicio( response.data);
       }
     }
 
     const _MaterialesPeligrosos = async () => {
       let result = await loadMatPeligroso.call;
       if(result.data.success){
-        let info = result.data.data;
-        let cleanData = info.map( (item: any) => ({
-          id: item.id_MaterialesPeligrosos,
-          label: item.c_MaterialesPeligrosos + " - " + item.st_descripcion
-        }));
-        setCatMatPeligroso(cleanData);
+        let response = result.data;
+        setCatMatPeligroso( response.data);
+      }
+    }
+
+    const _Embalajes = async() => {
+      let result = await loadMatPeligroso.call;
+      if(result.data.success){
+        let response = result.data;
+        setCatEmbalajes(response.data);
+      }
+    } 
+
+    const _UnidadPeso = async () => {
+      let result = await loadUnidadPeso.call;
+      if(result.data.success){
+        let response = result.data;
+        setCatUnidadPeso( response.data);
       }
     }
 
     //Call functions
     _ProductosServicio();
     _MaterialesPeligrosos();
+    _UnidadPeso();
+    _Embalajes();
 
     //destruimos la peticion si cambia de pantalla
     return () => {
@@ -85,11 +92,30 @@ function ProductoServicioForm() {
   //todo: funciones para seleccionar productos servicio y (si existe) material peligroso
   const onChangeProducto = (item: any) => {
     if(item !== null){
-      setSelectProServicio( item );
-      catProducServicio.forEach(element => {
-          if(element.id === item.id){
-              setProductoServicio({...productoServicio, id_ClaveProducto: element.id});
-          }
+      catProducServicio.forEach((element) => {
+        if(element.id_ClaveProducto === item.id_ClaveProducto){
+          setProductoServicio({...productoServicio, id_ClaveProducto: element.id_ClaveProducto});
+        }
+      });
+    }
+  }
+
+  const onChangeUnidadPeso = (item: any) => {
+    if(item !== null){
+      catUnidadPeso.forEach((element) => {
+        if(element.id_ClaveUnidadPeso === item.id_ClaveUnidadPeso){
+          setProductoServicio({...productoServicio, id_ClaveUnidadPeso: element.id_ClaveUnidadPeso});
+        }
+      });
+    }
+  }
+
+  const onChangeMaterialPeligroso = (item: any) => {
+    if(item !== null){
+      catMatPeligroso.forEach(element => {
+        if(element.id_MaterialesPeligrosos === item.id_MaterialesPeligrosos){
+          setMatPeligroso({...matPeligroso, id_MaterialesPeligrosos: element.id_MaterialesPeligrosos});
+        }
       });
     }
   }
@@ -103,12 +129,33 @@ function ProductoServicioForm() {
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
             <Autocomplete
-              value={selectProServicio}
               options={catProducServicio}   
               onChange={(_option, value) => onChangeProducto(value)}
-              getOptionLabel={(option) => option.label ? option.label : ''}
-              isOptionEqualToValue={(option: IAutoComplete, value: IAutoComplete) => option.id === value.id}
+              getOptionLabel={(option) => option.st_ClaveProducto + " - " + option.st_DescripcionProducto}
+              isOptionEqualToValue={(option, value) => option.id_ClaveProducto === value.id_ClaveProducto}
               renderInput={(params) => <TextField {...params} label="Selecciona el bien transportado" variant="outlined" />}
+            />
+          </div>
+        </div>
+        <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+            <Autocomplete
+              options={catUnidadPeso}   
+              onChange={(_option, value) => onChangeUnidadPeso(value)}
+              getOptionLabel={(option) => option.st_ClaveUnidad + " - " + option.st_NombreClave}
+              isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPeso === value.id_ClaveUnidadPeso}
+              renderInput={(params) => <TextField {...params} label="Selecciona unidad peso" variant="outlined" />}
+            />
+          </div>
+        </div>
+        <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+            <Autocomplete
+              options={catMatPeligroso}
+              onChange={(_option, value) => onChangeMaterialPeligroso(value)}
+              getOptionLabel={(option) => option.c_MaterialesPeligrosos + " - " + option.st_descripcion}
+              isOptionEqualToValue={(option, value) => option.id_MaterialesPeligrosos === value.id_MaterialesPeligrosos}
+              renderInput={(params) => <TextField {...params} label="Selecciona el material peligroso" variant="outlined" />}
             />
           </div>
         </div>

@@ -12,7 +12,6 @@ export const getTipoUnidad = () => {
     }
 }
 
-
 export const getTipoRemolque = () => {
     const controller = loadAbort();
     const urlGet = baseUrl + "remolques/readTypes";
@@ -40,16 +39,14 @@ export const getCatRegimenFiscal = () => {
     }
 }
 
-
-export const getProductosServicio = () =>{
+export const getProductosServicioCP = () =>{
     const controller = loadAbort();
-    const url = baseUrl + "catalogos/readProdServicioCFDI";
+    const url = baseUrl + "catalogos/readProdServicioCP";
     return {
         call: axios.get(url, { signal: controller.signal }),
         controller
     }
 }
-
 
 export const getMaterialesPeligrosos = () =>{
     const controller = loadAbort();
@@ -60,7 +57,6 @@ export const getMaterialesPeligrosos = () =>{
     }
 }
 
-
 export const getOrigenesCPEmpresa = (id_Empresa: string) => {
     const controller = loadAbort();
     const url = baseUrl + "complemento de la url" + id_Empresa;
@@ -70,7 +66,20 @@ export const getOrigenesCPEmpresa = (id_Empresa: string) => {
     }
 }
 
-export const getUnidadPeso = () => {
+export const getUnidadPesoCP = () => {
     const controller = loadAbort();
-    const url = baseUrl + ""
+    const url = baseUrl + "productos/readClaveUnidadPeso";
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const getEmbalajesCP = () =>{
+    const controller = loadAbort();
+    const url = baseUrl + "catalogos/readEmbalajes";
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
 }
