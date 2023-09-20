@@ -121,7 +121,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
 
   return (
     <Fragment>
-      <h4 className="card-title">Destinos (registrados: {countDestinos})</h4>
+      <h4 className="card-title mt-5">Destinos (registrados: {countDestinos})</h4>
       <Button variant='contained' startIcon={<VisibilityIcon />} size='small'>Mostrar destinos</Button>
       <hr></hr>
       <div className='row'>

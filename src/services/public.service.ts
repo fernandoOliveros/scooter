@@ -48,6 +48,15 @@ export const getProductosServicioCP = () =>{
     }
 }
 
+export const getProductoCPLike = (search: string) => {
+    const controller = loadAbort();
+    const url = baseUrl + 'productos/readClaveProductoServicio/"' + search + '"';
+    return {
+        call: axios.get(url, { signal: controller.signal }),
+        controller
+    }
+}
+
 export const getMaterialesPeligrosos = () =>{
     const controller = loadAbort();
     const url = baseUrl + "catalogos/readMaterialesPeligrosos";

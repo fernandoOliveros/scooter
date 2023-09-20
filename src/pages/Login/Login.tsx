@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import useFetchAndLoad from '../../hooks/useFetchAndLoad';
 import { useDispatch } from 'react-redux';
 import loginService from '../../services/login/login.service';

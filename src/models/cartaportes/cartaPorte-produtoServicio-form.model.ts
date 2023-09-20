@@ -4,9 +4,7 @@ export interface ICartaPorteProductoServicioForm {
     Cantidad: number;
     deci_ValoeUnitario: number;
     id_ClaveUnidadPeso: number | null;
-    CantidadTransporta?: ProductoTransportado;
     MaterialPeligroso: String;
-}
-export interface ProductoTransportado {
-    Cantidad: number;
+    id_MaterialesPeligrosos?: number;
+    id_TipoEmbalaje?: number;
 }

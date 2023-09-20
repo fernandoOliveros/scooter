@@ -1,11 +1,11 @@
-import { Fragment, useEffect, useState } from 'react'
+import { ChangeEvent, Fragment, useEffect, useState } from 'react'
 import { ICartaPorteProductoServicioForm } from '../../../models/cartaportes/cartaPorte-produtoServicio-form.model';
 import { ICartaPorteMaterialPeligroso } from '../../../models/cartaportes/cartaPorte-MaterialPeligro.model';
-import { IAutoComplete } from '../../../models/shared/autocomplete.model';
-import { getMaterialesPeligrosos, getProductosServicioCP, getUnidadPesoCP } from '../../../services/public.service';
-import { Autocomplete, Button, TextField } from '@mui/material';
+import { getEmbalajesCP, getMaterialesPeligrosos, getProductoCPLike, getUnidadPesoCP } from '../../../services/public.service';
+import { Autocomplete, Button, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPeso } from '../../../models/cartaportes/cartaPorte.model';
+import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 
 export interface Props {}
 
@@ -16,21 +16,21 @@ let productoServicioEmpty: ICartaPorteProductoServicioForm = {
   Cantidad: 1,
   id_ClaveUnidadPeso:null,
   deci_ValoeUnitario: 1,
-  CantidadTransporta: { Cantidad: 1 },
   MaterialPeligroso: 'No'
 }
-let productoPeligroso: ICartaPorteMaterialPeligroso = {
+let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
   id_MaterialesPeligrosos: null,
   id_TipoEmbalaje: null
 }
 
+type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+
 function ProductoServicioForm() {
+  const { callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
 
   //todo: Variables globales
-  const [opMatPeligrsos, setOpMatPeligroso] = useState<boolean>(false);
   const [productoServicio, setProductoServicio] = useState<ICartaPorteProductoServicioForm>(productoServicioEmpty);
-  const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligroso);
-  const [optionPeligroso, setOptionPeligroso] = useState<boolean>(false);
+  const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligrosoEmpty);
 
   //todo: Catálogo
   const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
@@ -38,22 +38,34 @@ function ProductoServicioForm() {
   const [catUnidadPeso, setCatUnidadPeso] = useState<IUnidadPeso[]>([]);
   const [catEmbalajes, setCatEmbalajes] = useState<IEmbalaje[]>([]);
 
+  //todo: Variables para funcionalidad de materialPeligrsos HTML
+  const [selectProducto, setSelectProducto] = useState<IProductosServicios | null>(null);
+  const [isPeligroso, setIsPeligroso] = useState<boolean>(false);
+
+  const onChangeFormProducto = ({ target: { name, value } }: handleChangeForm) => {
+    setProductoServicio({...productoServicio, [name]: value});
+  }
+
   //todo: INITIAL FUNCTION
   useEffect(() => {
     //services
-    const loadProductoServicio = getProductosServicioCP();
     const loadMatPeligroso = getMaterialesPeligrosos();
     const loadUnidadPeso = getUnidadPesoCP();
-
-    //functions
-    const _ProductosServicio = async () => {
-      let result = await loadProductoServicio.call;
-      if(result.data.success){
-        let response = result.data;
-        setCatProducServicio( response.data);
+    const loadEmbalaje = getEmbalajesCP();
+    /*
+      const loadProductoServicio = getProductosServicioCP();
+      const _ProductosServicio = async () => {
+        let result = await loadProductoServicio.call;
+        if(result.data.success){
+          let response = result.data;
+          setCatProducServicio( response.data);
+        }
       }
-    }
-
+      //Call functions
+      _ProductosServicio();
+      loadProductoServicio.controller.abort();
+    */
+    //todo: functions
     const _MaterialesPeligrosos = async () => {
       let result = await loadMatPeligroso.call;
       if(result.data.success){
@@ -63,7 +75,7 @@ function ProductoServicioForm() {
     }
 
     const _Embalajes = async() => {
-      let result = await loadMatPeligroso.call;
+      let result = await loadEmbalaje.call;
       if(result.data.success){
         let response = result.data;
         setCatEmbalajes(response.data);
@@ -78,15 +90,16 @@ function ProductoServicioForm() {
       }
     }
 
-    //Call functions
-    _ProductosServicio();
+    //Call Functions
     _MaterialesPeligrosos();
     _UnidadPeso();
     _Embalajes();
 
     //destruimos la peticion si cambia de pantalla
     return () => {
-      loadProductoServicio.controller.abort();
+      loadMatPeligroso.controller.abort();
+      loadUnidadPeso.controller.abort();
+      loadEmbalaje.controller.abort();
     }
   },[]);
 
@@ -97,13 +110,12 @@ function ProductoServicioForm() {
       catProducServicio.forEach((element) => {
         if(element.id_ClaveProducto === item.id_ClaveProducto){
           setProductoServicio({...productoServicio, id_ClaveProducto: element.id_ClaveProducto});
+          setSelectProducto(item);
         }
       });
-      let posiblePeligroso = item.st_MaterialPeligroso.search(",");
-      let posiblePeligroso2 = item.st_MaterialPeligroso.search("1");
-      if(posiblePeligroso !== -1 || posiblePeligroso2 !== -1){
-        setOptionPeligroso(true);
-      }
+    }else{
+      setCatProducServicio( [] );
+      setSelectProducto(null);
     }
   }
 
@@ -127,31 +139,75 @@ function ProductoServicioForm() {
     }
   }
 
+  const onChangeEmbalaje = (item: any) => {
+    if(item !== null){
+      catEmbalajes.forEach((element) => {
+        if(element.id_TipoEmbalaje === item.id_TipoEmbalaje){
+          setMatPeligroso({...matPeligroso, id_TipoEmbalaje: element.id_TipoEmbalaje});
+        }
+      });
+    }
+  }
+
+  const changeTextField = async ({ target: { value } }: handleChangeForm) => {
+    let findProductos = value;
+    const result = await callEndpoint(  getProductoCPLike(findProductos) );
+    setCatProducServicio( result.data.data);
+    console.log(result.data.data); 
+  }
+
+  const chooseProductoPeligroso = () => {
+    if(!isPeligroso){
+      setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
+    }else{
+      setProductoServicio({...productoServicio, MaterialPeligroso: 'No'});
+      setMatPeligroso(productoPeligrosoEmpty);
+    }
+    setIsPeligroso(!isPeligroso);
+  }
+
+  const handleSabeProductoServicio = () => {
+    if(productoServicio.MaterialPeligroso === 'Si' && 
+      ( matPeligroso.id_MaterialesPeligrosos === null || matPeligroso.id_TipoEmbalaje === null )
+    ){
+      alert("Si el material es peligroso selecciona el embalaje y el producto peligroso");
+    }
+    console.log(productoServicio);
+    console.log(matPeligroso);
+  }
+
   return (
     <Fragment>
-      <h4 className="card-title">Bienes Transportado (registrados: 0)</h4>
+      <h4 className="card-title mt-5">Bienes Transportado (registrados: 0)</h4>
       <Button variant='contained' startIcon={<VisibilityIcon />} size='small'>Mostrar bienes transportados</Button>
       <hr></hr>
       <div className='row'>
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
             <Autocomplete
-              options={catProducServicio}   
               onChange={(_option, value) => onChangeProducto(value)}
+              options={catProducServicio}   
               getOptionLabel={(option) => option.st_ClaveProducto + " - " + option.st_DescripcionProducto}
               isOptionEqualToValue={(option, value) => option.id_ClaveProducto === value.id_ClaveProducto}
-              renderInput={(params) => <TextField {...params} label="Selecciona el bien transportado" variant="outlined" />}
+              renderInput={(params) => <TextField {...params} name='searchProducto' label="Selecciona el bien transportado" onChange={changeTextField} variant="outlined" />}
             />
           </div>
         </div>
+        {
+          selectProducto !== null && 
+          ( 
+            selectProducto.st_MaterialPeligroso.search(",") !== -1 ||  selectProducto.st_MaterialPeligroso.search("1") !== -1 
+          ) ? (
+            <div className="col-md-2 col-lg-2 col-sm-12 col-xs-12">
+              <div className="form-group">
+              <FormControlLabel control={<Switch value={isPeligroso} onChange={chooseProductoPeligroso} />} label="Material Peligroso" />
+              </div>
+            </div>
+          ) : void(0)
+        }
         <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
-          <TextField id='PesoEnKg' className="form-control" variant="outlined" label="Peso en KG"  type="text" name="PesoEnKg" value={productoServicio.PesoEnKg || ''} inputProps={{ autoComplete: "off" }} required/>
-          </div>
-        </div>
-        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
-          <div className="form-group">
-          <TextField id='deci_ValoeUnitario' className="form-control" variant="outlined" label="Valor de la mercancia"  type="text" name="deci_ValoeUnitario" value={productoServicio.deci_ValoeUnitario || ''} inputProps={{ autoComplete: "off" }} required/>
+          <TextField id='PesoEnKg' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Peso en KG"  type="number" inputProps={{ autoComplete: "off", min: 1}} name="PesoEnKg" value={productoServicio.PesoEnKg || ''} required/>
           </div>
         </div>
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
@@ -164,10 +220,23 @@ function ProductoServicioForm() {
               renderInput={(params) => <TextField {...params} label="Selecciona unidad peso" variant="outlined" />} />
           </div>
         </div>
-        {
-          optionPeligroso ? (
-          <>
-            <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField id='Cantidad' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Cantidad"  type="number" name="Cantidad" value={productoServicio.Cantidad || ''} inputProps={{ autoComplete: "off", min: 1 }} required/>
+          </div>
+        </div>
+        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField id='deci_ValoeUnitario' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Valor de la mercancia"  type="number" name="deci_ValoeUnitario" value={productoServicio.deci_ValoeUnitario || ''} inputProps={{ autoComplete: "off", min: 1}} required/>
+          </div>
+        </div>
+      </div>
+      {
+          isPeligroso ? (
+          <Fragment>
+            <h4 className="card-title">Configura tu material peligroso</h4>
+            <div className="row">
+              <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
                 <div className="form-group">
                   <Autocomplete
                     options={catMatPeligroso}
@@ -177,10 +246,23 @@ function ProductoServicioForm() {
                     renderInput={(params) => <TextField {...params} label="Selecciona el material peligroso" variant="outlined" />} />
                 </div>
               </div>
-          </>
+              <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                <div className="form-group">
+                  <Autocomplete
+                    options={catEmbalajes}
+                    onChange={(_option, value) => onChangeEmbalaje(value)}
+                    getOptionLabel={(option) => option.c_tipoEmbalaje + " - " + option.st_descripcion}
+                    isOptionEqualToValue={(option, value) => option.id_TipoEmbalaje === value.id_TipoEmbalaje}
+                    renderInput={(params) => <TextField {...params} label="Selecciona el embalaje" variant="outlined" />} />
+                </div>
+              </div>
+            </div>
+          </Fragment>
           ) : void(0)
         }
-      </div>
+        <div className="col-12 text-end">
+          <Button variant='contained' onClick={handleSabeProductoServicio} color='success'>Guardar producto</Button>
+        </div>
     </Fragment>
   )
 }

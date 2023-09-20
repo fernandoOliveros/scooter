@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { ICartaPorteDirOrigenForm } from '../../../models/cartaportes/cartaPorte-dirOrigen-form.model';
 import { ICartaPorteDirDestinoForm } from '../../../models/cartaportes/cartaPorte-dirDestino-form.model';
 import { ICartaPorteUbicaciones } from '../../../models/cartaportes/cartaPorte-ubicaciones.model';
@@ -6,15 +6,18 @@ import { ICartaPorteUbicaciones } from '../../../models/cartaportes/cartaPorte-u
 import DirOrigenForm from './DirOrigenForm';
 import DirDestinoForm from './DirDestinoForm';
 import ProductoServicioForm from './ProductoServicioForm';
-
+import { ICartaPorteProductoServicioForm } from '../../../models/cartaportes/cartaPorte-produtoServicio-form.model';
+import DialogShared from '../../../components/shared/DialogShared';
 
 //todo: Global
-let ArrServicioProducto = {id_CartaPorte: null, id_ClaveProducto: null, id_ServicioProducto: null };
 function CartaPorteForm() {
+    //todo: Variables para abrir el modal
+    const [open, setOpen] = useState<boolean>(false);
     //todo: Array con todos los origenes, destino y servicios y productos para la carta porte
     const [arrOrigenes, setArrOrigenes] = useState<ICartaPorteDirOrigenForm[]>([]);
     const [arrDestinos, setArrDestino] = useState<ICartaPorteDirDestinoForm[]>([]);
     const [ubicaciones, setUbicaciones] = useState<ICartaPorteUbicaciones[]>([]);
+    const [porductosServicios, setProductoServicios] = useState<ICartaPorteProductoServicioForm[]>([]);
 
     //todo: Funciones reciben respuesta de los respectivos componentes
     const guardarOrigen = (origen: ICartaPorteDirOrigenForm) => {
@@ -78,19 +81,25 @@ function CartaPorteForm() {
     }
     */
 
-    const viewOrigenes = () => {console.log(ubicaciones);}
+    const viewOrigenes = () => {
+        console.log(ubicaciones);
+        setOpen(true);
+    }
     const viewDestinos = () => {console.log(ubicaciones);}
 
     return (
+        <Fragment>
+        <DialogShared open={open} returnCloseDialog={(close) => setOpen(close)} children={arrOrigenes} />
         <div className="form-horizontal">
             <div className="form-body">
                 {/* ORIGENES */}
-                <DirOrigenForm retornaOrigen={ (e) => guardarOrigen(e)} retornaVerOrigenes={viewOrigenes}/>
+                <DirOrigenForm retornaOrigen={(e) => guardarOrigen(e)} retornaVerOrigenes={viewOrigenes} />
                 {/* DESTINOS */}
-                <DirDestinoForm retornaDestino={(e) => guardarDestino(e)} retornaVerDestinos={viewDestinos}/>
+                <DirDestinoForm retornaDestino={(e) => guardarDestino(e)} retornaVerDestinos={viewDestinos} />
                 <ProductoServicioForm />
             </div>
         </div>
+        </Fragment>
     )
 }
 
