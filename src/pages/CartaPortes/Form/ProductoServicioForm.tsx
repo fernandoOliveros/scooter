@@ -6,8 +6,11 @@ import { Autocomplete, Button, FormControlLabel, InputAdornment, Switch, TextFie
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPeso } from '../../../models/cartaportes/cartaPorte.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
+import Swal from 'sweetalert2';
 
-export interface Props {}
+export interface Props {
+  retornaProducto: (producto: ICartaPorteProductoServicioForm) => void
+}
 
 //todo: json iniciales
 let productoServicioEmpty: ICartaPorteProductoServicioForm = {
@@ -16,7 +19,9 @@ let productoServicioEmpty: ICartaPorteProductoServicioForm = {
   Cantidad: 1,
   id_ClaveUnidadPeso:null,
   deci_ValoeUnitario: 1,
-  MaterialPeligroso: 'No'
+  MaterialPeligroso: 'No',
+  id_MaterialesPeligrosos: null,
+  id_TipoEmbalaje: null
 }
 let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
   id_MaterialesPeligrosos: null,
@@ -25,7 +30,7 @@ let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
 
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
-function ProductoServicioForm() {
+function ProductoServicioForm({retornaProducto}: Props) {
   const { callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
 
   //todo: Variables globales
@@ -105,7 +110,6 @@ function ProductoServicioForm() {
 
   //todo: funciones para seleccionar productos servicio y (si existe) material peligroso
   const onChangeProducto = (item: any) => {
-    console.log(item);
     if(item !== null){
       catProducServicio.forEach((element) => {
         if(element.id_ClaveProducto === item.id_ClaveProducto){
@@ -153,11 +157,12 @@ function ProductoServicioForm() {
     let findProductos = value;
     const result = await callEndpoint(  getProductoCPLike(findProductos) );
     setCatProducServicio( result.data.data);
-    console.log(result.data.data); 
   }
 
   const chooseProductoPeligroso = () => {
-    if(!isPeligroso){
+    let tempIsPeligroso = isPeligroso;
+    console.log("temp: " + tempIsPeligroso);
+    if(!tempIsPeligroso){
       setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
     }else{
       setProductoServicio({...productoServicio, MaterialPeligroso: 'No'});
@@ -166,14 +171,35 @@ function ProductoServicioForm() {
     setIsPeligroso(!isPeligroso);
   }
 
-  const handleSabeProductoServicio = () => {
+  const handleSabeProductoServicio = (e: any) => {
+    e.preventDefault();
     if(productoServicio.MaterialPeligroso === 'Si' && 
       ( matPeligroso.id_MaterialesPeligrosos === null || matPeligroso.id_TipoEmbalaje === null )
     ){
-      alert("Si el material es peligroso selecciona el embalaje y el producto peligroso");
+      Swal.fire({ title: 'Error', text: 'Si el material es peligroso selecciona el embalaje y el producto peligroso', icon: 'error', showConfirmButton: true});
+      return false;
     }
-    console.log(productoServicio);
-    console.log(matPeligroso);
+    // ? validación de material peligros al array principal de producto
+    if(productoServicio.MaterialPeligroso === 'Si' && 
+      ( matPeligroso.id_MaterialesPeligrosos !== null && matPeligroso.id_TipoEmbalaje !== null )
+    ){
+      console.log("Entro al if");
+      console.log(matPeligroso);
+      setProductoServicio({...productoServicio, 
+        id_MaterialesPeligrosos: matPeligroso.id_MaterialesPeligrosos,
+        id_TipoEmbalaje: matPeligroso.id_TipoEmbalaje
+      });
+    }
+    //todo: array para retornar
+    let arrayReturn = productoServicio;
+
+    //todo: setear el formulario
+    setProductoServicio(productoServicioEmpty);
+    setMatPeligroso(productoPeligrosoEmpty);
+    setSelectProducto(null);
+
+    //todo: Retorna el productos
+    retornaProducto(arrayReturn);
   }
 
   return (
@@ -194,6 +220,7 @@ function ProductoServicioForm() {
           </div>
         </div>
         {
+          // todo: "0,1", "1"
           selectProducto !== null && 
           ( 
             selectProducto.st_MaterialPeligroso.search(",") !== -1 ||  selectProducto.st_MaterialPeligroso.search("1") !== -1 

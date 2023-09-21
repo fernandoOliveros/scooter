@@ -5,6 +5,6 @@ export interface ICartaPorteProductoServicioForm {
     deci_ValoeUnitario: number;
     id_ClaveUnidadPeso: number | null;
     MaterialPeligroso: String;
-    id_MaterialesPeligrosos?: number;
-    id_TipoEmbalaje?: number;
+    id_MaterialesPeligrosos: number | null;
+    id_TipoEmbalaje: number | null;
 }

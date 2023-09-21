@@ -17,7 +17,7 @@ function CartaPorteForm() {
     const [arrOrigenes, setArrOrigenes] = useState<ICartaPorteDirOrigenForm[]>([]);
     const [arrDestinos, setArrDestino] = useState<ICartaPorteDirDestinoForm[]>([]);
     const [ubicaciones, setUbicaciones] = useState<ICartaPorteUbicaciones[]>([]);
-    const [porductosServicios, setProductoServicios] = useState<ICartaPorteProductoServicioForm[]>([]);
+    const [productosServicios, setProductoServicios] = useState<ICartaPorteProductoServicioForm[]>([]);
 
     //todo: Funciones reciben respuesta de los respectivos componentes
     const guardarOrigen = (origen: ICartaPorteDirOrigenForm) => {
@@ -72,6 +72,11 @@ function CartaPorteForm() {
         setArrDestino([...arrDestinos, destino]);
     }
 
+    const guardarProductosServicios = (producto: ICartaPorteProductoServicioForm) => {
+        console.log(producto);
+        setProductoServicios([...productosServicios, producto]);
+    }
+
     /*
     const saveUbicaciones = (origen: ICartaPorteDirOrigenForm, destino: ICartaPorteDirDestinoForm) => {
         console.log("OK");
@@ -96,7 +101,8 @@ function CartaPorteForm() {
                 <DirOrigenForm retornaOrigen={(e) => guardarOrigen(e)} retornaVerOrigenes={viewOrigenes} />
                 {/* DESTINOS */}
                 <DirDestinoForm retornaDestino={(e) => guardarDestino(e)} retornaVerDestinos={viewDestinos} />
-                <ProductoServicioForm />
+                {/* PRODUCTOS Y BIENES TRANSPORTADOS */}
+                <ProductoServicioForm retornaProducto={(e) => guardarProductosServicios(e)} />
             </div>
         </div>
         </Fragment>
