@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment, useEffect, useState } from 'react'
+import { ChangeEvent, Fragment, useEffect, useState, KeyboardEvent } from 'react'
 import { ICartaPorteProductoServicioForm } from '../../../models/cartaportes/cartaPorte-produtoServicio-form.model';
 import { ICartaPorteMaterialPeligroso } from '../../../models/cartaportes/cartaPorte-MaterialPeligro.model';
 import { getEmbalajesCP, getMaterialesPeligrosos, getProductoCPLike, getUnidadPesoCP } from '../../../services/public.service';
@@ -30,12 +30,17 @@ let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
 
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
+
+type enterKey = KeyboardEvent<HTMLInputElement>;
+
 function ProductoServicioForm({retornaProducto}: Props) {
-  const { callEndpoint } = useFetchAndLoad(); //Custom Hooks to control http request
+  //todo: Custom Hooks to control http request
+  const { callEndpoint } = useFetchAndLoad();
 
   //todo: Variables globales
   const [productoServicio, setProductoServicio] = useState<ICartaPorteProductoServicioForm>(productoServicioEmpty);
   const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligrosoEmpty);
+  const [searchProducto, setSearchProducto] = useState<string>("");
 
   //todo: Catálogo
   const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
@@ -57,19 +62,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
     const loadMatPeligroso = getMaterialesPeligrosos();
     const loadUnidadPeso = getUnidadPesoCP();
     const loadEmbalaje = getEmbalajesCP();
-    /*
-      const loadProductoServicio = getProductosServicioCP();
-      const _ProductosServicio = async () => {
-        let result = await loadProductoServicio.call;
-        if(result.data.success){
-          let response = result.data;
-          setCatProducServicio( response.data);
-        }
-      }
-      //Call functions
-      _ProductosServicio();
-      loadProductoServicio.controller.abort();
-    */
+
     //todo: functions
     const _MaterialesPeligrosos = async () => {
       let result = await loadMatPeligroso.call;
@@ -117,6 +110,8 @@ function ProductoServicioForm({retornaProducto}: Props) {
           setSelectProducto(item);
         }
       });
+      //todo: verificar si es mat peligroso 
+      if( item.st_MaterialPeligroso.search("1") !== -1 ) setIsPeligroso(true);
     }else{
       setCatProducServicio( [] );
       setSelectProducto(null);
@@ -155,13 +150,25 @@ function ProductoServicioForm({retornaProducto}: Props) {
 
   const changeTextField = async ({ target: { value } }: handleChangeForm) => {
     let findProductos = value;
+    /*
     const result = await callEndpoint(  getProductoCPLike(findProductos) );
     setCatProducServicio( result.data.data);
+    */
+  }
+
+  const findProductoApi = async (event: KeyboardEvent<HTMLInputElement>) => {
+    console.log(event.key);
+    if(event.key === "Enter"){
+      alert("click enter");
+      const result = await callEndpoint(  getProductoCPLike(searchProducto) );
+      setCatProducServicio( result.data.data);
+    }else{
+      setSearchProducto(event.key);
+    }
   }
 
   const chooseProductoPeligroso = () => {
     let tempIsPeligroso = isPeligroso;
-    console.log("temp: " + tempIsPeligroso);
     if(!tempIsPeligroso){
       setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
     }else{
@@ -184,7 +191,6 @@ function ProductoServicioForm({retornaProducto}: Props) {
       ( matPeligroso.id_MaterialesPeligrosos !== null && matPeligroso.id_TipoEmbalaje !== null )
     ){
       console.log("Entro al if");
-      console.log(matPeligroso);
       setProductoServicio({...productoServicio, 
         id_MaterialesPeligrosos: matPeligroso.id_MaterialesPeligrosos,
         id_TipoEmbalaje: matPeligroso.id_TipoEmbalaje
@@ -192,7 +198,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
     }
     //todo: array para retornar
     let arrayReturn = productoServicio;
-
+    console.log(arrayReturn);
     //todo: setear el formulario
     setProductoServicio(productoServicioEmpty);
     setMatPeligroso(productoPeligrosoEmpty);
@@ -215,7 +221,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
               options={catProducServicio}   
               getOptionLabel={(option) => option.st_ClaveProducto + " - " + option.st_DescripcionProducto}
               isOptionEqualToValue={(option, value) => option.id_ClaveProducto === value.id_ClaveProducto}
-              renderInput={(params) => <TextField {...params} name='searchProducto' label="Selecciona el bien transportado" onChange={changeTextField} variant="outlined" />}
+              renderInput={(params) => <TextField {...params} name='searchProducto' label="Selecciona el bien transportado" onChange={changeTextField} variant="outlined" onKeyDown={findProductoApi} /> }
             />
           </div>
         </div>
@@ -227,7 +233,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
           ) ? (
             <div className="col-md-2 col-lg-2 col-sm-12 col-xs-12">
               <div className="form-group">
-              <FormControlLabel control={<Switch value={isPeligroso} onChange={chooseProductoPeligroso} />} label="Material Peligroso" />
+              <FormControlLabel control={ <Switch value={isPeligroso} onChange={chooseProductoPeligroso} />} label="Material Peligroso" />
               </div>
             </div>
           ) : void(0)
