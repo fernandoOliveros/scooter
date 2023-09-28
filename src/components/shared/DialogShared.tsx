@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 
 export interface Props {
   open: boolean,
-  children?: JSX.Element | JSX.Element[] | any[],
+  children?: JSX.Element | JSX.Element[] | any[] | React.ReactNode,
   returnCloseDialog: (close: boolean) => void,
 }
 
