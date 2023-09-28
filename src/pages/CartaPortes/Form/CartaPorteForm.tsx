@@ -19,6 +19,9 @@ function CartaPorteForm() {
     const [ubicaciones, setUbicaciones] = useState<ICartaPorteUbicaciones[]>([]);
     const [productosServicios, setProductoServicios] = useState<ICartaPorteProductoServicioForm[]>([]);
 
+    // * imprimos el arreglo guardado en productos y servicios
+    console.log(productosServicios);
+
     //todo: Funciones reciben respuesta de los respectivos componentes
     const guardarOrigen = (origen: ICartaPorteDirOrigenForm) => {
         //Armamos el arreglo para ubicación de tipo origen
@@ -73,7 +76,6 @@ function CartaPorteForm() {
     }
 
     const guardarProductosServicios = (producto: ICartaPorteProductoServicioForm) => {
-        console.log(producto);
         setProductoServicios([...productosServicios, producto]);
     }
 

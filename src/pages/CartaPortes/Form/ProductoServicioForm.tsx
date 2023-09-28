@@ -2,7 +2,7 @@ import { ChangeEvent, Fragment, useEffect, useState, KeyboardEvent } from 'react
 import { ICartaPorteProductoServicioForm } from '../../../models/cartaportes/cartaPorte-produtoServicio-form.model';
 import { ICartaPorteMaterialPeligroso } from '../../../models/cartaportes/cartaPorte-MaterialPeligro.model';
 import { getEmbalajesCP, getMaterialesPeligrosos, getProductoCPLike, getUnidadPesoCP } from '../../../services/public.service';
-import { Autocomplete, Button, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
+import { Autocomplete, Button, FormControlLabel, Switch, TextField } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPeso } from '../../../models/cartaportes/cartaPorte.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
@@ -19,7 +19,7 @@ let productoServicioEmpty: ICartaPorteProductoServicioForm = {
   Cantidad: 1,
   id_ClaveUnidadPeso:null,
   deci_ValoeUnitario: 1,
-  MaterialPeligroso: 'No',
+  MaterialPeligroso: "No",
   id_MaterialesPeligrosos: null,
   id_TipoEmbalaje: null
 }
@@ -28,12 +28,19 @@ let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
   id_TipoEmbalaje: null
 }
 
-type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+let unidadPesoEmpty: IUnidadPeso = {
+  "id_ClaveUnidadPeso": 0,
+  "st_ClaveUnidad": "",
+  "st_NombreClave": "",
+  "st_DescripcionClave": ""
+}
 
+type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
 type enterKey = KeyboardEvent<HTMLInputElement>;
 
 function ProductoServicioForm({retornaProducto}: Props) {
+
   //todo: Custom Hooks to control http request
   const { callEndpoint } = useFetchAndLoad();
 
@@ -51,7 +58,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
   //todo: Variables para funcionalidad de materialPeligrsos HTML
   const [selectProducto, setSelectProducto] = useState<IProductosServicios | null>(null);
   const [isPeligroso, setIsPeligroso] = useState<boolean>(false);
-
+  const [selectUnidadPeso, setSelectUnidadPeso] = useState<IUnidadPeso | null>(null);
   const onChangeFormProducto = ({ target: { name, value } }: handleChangeForm) => {
     setProductoServicio({...productoServicio, [name]: value});
   }
@@ -92,6 +99,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
     _MaterialesPeligrosos();
     _UnidadPeso();
     _Embalajes();
+    setProductoServicio(productoServicioEmpty);
 
     //destruimos la peticion si cambia de pantalla
     return () => {
@@ -101,19 +109,38 @@ function ProductoServicioForm({retornaProducto}: Props) {
     }
   },[]);
 
+  // todo: SE EJECUTA CADA VEZ QUE MOVEMOS EL SWITCH DE MATERIAL PELIGROSO O EL MATERIAL ES FORZOSO PELIGROSO
+  useEffect(() => {
+    if(isPeligroso){
+      setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
+    }else{
+      setProductoServicio({...productoServicio, MaterialPeligroso: 'No'});
+    }
+  },[isPeligroso]);
+
+  // todo: SE EJECUTA CADA VEZ SELECCIONAMOS UN PRODUCTO
+  useEffect(() => {
+    if(selectProducto === null){
+      // ?: limpiamos las variables con relacion a la lógica del producto del bien transportado
+      setProductoServicio({...productoServicio, id_ClaveProducto: null});
+      setSearchProducto("");
+      setCatProducServicio([]);
+      setMatPeligroso(productoPeligrosoEmpty);
+      setIsPeligroso(false);
+    }
+  },[selectProducto]);
+
   //todo: funciones para seleccionar productos servicio y (si existe) material peligroso
   const onChangeProducto = (item: any) => {
     if(item !== null){
       catProducServicio.forEach((element) => {
         if(element.id_ClaveProducto === item.id_ClaveProducto){
           setProductoServicio({...productoServicio, id_ClaveProducto: element.id_ClaveProducto});
-          setSelectProducto(item);
+          setSelectProducto(element);
         }
       });
-      //todo: verificar si es mat peligroso 
-      if( item.st_MaterialPeligroso.search("1") !== -1 ) setIsPeligroso(true);
+      if( item.st_MaterialPeligroso === "1" ) setIsPeligroso(true);
     }else{
-      setCatProducServicio( [] );
       setSelectProducto(null);
     }
   }
@@ -123,8 +150,12 @@ function ProductoServicioForm({retornaProducto}: Props) {
       catUnidadPeso.forEach((element) => {
         if(element.id_ClaveUnidadPeso === item.id_ClaveUnidadPeso){
           setProductoServicio({...productoServicio, id_ClaveUnidadPeso: element.id_ClaveUnidadPeso});
+          setSelectUnidadPeso(element);
         }
       });
+    }else{
+      setProductoServicio({ ...productoServicio, id_ClaveUnidadPeso: null });
+      setSelectUnidadPeso(null);
     }
   }
 
@@ -132,9 +163,13 @@ function ProductoServicioForm({retornaProducto}: Props) {
     if(item !== null){
       catMatPeligroso.forEach(element => {
         if(element.id_MaterialesPeligrosos === item.id_MaterialesPeligrosos){
+          setProductoServicio({...productoServicio, id_MaterialesPeligrosos: element.id_MaterialesPeligrosos});
           setMatPeligroso({...matPeligroso, id_MaterialesPeligrosos: element.id_MaterialesPeligrosos});
         }
       });
+    }else{
+      setProductoServicio({...productoServicio, id_MaterialesPeligrosos: null});
+      setMatPeligroso({...matPeligroso, id_MaterialesPeligrosos: null});
     }
   }
 
@@ -142,70 +177,42 @@ function ProductoServicioForm({retornaProducto}: Props) {
     if(item !== null){
       catEmbalajes.forEach((element) => {
         if(element.id_TipoEmbalaje === item.id_TipoEmbalaje){
+          setProductoServicio({...productoServicio, id_TipoEmbalaje: element.id_TipoEmbalaje});
           setMatPeligroso({...matPeligroso, id_TipoEmbalaje: element.id_TipoEmbalaje});
         }
       });
+    }else{
+      setProductoServicio({...productoServicio, id_TipoEmbalaje: null});
+      setMatPeligroso({...matPeligroso, id_TipoEmbalaje: null});
     }
   }
 
-  const changeTextField = async ({ target: { value } }: handleChangeForm) => {
-    let findProductos = value;
-    /*
-    const result = await callEndpoint(  getProductoCPLike(findProductos) );
-    setCatProducServicio( result.data.data);
-    */
-  }
-
-  const findProductoApi = async (event: KeyboardEvent<HTMLInputElement>) => {
-    console.log(event.key);
+  const findProductoApi = async (event: enterKey) => {
     if(event.key === "Enter"){
-      alert("click enter");
       const result = await callEndpoint(  getProductoCPLike(searchProducto) );
-      setCatProducServicio( result.data.data);
-    }else{
-      setSearchProducto(event.key);
+      setCatProducServicio( result.data.data );
     }
-  }
-
-  const chooseProductoPeligroso = () => {
-    let tempIsPeligroso = isPeligroso;
-    if(!tempIsPeligroso){
-      setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
-    }else{
-      setProductoServicio({...productoServicio, MaterialPeligroso: 'No'});
-      setMatPeligroso(productoPeligrosoEmpty);
-    }
-    setIsPeligroso(!isPeligroso);
   }
 
   const handleSabeProductoServicio = (e: any) => {
     e.preventDefault();
     if(productoServicio.MaterialPeligroso === 'Si' && 
+      ( productoServicio.id_MaterialesPeligrosos === null || productoServicio.id_TipoEmbalaje === null ) &&
       ( matPeligroso.id_MaterialesPeligrosos === null || matPeligroso.id_TipoEmbalaje === null )
     ){
       Swal.fire({ title: 'Error', text: 'Si el material es peligroso selecciona el embalaje y el producto peligroso', icon: 'error', showConfirmButton: true});
-      return false;
-    }
-    // ? validación de material peligros al array principal de producto
-    if(productoServicio.MaterialPeligroso === 'Si' && 
-      ( matPeligroso.id_MaterialesPeligrosos !== null && matPeligroso.id_TipoEmbalaje !== null )
-    ){
-      console.log("Entro al if");
-      setProductoServicio({...productoServicio, 
-        id_MaterialesPeligrosos: matPeligroso.id_MaterialesPeligrosos,
-        id_TipoEmbalaje: matPeligroso.id_TipoEmbalaje
-      });
-    }
-    //todo: array para retornar
-    let arrayReturn = productoServicio;
-    console.log(arrayReturn);
-    //todo: setear el formulario
-    setProductoServicio(productoServicioEmpty);
-    setMatPeligroso(productoPeligrosoEmpty);
-    setSelectProducto(null);
+    }else{
+      //todo: array para retornar
+      let arrayReturn = productoServicio;
 
-    //todo: Retorna el productos
-    retornaProducto(arrayReturn);
+      //todo: setear el formulario
+      setProductoServicio(productoServicioEmpty);
+      setSelectUnidadPeso(null);
+      setSelectProducto(null);
+      
+      //todo: Retorna el productos
+      retornaProducto(arrayReturn);
+    }
   }
 
   return (
@@ -217,23 +224,26 @@ function ProductoServicioForm({retornaProducto}: Props) {
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
             <Autocomplete
+              onInputChange={(_event, newInputValue) => {
+                setSearchProducto(newInputValue);
+              }}
+              value={selectProducto}
+              onKeyDownCapture={findProductoApi}
               onChange={(_option, value) => onChangeProducto(value)}
-              options={catProducServicio}   
+              options={catProducServicio}
               getOptionLabel={(option) => option.st_ClaveProducto + " - " + option.st_DescripcionProducto}
               isOptionEqualToValue={(option, value) => option.id_ClaveProducto === value.id_ClaveProducto}
-              renderInput={(params) => <TextField {...params} name='searchProducto' label="Selecciona el bien transportado" onChange={changeTextField} variant="outlined" onKeyDown={findProductoApi} /> }
+              renderInput={(params) => <TextField {...params} name='searchProducto' label="Selecciona el bien transportado"   variant="outlined" helperText={(selectProducto !== null && selectProducto.st_MaterialPeligroso.search(",") !== -1) ? 'El producto puede o no ser material peligroso' : (selectProducto !== null && isPeligroso)  ? 'El producto es material peligroso - configuralo' : ''} /> }
             />
           </div>
         </div>
         {
-          // todo: "0,1", "1"
-          selectProducto !== null && 
-          ( 
-            selectProducto.st_MaterialPeligroso.search(",") !== -1 ||  selectProducto.st_MaterialPeligroso.search("1") !== -1 
-          ) ? (
+          // ? Validamos que el el material sea: "0,1"
+          selectProducto !== null && selectProducto.st_MaterialPeligroso.search(",") !== -1 ?
+          (
             <div className="col-md-2 col-lg-2 col-sm-12 col-xs-12">
               <div className="form-group">
-              <FormControlLabel control={ <Switch value={isPeligroso} onChange={chooseProductoPeligroso} />} label="Material Peligroso" />
+              <FormControlLabel control={ <Switch value={isPeligroso} onChange={ () => setIsPeligroso(!isPeligroso)} />} label="Material Peligroso" />
               </div>
             </div>
           ) : void(0)
@@ -247,6 +257,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
           <div className="form-group">
             <Autocomplete
               options={catUnidadPeso}
+              value={selectUnidadPeso}
               onChange={(_option, value) => onChangeUnidadPeso(value)}
               getOptionLabel={(option) => option.st_ClaveUnidad + " - " + option.st_NombreClave}
               isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPeso === value.id_ClaveUnidadPeso}
