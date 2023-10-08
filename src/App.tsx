@@ -21,6 +21,11 @@ const RemolquesScreen = lazy( () => import('./pages/Remolques/Remolque'));
 const CreateRemolquesScreen = lazy( () => import('./pages/Remolques/CreateRemolque'));
 const EditRemolquesScreen = lazy( () => import('./pages/Remolques/EditRemolque'));
 
+//todo: CLIENTES
+const ClientesScreen = lazy( () => import('./pages/Clientes/Clientes'));
+const CreateCliente = lazy( () => import('./pages/Clientes/CreateCliente'));
+const EditClientes = lazy( () => import('./pages/Clientes/EditCliente'));
+
 //todo: VIAJES
 const ViajesScreen = lazy(() => import('./pages/Viajes/Viajes'));
 const CreateViajesScreen = lazy(() => import('./pages/Viajes/CreateViaje'));
@@ -30,6 +35,11 @@ const CreateViajesScreen = lazy(() => import('./pages/Viajes/CreateViaje'));
 const CartaPortesScreen = lazy( () => import('./pages/CartaPortes/CartaPortes'));
 const CreateCartaPorte = lazy(() => import('./pages/CartaPortes/CreateCartaPorte'));
 
+//todo: FCTURACIÓN CFDI
+const FacturasScreen = lazy( () => import('./pages/Facturas/Facturas') );
+const CreateFactura = lazy( () => import('./pages/Facturas/CreateFactura') );
+
+
 function App() {
   return (
     <Suspense fallback={<p>Loading ...</p>}>
@@ -37,7 +47,6 @@ function App() {
         <Route path="/" element={<Navigate replace to={PrivateRoutes.home} />} />
         <Route path='*' element={"NOT FOUND"} />
         <Route path='login' element={<LoginScreen />} />
-        
         <Route element={<AuthGuard />}>
           {/* HOME */}
           <Route path={PrivateRoutes.home} element={<HomeScreen />} />
@@ -57,6 +66,11 @@ function App() {
           <Route path={PrivateRoutes.newRemolques} element={<CreateRemolquesScreen />} />
           <Route path={PrivateRoutes.editRemolques} element={<EditRemolquesScreen />} />
 
+          {/* CLIENTES*/}
+          <Route path={PrivateRoutes.clientes} element={<ClientesScreen />} />
+          <Route path={PrivateRoutes.newCliente} element={<CreateCliente />} />
+          <Route path={PrivateRoutes.editCliente} element={<EditClientes />} />
+
           {/* VIAJES */}
           <Route path={PrivateRoutes.viajes} element={<ViajesScreen />} />
           <Route path={PrivateRoutes.viajes} element={<CreateViajesScreen />} />
@@ -64,6 +78,12 @@ function App() {
           {/* CARTA PORTE */}
           <Route path={PrivateRoutes.cartaPorte} element={<CartaPortesScreen />}/>
           <Route path={PrivateRoutes.cartaPorteNew} element={<CreateCartaPorte />}/>
+
+          {/* FACTURAS */}
+          <Route path={PrivateRoutes.factura} element={<FacturasScreen />}/>
+          <Route path={PrivateRoutes.newFactura} element={<CreateFactura />}/>
+
+
         </Route>
       </Routes>
     </Suspense>

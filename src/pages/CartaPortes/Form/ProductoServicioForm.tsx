@@ -28,13 +28,6 @@ let productoPeligrosoEmpty: ICartaPorteMaterialPeligroso = {
   id_TipoEmbalaje: null
 }
 
-let unidadPesoEmpty: IUnidadPeso = {
-  "id_ClaveUnidadPeso": 0,
-  "st_ClaveUnidad": "",
-  "st_NombreClave": "",
-  "st_DescripcionClave": ""
-}
-
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
 type enterKey = KeyboardEvent<HTMLInputElement>;

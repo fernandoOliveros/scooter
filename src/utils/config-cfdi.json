@@ -1,0 +1,152 @@
+{
+    "Comprobante": 
+    {
+        "Version": {
+            "required": true
+        },
+        "Serie": {
+            "required": true
+        },
+        "Folio": {
+            "required": true
+        },
+        "Fecha": {
+            "required": true
+        },
+        "Sello": {
+            "required": true
+        },
+        "NoCertificado": {
+            "required": true
+        },
+        "Certificado": {
+            "required": true
+        },
+        "Moneda": {
+            "required": true
+        },
+        "TipoComprobante": {
+            "required": true
+        },
+        "Exportacion": {
+            "required": true,
+            "_comment": "Solo si sale del territorio mexicano",
+            "default": "01"
+        },
+        "LugarExpedicion":{
+            "required": true
+        },
+        "Confirmacion":{
+            "required": true
+        },
+
+        "Ingreso": {
+            "FormaPago": {
+                "required": true
+            },
+            "CondicionesDePago": {
+                "required": true
+            },
+            "MetodoPago": {
+                "required": true
+            },
+            "Descuento": {
+                "required": true
+            },
+            "SubTotal": {
+                "required": true
+            },
+            "Total": {
+                "required": true
+            }
+        },
+
+        "Egreso": {
+            "FormaPago": {
+                "required": true
+            },
+            "CondicionesDePago": {
+                "required": true
+            },
+            "MetodoPago": {
+                "required": true
+            },
+            "Descuento": {
+                "required": true
+            },
+            "SubTotal": {
+                "required": true
+            },
+            "Total": {
+                "required": true
+            }
+        },
+
+        "Nomina":{
+            "FormaPago": {
+                "required": false
+            },
+            "CondicionesDePago": {
+                "required": false
+            },
+            "MetodoPago": {
+                "required": true
+            },
+            "Descuento": {
+                "required": true
+            },
+            "SubTotal": {
+                "required": true
+            },
+            "Total": {
+                "required": true
+            }
+        },
+
+        "Traslado": {
+            "FormaPago": {
+                "required": false
+            },
+            "CondicionesDePago": {
+                "required": false
+            },
+            "MetodoPago": {
+                "required": false
+            },
+            "SubTotal": {
+                "required": false,
+                "value": 0
+            },
+            "Descuento": {
+                "required": false
+            },
+            "Total": {
+                "required": false,
+                "value": 0
+            }
+        },
+
+        "Pago": {
+            "FormaPago": {
+                "required": false
+            },
+            "CondicionesDePago": {
+                "required": false
+            },
+            "MetodoPago": {
+                "required": false
+            },
+            "SubTotal": {
+                "required": false,
+                "value": 0
+            },
+            "Descuento": {
+                "required": false
+            },
+            "Total":  {
+                "required": false,
+                "value": 0
+            }
+        }
+    }
+}

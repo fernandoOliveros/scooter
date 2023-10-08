@@ -9,12 +9,17 @@ export const PrivateRoutes = {
     operadores: 'operadores',
     newOperador: 'operadores/crear',
     editOperador: 'operadores/editar/:idOperador',
+    clientes:'cliente',
+    newCliente: 'cliente/crear',
+    editCliente: 'cliente/editar/:idClientes',
     viajes: 'viajes',
     newViaje: 'viajes/crear',
     cartaPorte: 'cartaPorte',
     cartaPorteNew: 'cartaPorte/crear',
     cartaPorteEdit: 'cartaPorte/editar',
     gastos: 'gastos',
+    factura: 'facturas',
+    newFactura: 'facturas/crear'
 }
 
 export const PublicRoutes = {
