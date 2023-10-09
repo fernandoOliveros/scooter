@@ -11,21 +11,21 @@ export interface ICfdiForm {
     id_Cliente : number | null;
     id_TipoViaje : number | null;
     st_nombreCrudoXML?: string;
-    dec_SubTotal?: number | null;
-    dec_Total?: number | null;
-    dec_BaseTraslado?: number | null;
-    dec_BaseRetencion?: number | null;
-    id_ObjetoImp?: number | null;
-    c_ImpuestoTraslado?: string | null;
-    c_ImpuestoRetencion?: string | null;
-    dec_ImporteTraslado?: number | null;
-    dec_ImporteRetencion?: number | null;
-    st_TipoFactorTraslado?: string | null;
-    st_TipoFactorRetencion?: string | null;
-    dec_TasaOCuotaTraslado?: number | null;
-    dec_TasaOCuotaRetencion?: number | null;
-    st_RFC_emisor?: string | null;
-    st_RFC_receptor?: string | null;
+    dec_SubTotal: number | null;
+    dec_Total: number | null;
+    dec_BaseTraslado: number | null;
+    dec_BaseRetencion: number | null;
+    id_ObjetoImp: number | null;
+    c_ImpuestoTraslado: string | null;
+    c_ImpuestoRetencion: string | null;
+    dec_ImporteTraslado: number | null;
+    dec_ImporteRetencion: number | null;
+    st_TipoFactorTraslado: string | null;
+    st_TipoFactorRetencion: string | null;
+    dec_TasaOCuotaTraslado: number | null;
+    dec_TasaOCuotaRetencion: number | null;
+    st_RFC_emisor: string | null;
+    st_RFC_receptor: string | null;
 }
 
 
@@ -96,4 +96,11 @@ export interface IObjetoImpuesto{
 export interface ITipoFactor {
     id_TipoFactor: number;
     c_TipoFactor: string;
+}
+
+
+export interface ITasaCuota {
+    id_TasaCuotaJson: number;
+    c_TasaCuota: string;
+    dec_ValorAplica: number;
 }
