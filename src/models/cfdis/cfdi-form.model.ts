@@ -26,6 +26,28 @@ export interface ICfdiForm {
     dec_TasaOCuotaRetencion: number | null;
     st_RFC_emisor: string | null;
     st_RFC_receptor: string | null;
+    st_LugarExpedicion: string | null;
+}
+
+export interface IProducServicioCfdiForm {
+    id_ClaveProdServCFDI: number | null;
+    dec_Cantidad: number | null;
+    id_ClaveUnidadPeso: number | null;
+    st_Descripcion: string | null;
+    dec_ValorUnitario: number | null;
+    dec_Importe: number | null;
+    dec_Descuento: number | null;
+    id_ObjetoImp: number | null;
+    dec_BaseTraslado: number | null;
+    c_ImpuestoTraslado: string | null;
+    dec_ImporteTraslado: number | null;
+    st_TipoFactorTraslado: string | null;
+    dec_TasaOCuotaTraslado: number | null;
+    dec_BaseRetencion: number | null;
+    c_ImpuestoRetencion: string | null;
+    dec_ImporteRetencion: number | null;
+    st_TipoFactorRetencion: string | null;
+    dec_TasaOCuotaRetencion: number | null;
 }
 
 
