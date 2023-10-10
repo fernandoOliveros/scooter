@@ -494,7 +494,7 @@ function FacturaForm() {
               />
             </div>
           </div>
-          <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+          <div className="col-md-8 col-lg-8 col-sm-12 col-xs-12">
             <div className="form-group">
               <TextField size='medium' fullWidth onChange={onChangeFormPoductoServicio} id='st_Descripcion' className="form-control" variant="outlined" label="Descripción"  type="text" inputProps={{ autoComplete: "off" }} name="st_Descripcion" value={productoServicioCfdi.st_Descripcion || ''} required/>
             </div>
@@ -514,20 +514,17 @@ function FacturaForm() {
           <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
             <div className="form-group">
               <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitario' className="form-control" variant="outlined" label="Precio Unitario"  type="number" 
-              inputProps={{ 
-                autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1,
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              }} name="dec_ValorUnitario" value={productoServicioCfdi.dec_ValorUnitario || ''} required/>
-            </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <TextField fullWidth  id='dec_ValorUnitario'  name="dec_ValorUnitario" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} value={productoServicioCfdi.dec_Importe || ''} required/>
+              inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitario" value={productoServicioCfdi.dec_ValorUnitario || ''} required/>
             </div>
           </div>
           <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
             <div className="form-group">
               <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_Descuento' className="form-control" variant="outlined" label="Descuento"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} name="dec_Descuento" value={productoServicioCfdi.dec_Descuento || ''} required/>
+            </div>
+          </div>
+          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+            <div className="form-group">
+              <TextField fullWidth  id='dec_ValorUnitario'  name="dec_ValorUnitario" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} value={productoServicioCfdi.dec_Importe || ''} required/>
             </div>
           </div>
         </div>
