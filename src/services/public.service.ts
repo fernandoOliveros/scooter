@@ -2,6 +2,18 @@ import axios from "axios";
 import loadAbort from "../utils/load-abort.util"
 import baseUrl from "../utils/base-url.utils";
 
+
+export const getTipoPermisoSct = () =>{
+    const controller = loadAbort();
+    //Peticion
+    const urlGet = baseUrl + "unidades/readTiposPermisosSCT";
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+
+}
+
 export const getTipoUnidad = () => {
     const controller = loadAbort();
     //Peticion

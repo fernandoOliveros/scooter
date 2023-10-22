@@ -13,5 +13,5 @@ export interface IUnidadForm{
     date_Ecologico: Date | null,
     id_Empresa: number |  null,
     id_Candado: number,
-    id_TipoPermiso?: number | null;
+    id_TipoPermiso: number | null;
 }

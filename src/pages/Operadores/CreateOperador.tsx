@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom'
 import OperadorForm from './Form/OperadorForm'
 
 const CreateOperador = ()  => {
+    const catchResponseForm = (success: boolean) => {
+        console.log(success);
+    }
     return (
         <Fragment>
             <div className="container-fluid">
@@ -26,7 +29,7 @@ const CreateOperador = ()  => {
                         <div className="card-body">
                             <div className='row'>
                                 <div className='col-12'>
-                                    <OperadorForm />
+                                    <OperadorForm returnFormOperador={catchResponseForm} />
                                 </div>
                             </div>
                         </div>

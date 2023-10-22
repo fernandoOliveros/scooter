@@ -5,6 +5,10 @@ import UnidadForms from './Form/UnidadForm';
 
 const EditUnidad = () => {
     const { idUnidad } = useParams();
+
+    const catchResponseForm = (resp: boolean) => {
+        console.log(resp)
+    }
     return (
     <Fragment>
         <div className="container-fluid">
@@ -27,7 +31,7 @@ const EditUnidad = () => {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <UnidadForms id_Unidad={idUnidad} />
+                                <UnidadForms id_Unidad={idUnidad} returnFormUnidad={catchResponseForm} />
                             </div>
                         </div>
                     </div>

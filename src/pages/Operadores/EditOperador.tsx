@@ -5,6 +5,9 @@ import { Link, useParams } from 'react-router-dom'
 const  EditOperador = () => {
     //todo: Obtenemos el idOperador de la ruta
     const { idOperador } = useParams();
+    const catchResponseForm = (success: boolean) => {
+        console.log(success);
+    }
     return (
         <Fragment>
             <div className="container-fluid">
@@ -27,7 +30,7 @@ const  EditOperador = () => {
                         <div className="card-body">
                             <div className='row'>
                                 <div className='col-12'>
-                                    <OperadorForm id_Operador={idOperador} />
+                                    <OperadorForm id_Operador={idOperador} returnFormOperador={catchResponseForm} />
                                 </div>
                             </div>
                         </div>

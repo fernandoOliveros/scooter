@@ -34,6 +34,7 @@ File: scss
 
 @import url(https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700);
 @import url(https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700);
+
 .skin-default .topbar {
   background: #4F5467; }
   .skin-default .topbar .top-navbar .navbar-header .navbar-brand .dark-logo {
@@ -21710,3 +21711,10 @@ File: scss
     overflow: hidden; }
   .hidden-md-down {
     display: none; } }
+   
+  .borderForm{
+    padding: 1rem;
+    border: solid;
+    border-radius: 5px;
+    border-color: #007ee5;
+  }

@@ -4,8 +4,7 @@ import UnidadForms from './Form/UnidadForm';
 import { Link } from 'react-router-dom';
 
 function returnFormUnidad (success: boolean) {
-    if(success)
-        alert("Unidad creada con éxito");
+    console.log(success);
 }
 
 
