@@ -1,12 +1,19 @@
 import { Fragment } from 'react'
 import OperadorForm from './Form/OperadorForm';
 import MenuBar from "../../components/shared/Menu"
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import Swal from 'sweetalert2';
 const  EditOperador = () => {
-    //todo: Obtenemos el idOperador de la ruta
+    //todo: params / variables
     const { idOperador } = useParams();
+    const navigate = useNavigate();
+
     const catchResponseForm = (success: boolean) => {
-        console.log(success);
+        if(success){
+            navigate("/operadores");
+        }else{
+            Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'No se edito la información del operador, verifica que esten todos los campos con (*) llenos', showConfirmButton: true });
+        }
     }
     return (
         <Fragment>

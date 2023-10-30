@@ -144,7 +144,7 @@ const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
       //todo: Actualizamos el registro de los documentos del remolque
       await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));
       returnFormRemolque(true);
-    } catch (error) { returnFormRemolque(true);  console.log(error); alert("Error, al crear el remolque")}
+    } catch (error) { returnFormRemolque(false);}
   }
 
   const onSubmitEdit =  async(e: any) => {
@@ -154,10 +154,8 @@ const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
       await callEndpoint(editRemolque(id_Remolque, remolqueForm));
       //* Actualizamos los archivos
       await callEndpoint(updateFilesRemolque(documentos, idDocumento.toString(), id_Remolque));
-    } catch (error) {
-      alert("Error, al actualizar la unidad");
-      console.log(error);
-    }
+      returnFormRemolque(true);
+    } catch (error) { returnFormRemolque(false); }
   }
 
   return (
@@ -257,7 +255,7 @@ const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
             <div className="row mt-4">
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                   <div className="form-group">
-                    <button onClick={(idDocumento === 0 && id_Remolque === '' ) ? onSubmit : onSubmitEdit}  className="btn btn-success btn-rounded btn-lg" type="button"><i className="fa fa-save"></i> { (idDocumento === 0 && id_Remolque === '' ) ? " Guardar" : " Editar"}</button>
+                    <Button onClick={(idDocumento === 0 && id_Remolque === '' ) ? onSubmit : onSubmitEdit}  variant='contained' color='success' size='medium' type="button"> { (idDocumento === 0 && id_Remolque === '' ) ? "Alta Remolque" : "Guardar Remolque"}</Button>
                   </div>
                 </div>
             </div>

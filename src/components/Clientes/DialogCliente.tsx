@@ -1,19 +1,19 @@
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
-import { Fragment } from 'react';
-import RemolqueForm from '../../pages/Remolques/Form/RemolqueForm';
+import React, { Fragment } from 'react'
+import ClienteForm from '../../pages/Clientes/Form/ClienteForm';
 
 
 export interface Props {
     open: boolean,
     returnCloseDialog: (close: boolean) => void,
-    returnRemolque: (success: boolean) => void
+    returnCliente: (success: boolean) => void
 }
 
-const DialogRemolque = ({open, returnCloseDialog, returnRemolque}: Props) => {
 
+function DialogCliente({open, returnCloseDialog, returnCliente}: Props) {
     const returnFunction = (e: boolean) => {
         //retornamos la respuesta del formulario de unidad
-        returnRemolque(e);
+        returnCliente(e);
         //cerramos el modal dle formulario d ela unidad
         returnCloseDialog(false);
     }
@@ -22,7 +22,7 @@ const DialogRemolque = ({open, returnCloseDialog, returnRemolque}: Props) => {
         <Fragment>
             <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"  maxWidth={"lg"}>
                 <DialogContent>
-                    <RemolqueForm  returnFormRemolque={(e) => returnFunction(e)} />
+                    <ClienteForm  returnFormCliente={(e) => returnFunction(e)} />
                 </DialogContent>
                 <DialogActions>
                     <Button variant='contained' color='warning'  onClick={() => returnCloseDialog(false)}>Salir sin guardar</Button>
@@ -32,4 +32,4 @@ const DialogRemolque = ({open, returnCloseDialog, returnRemolque}: Props) => {
     );
 }
 
-export default DialogRemolque
+export default DialogCliente

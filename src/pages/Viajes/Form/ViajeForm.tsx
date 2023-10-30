@@ -7,15 +7,20 @@ import { getUnidades } from '../../../services/unidades/unidades.service';
 import { getOperadoresByEmpresa } from '../../../services/operadores/operadores.service';
 import { getRemolques } from '../../../services/remolques/remolques.service';
 import { Autocomplete, Button, TextField } from '@mui/material';
-import { IAutoComplete } from '../../../models/shared/autocomplete.model';
 import { IViajeForm } from '../../../models/viajes/viaje-form.model';
 import { IOperadorModel } from '../../../models/operadores/operador.model';
 import AddIcon from '@mui/icons-material/Add';
+import { getUltimoFolioViaje } from '../../../services/public.service';
+import { getClientesEmpresa } from '../../../services/clientes/clientes.service';
+import { ICliente } from '../../../models/clientes/cliente.model';
+import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
+import { createViaje } from '../../../services/viajes/viajes.service';
 
 //Lazy
 const ModalUnidad = lazy( () => import('../../../components/Unidades/DialogUnidad'));
 const ModalRemolque = lazy( () => import('../../../components/Remolques/DialogRemolque'));
 const ModalOperador = lazy( () => import('../../../components/Operadores/DialogOperador'));
+const ModalCliente = lazy( () => import('../../../components/Clientes/DialogCliente'));
 
 
 // todo: VARIABLES GLOBALES
@@ -24,29 +29,29 @@ type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTM
 const ViajeForm = () => {
     const TipoViaje = [{id_TipoViaje: 1, st_Descripcion: "Local"}, {id_TipoViaje: 2, st_Descripcion: "Foráneo"}];
 
-    //Button News
-    const optionsNew = ['Nueva unidad', 'Nuevo remolque', 'Nuevo operador', 'Nuevo cliente'];
-
     //todo: Variables globales
     const userState = useSelector((store: RootStore) => store.user);
     const id_Empresa = userState.user.id_Empresa;
+    const { callEndpoint } = useFetchAndLoad();
 
     const[dialogUnidad, setDialogUnidad] = useState<boolean>(false);
     const[dialogRemolque, setDialogRemolque] = useState<boolean>(false);
     const[dialogOperador, setDialogOperador] = useState<boolean>(false);
+    const[dialogCliente, setDialogCliente] = useState<boolean>(false);
 
-    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 0, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, id_Remolque: null, i_km_totales: 0, id_Empresa:  id_Empresa, id_StatusViaje: 0 });
+    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 1, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, id_Remolque: null, i_km_totales: 1, id_Empresa:  id_Empresa, id_StatusViaje: 1, id_Candado: 1});
     
     // CATÁLOGOS PARA LOS SELECT DE UNIDADES, OPERADORES, REMOLQUES
     //const [clientes, setClientes] = useState<IAutoComplete[]>([]);
-    const [unidades, setUnidades] = useState<IAutoComplete[]>([]);
-    const [remolques, setRemolques] = useState<IAutoComplete[]>([]);
-    const [operadores, setOperadores] = useState<IAutoComplete[]>([]);
+    const [unidades, setUnidades] = useState<UnidadModel[]>([]);
+    const [remolques, setRemolques] = useState<IRemolqueModel[]>([]);
+    const [operadores, setOperadores] = useState<IOperadorModel[]>([]);
+    const [clientes, setClientes] = useState<ICliente[]>([]);
 
-    const [selectUnidad, setSelectUnidad] = useState(null);
-    const [selectOperador, setSelectOperador] = useState(null);
-    const [selectRemolque, setSelectRemolque] = useState(null);
-    //const [selectCliente, setSelectCliente] = useState(null);
+    const [selectUnidad, setSelectUnidad] = useState<UnidadModel | null>(null);
+    const [selectOperador, setSelectOperador] = useState<IOperadorModel | null>(null);
+    const [selectRemolque, setSelectRemolque] = useState<IRemolqueModel | null>(null);
+    const [selectCliente, setSelectCliente] = useState<ICliente | null>(null);
 
     const [newUnidad, setNewUnidad] = useState(false);
     const [newRemolque, setNewRemolque] = useState(false);
@@ -58,90 +63,93 @@ const ViajeForm = () => {
         const loadUnidad = getUnidades(id_Empresa);
         const loadOperadores = getOperadoresByEmpresa(id_Empresa);
         const loadRemolques = getRemolques(id_Empresa);
+        const loadLastFolio = getUltimoFolioViaje(id_Empresa);
+        const loadClientes = getClientesEmpresa(id_Empresa);
 
         const useGetUnidades = async() => {
             try{
                 const response = await loadUnidad.call;
-                let info = response.data.data;
-                let dataFormatter = info.map( (item: UnidadModel) => ({
-                    id: item.id_Unidad,
-                    label: "ECO: " + item.st_Economico
-                }));
-                setUnidades(dataFormatter);
-            }catch(error){ alert(error); }
+                let tmpUnidades = response.data.data;
+                setUnidades(tmpUnidades);
+            }catch(error){ console.log(error); }
         };
 
         const useGetOperadores = async () => {
             try {
                 const result = await loadOperadores.call;
-                let info = result.data.data;
-                let dataFormatter = info.map( (item: IOperadorModel) => ({
-                    id: item.id_Operador,
-                    label: item.st_Nombre + " " + item.st_ApellidoP + " " + item.st_ApellidoM
-                }));
-                setOperadores(dataFormatter);
+                let tmpOperador = result.data.data;
+                setOperadores(tmpOperador);
             } catch (error) { console.log(error); }
         }
 
         const useGetRemolques = async() => {
             try{
                 const response = await loadRemolques.call;
-                let info = response.data.data;
-                let dataFormatter = info.map( (item: IRemolqueModel) => ({
-                    id: item.id_Remolque,
-                    label: "ECO: " + item.st_Economico
-                }));
-                setRemolques(dataFormatter);
+                let tmpRemolques = response.data.data;
+                setRemolques(tmpRemolques);
             }catch(error){ console.log(error); }
         };
+
+        const useGetClientesEmpresa = async() => {
+            try{
+                const response = await loadClientes.call;
+                let tmpClientes = response.data.data;
+                setClientes(tmpClientes);
+            }catch(error){ console.log(error); }
+        }
+
+        const useGetLastFolio = async() => {
+            const response = await loadLastFolio.call;
+            let tmpId = response.data.data.id_latest_folio;
+            setViajeForm({...viajeForm, folio_int_viaje: (tmpId !== null) ? tmpId + 1 : viajeForm.folio_int_viaje});
+            console.log(tmpId);
+        }
 
         //Call Functions
         useGetUnidades();
         useGetOperadores();
         useGetRemolques();
+        useGetClientesEmpresa();
+        useGetLastFolio();
 
+        // * destruimos el componente
         return() => { 
             loadRemolques.controller.abort();
             loadUnidad.controller.abort(); 
             loadOperadores.controller.abort(); 
+            loadClientes.controller.abort();
+            loadLastFolio.controller.abort();
         };
     },[]);
     
-
     const onChangeViajeForm = ({ target: { name, value } }: handleChangeForm) => {
         setViajeForm({...viajeForm, [name]: value});
     }
 
-    const onSelectUnidad  = (unidad: any) => {
-        if(unidad !== null){
-            setSelectUnidad(unidad);
-            setViajeForm({...viajeForm , id_Unidad: unidad.id});
-        }else{
-            setSelectUnidad(null);
-            setViajeForm({...viajeForm , id_Unidad: null});
-        }
-    }
+    //todo: Select unidad
+    useEffect(()=>{
+        setViajeForm({...viajeForm, id_Unidad: (selectUnidad !== null) ? selectUnidad.id_Unidad : null});
+    },[selectUnidad]);
 
-    const onSelectRemolques = (remolque: any) => {
-        if(remolque !== null){
-            setSelectRemolque(remolque);
-            setViajeForm({...viajeForm , id_Remolque: remolque.id});
-        }else{
-            setSelectRemolque(null);
-            setViajeForm({...viajeForm , id_Remolque: null});
-        }
-    }
+    //todo: Select Remolque
+    useEffect(()=>{
+        setViajeForm({...viajeForm, id_Remolque: (selectRemolque !== null) ? selectRemolque.id_Remolque : null});
+    },[selectRemolque]);
 
-    const onSelectOperador = (operador: any) => {
-        if(operador !== null){
-            setSelectOperador(operador);
-            setViajeForm({...viajeForm , id_Operador: operador.id});
-        }else{
-            setSelectOperador(null);
-            setViajeForm({...viajeForm , id_Operador: null});
-        }
-    }
 
+    //todo: Select Operador
+    useEffect(()=>{
+        setViajeForm({...viajeForm, id_Operador: (selectOperador !== null) ? selectOperador.id_Operador : null});
+    },[selectOperador]);
+
+
+    //todo: Select Operador
+    useEffect(()=>{
+        setViajeForm({...viajeForm, id_Cliente: (selectCliente !== null) ? selectCliente.id_Cliente : null});
+    },[selectCliente]);
+
+
+    //todo: Select TipoViaje
     const onChangeTipoViaje = (tipoViaje: any) => {
         if(tipoViaje !== null){
             setViajeForm({...viajeForm, id_TipoViaje : tipoViaje.id_TipoViaje});
@@ -150,39 +158,87 @@ const ViajeForm = () => {
         }
     }
 
+    //todo: Refrescamos el catalogo Unidades
     useEffect(() => {
         const loadUnidad = getUnidades(id_Empresa);
         const useGetUnidades = async() => {
-            console.log("Entro");
             try{
                 const response = await loadUnidad.call;
-                let info = response.data.data;
-                let dataFormatter = info.map( (item: UnidadModel) => ({
-                    id: item.id_Unidad,
-                    label: "ECO: " + item.st_Economico
-                }));
-                setUnidades(dataFormatter);
+                let tmpUnidades = response.data.data;
+                setUnidades(tmpUnidades);
             }catch(error){ alert(error); }
         };
         useGetUnidades();
-
         return() => { 
             loadUnidad.controller.abort(); 
         };
 
     },[newUnidad]);
 
-    useEffect(() => {},[newRemolque]);
-    useEffect(() => {},[newOperador]);
-    useEffect(() => {},[newCliente]);
+    //todo: Refrescamos el catalogo Remolques
+    useEffect(() => {
+        const loadRemolques = getRemolques(id_Empresa);
+        const useGetRemolques = async() => {
+            try{
+                const response = await loadRemolques.call;
+                let tmpRemolques = response.data.data;
+                setRemolques(tmpRemolques);
+            }catch(error){ console.log(error); }
+        };
+        useGetRemolques();
+        return() => { 
+            loadRemolques.controller.abort(); 
+        };
 
-    const refreshUnidades  = (set: boolean) => setNewUnidad(set);
-    const refreshRemolques  = (set: boolean) => setNewRemolque(set);
-    const refreshOperadores  = (set: boolean) => setNewOperador(set);
+    },[newRemolque]);
 
-    const onSubmit = (e: any) => {
+    //todo: Refrescamos el catalogo Remolques
+    useEffect(() => {
+        const loadOperadores = getOperadoresByEmpresa(id_Empresa);
+        const useGetOperadores = async () => {
+            try {
+                const result = await loadOperadores.call;
+                let tmpOperador = result.data.data;
+                setOperadores(tmpOperador);
+            } catch (error) { console.log(error); }
+        }
+        useGetOperadores();
+        return() => { 
+            loadOperadores.controller.abort(); 
+        };
+
+    },[newOperador]);
+
+
+    //todo: Refrescamos el catalogo Remolques
+    useEffect(() => {
+        const loadClientes2 = getClientesEmpresa(id_Empresa);
+        const useGetClientesEmpresa = async() => {
+            try{
+                const response = await loadClientes2.call;
+                let tmpClientes = response.data.data;
+                setClientes(tmpClientes);
+            }catch(error){ console.log(error); }
+        }
+        useGetClientesEmpresa();
+        return() => { 
+            loadClientes2.controller.abort(); 
+        };
+    },[newCliente]);
+
+    const refreshUnidades  = (set: boolean) => { setNewUnidad(set);}
+    const refreshRemolques  = (set: boolean) => {setNewRemolque(set);}
+    const refreshOperadores  = (set: boolean) => {setNewOperador(set);}
+    const refreshClientes  = (set: boolean) => {setNewCliente(set);}
+
+    const onSubmit = async(e: any) => {
         e.preventDefault();
-        console.log(viajeForm);
+        try {
+            let serviceCreate = await callEndpoint(createViaje(viajeForm));
+            console.log(serviceCreate);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -190,20 +246,33 @@ const ViajeForm = () => {
             <ModalUnidad open={dialogUnidad} returnCloseDialog={(close) => setDialogUnidad(close)} returnUnidad={(success) => refreshUnidades(success)}/>
             <ModalRemolque open={dialogRemolque} returnCloseDialog={(close) => setDialogRemolque(close)} returnRemolque={(success) => refreshRemolques(success)}/>
             <ModalOperador open={dialogOperador} returnCloseDialog={(close) => setDialogOperador(close)} returnOperador={(success) => refreshOperadores(success)}/>
+            <ModalCliente  open={dialogCliente} returnCloseDialog={(close) => setDialogCliente(close)} returnCliente={(success) => refreshClientes(success)}/>
 
             <div className="card">
-                <div className="card-body">
+                <div className="card-body"> 
                     <div className='row'>
                         <h4 className="card-title">Información general</h4>
                         <hr></hr>
                         <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-4">
                             <div className="form-group">
-                                <TextField id='folio_int_viaje' className="form-control" variant="outlined" label="Folio interno del viaje" type="text" name="st_Economico" disabled value={1} inputProps={{ autoComplete: "off" }} required/>
+                                <TextField id='folio_int_viaje' className="form-control" variant="outlined" label="Folio interno del viaje" type="text" name="st_Economico" disabled value={viajeForm.folio_int_viaje || ''} inputProps={{ autoComplete: "off" }} required/>
                             </div>
                         </div>
                         <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-4">
                             <div className="input-group">
-                                <TextField id='i_km_totales' className="form-control" variant="outlined" label="Km totales" type="number" name="i_km_totales" value={viajeForm.i_km_totales} inputProps={{ autoComplete: "off", min: 1, max: 50000 }} required onChange={onChangeViajeForm}/>
+                                <TextField id='i_km_totales' className="form-control" variant="outlined" label="Km totales" type="number" name="i_km_totales" value={viajeForm.i_km_totales || ''} inputProps={{ autoComplete: "off", min: 1, max: 50000 }} required onChange={onChangeViajeForm}/>
+                            </div>
+                        </div>
+                        <div className="col-md-6 col-lg-4 col-sm-12 col-xs-12 mt-4">
+                            <div className="form-group">
+                                <Autocomplete
+                                    value={selectCliente}
+                                    options={clientes}
+                                    onChange={(_option,value) => setSelectCliente(value)}
+                                    getOptionLabel={(option) => option.st_AliasCliente}
+                                    isOptionEqualToValue={(option, value) => option.id_Cliente === value.id_Cliente}
+                                    renderInput={(params) => <TextField {...params} label="Selecciona el cliente" variant="outlined" /> } 
+                                />
                             </div>
                         </div>
                         <div className="col-md-6 col-lg-4 col-sm-12 col-xs-12 mt-4">
@@ -211,7 +280,7 @@ const ViajeForm = () => {
                                 <Autocomplete
                                     id="idTipoViaje"
                                     options={TipoViaje}
-                                    onChange={(option,value) => onChangeTipoViaje(value)}
+                                    onChange={(_option,value) => onChangeTipoViaje(value)}
                                     getOptionLabel={(option) => option.st_Descripcion}
                                     isOptionEqualToValue={(option, value) => option.id_TipoViaje === value.id_TipoViaje}
                                     renderInput={(params) => <TextField {...params} label="Tipo de Viaje" variant="outlined" /> } 
@@ -229,6 +298,7 @@ const ViajeForm = () => {
                             <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogUnidad(true) }>Nueva unidad</Button>
                             <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogRemolque(true) }>Nuevo remolque</Button>
                             <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogOperador(true) }>Nuevo operador</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogCliente(true) }>Nuevo Cliente</Button>
                         </div>
                         <hr></hr>
                         <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -236,9 +306,9 @@ const ViajeForm = () => {
                                 <Autocomplete
                                     value={selectUnidad}
                                     options={unidades}
-                                    onChange={(_option, value) => onSelectUnidad(value)}
-                                    getOptionLabel={(option) => option.label ? option.label : ''}
-                                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                                    onChange={(_option, value) => setSelectUnidad(value)}
+                                    getOptionLabel={(option) => "ECO: " + option.st_Economico}
+                                    isOptionEqualToValue={(option, value) => option.id_Unidad === value.id_Unidad}
                                     renderInput={(params) => <TextField {...params} label="Selecciona la unidad" variant="outlined" />}
                                 />
                             </div>
@@ -247,9 +317,9 @@ const ViajeForm = () => {
                             <Autocomplete
                                 value={selectRemolque}
                                 options={remolques}
-                                onChange={(_option, value) => onSelectRemolques(value)}
-                                getOptionLabel={(option) => option.label ? option.label : ''}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                onChange={(_option, value) => setSelectRemolque(value)}
+                                getOptionLabel={(option) => "ECO: " + option.st_Economico}
+                                isOptionEqualToValue={(option, value) => option.id_Remolque === value.id_Remolque}
                                 renderInput={(params) => <TextField {...params} label="Selecciona el remolque" variant="outlined" />}
                             />
                         </div>
@@ -257,14 +327,14 @@ const ViajeForm = () => {
                             <Autocomplete
                                 value={selectOperador}
                                 options={operadores}
-                                onChange={(_option, value) => onSelectOperador(value)}
-                                getOptionLabel={(option) => option.label ? option.label : ''}
-                                isOptionEqualToValue={(option, value) => option.id === value.id}
+                                onChange={(_option, value) => setSelectOperador(value)}
+                                getOptionLabel={(option) => option.st_Nombre + " " + option.st_ApellidoP + " " + option.st_ApellidoM}
+                                isOptionEqualToValue={(option, value) => option.id_Operador === value.id_Operador}
                                 renderInput={(params) => <TextField {...params} label="Selecciona al operador" variant="outlined" />}
                             />
                         </div>
                         <div className='col-md-4 col-lg-4 col-sm-12 col-xs-12'>
-                            <Button onClick={(e) => onSubmit(e)} variant='contained' color='success' size='medium'> Crear Viaje</Button>
+                            <Button type='button' onClick={(e) => onSubmit(e)} variant='contained' color='success' size='medium'> Crear Viaje</Button>
                         </div>
                     </div>
                 </div>

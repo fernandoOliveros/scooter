@@ -188,8 +188,6 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
   const onSubmit = async (e: any) => {
     e.preventDefault();
     setLoad(true);
-    returnFormUnidad(true);
-    /*
     try {
       //todo: Creamos la unidad
       let result = await callEndpoint(createUnidad(unidadForm));
@@ -200,10 +198,7 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
       returnFormUnidad(true);
     } catch (error) {
       returnFormUnidad(false);
-      console.log(error);
-      alert("Error, al crear la unidad");
     }
-    */
     setLoad(false);
   }
 
@@ -215,9 +210,9 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
       await callEndpoint(editUnidad(id_Unidad,unidadForm));
       //actualizamos los archivos
       await callEndpoint(updateFilesUnidad(documentos, idDocumento.toString(), id_Unidad));
+      returnFormUnidad(true);
     } catch (error) {
-      alert("Error, al actualizar la unidad");
-      console.log(error);
+      returnFormUnidad(false);
     }
     setLoad(false); 
   }
@@ -357,9 +352,9 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
                   <div className="form-group">
                     {
                       !load ? (
-                        <button onClick={(idDocumento === 0 && id_Unidad === '' ) ? onSubmit : onSubmitEdit} className="btn btn-success" type="button"><i className="fa fa-save">  </i> 
-                          { (idDocumento === 0 && id_Unidad === '' ) ? " Guardar" : " Editar"} 
-                        </button>
+                        <Button onClick={(idDocumento === 0 && id_Unidad === '' ) ? onSubmit : onSubmitEdit}  variant='contained' color='success' size='medium' type="button"> 
+                          { (idDocumento === 0 && id_Unidad === '' ) ? " Alta Unidad" : " Guardar Unidad"} 
+                        </Button>
                       ) : (
                         <i className="fa fa-spinner fa-spin" style={{fontSize: "25px", color: "#038a68"}}>  </i>
                       )

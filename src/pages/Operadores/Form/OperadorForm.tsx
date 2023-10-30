@@ -320,7 +320,6 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     try {
       //todo: Creamos el registro del operador
       createrOperador = await callEndpoint(createOperador(operadorForm));
-      console.log(createrOperador.data);
       let id_OperadorTemp = createrOperador.data.data.id_Operador;
 
       //todo: ID DLE OPERADOR CORRECTO?
@@ -334,27 +333,18 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
         createrDireccion = await callEndpoint(insertDireccion(direccion));
         createrTelefono = await callEndpoint(insertTelefono(telefono));
         createrContacto = await callEndpoint(insertContacto(contacto));
-        console.log(createrDireccion.data);
-        console.log(createrTelefono.data);
-        console.log(createrContacto.data);
 
         //todo: CREAMOS EL REGISTRO DE LOS DOCUMENTOS
         createrDocuments = await callEndpoint(uploadFilesOperador(documentos, id_OperadorTemp));
-        console.log(createrDocuments.data);
 
         //todo: ACTUALIZAMOS EL REGISTRO DE LOS DOCUMENTOS
         let DocumentoId = createrDocuments.data.data.id_Documento;
         updaterDocuments = await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
-        console.log(updaterDocuments.data);
-      }else{
-        alert("No se pudo crear el operador (Falta el id retorno del API)");
-      }
-      returnFormOperador(true);
-    } catch (error) {
-      returnFormOperador(false);
-      alert("Error - al crear el operador");
-      console.log(error);
-    }
+
+        // * Retornamos boolean de respuesta
+        returnFormOperador(true);
+      }else{ returnFormOperador(false); }
+    } catch (error) { returnFormOperador(false); }
   }
 
   const HandleEditSubmit = async (e: any) => {
@@ -368,28 +358,23 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     try {
       //todo: ACTUALIZAMOS DATOS GENERALES DEL OPERADOR
       updaterOperador = await callEndpoint(updateOperador(operadorForm, id_Operador));
-      console.log(updaterOperador);
 
       //todo: ACTUALIZAMOS TELEFONO
       updaterTelefono = await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono.toString()));
-      console.log(updaterTelefono);
 
       //todo: ACTUALIZAMOS CONTACTOS
       updaterContacto = await callEndpoint(updateContactoOperador(contacto, id_ContactoEm.toString()));
-      console.log(updaterContacto);
 
       //todo: ACTULIZAMOS DIRECIÓN
       updaterDireccion = await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador.toString()));
-      console.log(updaterDireccion);
 
       //todo: ACTUALIZAMOS DOCUMENTOACIÓN
       if(documentos.url_CURP !== '' || documentos.url_ComprobanteDom !== '' || documentos.url_RFC !== ''){
         updaterDocuments = await callEndpoint(updateFilesOperador(documentos, idDocumento.toString(), id_Operador));
-        console.log(updaterDocuments);
       }
+      returnFormOperador(true);
     } catch (error) {
-      alert("Error, al actualizar los datos del operador")
-      console.log(error);
+      returnFormOperador(false);
     }
   }
 
@@ -585,9 +570,9 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
             <div className="row mt-4">
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                     <div className="form-group">
-                      <button onClick={(idDocumento === 0 && id_Operador === '' ) ? HandleSubmit : HandleEditSubmit} className="btn btn-success" type="button"><i className="fa fa-save">  </i> 
-                          { (idDocumento === 0 && id_Operador === '' ) ? " Guardar" : " Editar"}
-                      </button>
+                      <Button onClick={(idDocumento === 0 && id_Operador === '' ) ? HandleSubmit : HandleEditSubmit} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> 
+                          { (idDocumento === 0 && id_Operador === '' ) ? "   Guardar" : " Editar"}
+                      </Button>
                     </div>
                 </div>
             </div>

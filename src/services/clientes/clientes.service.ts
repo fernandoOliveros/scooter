@@ -12,12 +12,11 @@ export const createCliente = (cliente: IClienteForm) => {
     }
 }
 
-export const getClientes = (idEmpresa: string) => {
+export const getClientesEmpresa = (idEmpresa: string) => {
     const controller = loadAbort();
     return {
         //es la petición http
         call: axios.get(baseUrl + "clientes/readByEmpresa/" + idEmpresa, {signal: controller.signal}),
-        //controlador para abortar la petición en caso necesario
         controller
     }
 }

@@ -1,11 +1,17 @@
 import  { Fragment } from 'react'
 import MenuBar from "../../components/shared/Menu";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ClienteForm from './Form/ClienteForm';
+import Swal from 'sweetalert2';
 
 function CreateCliente() {
-  const responseClienteForm = (response: boolean) => {
-    console.log(response);
+  const navigate = useNavigate();
+  const catchResponseForm = (success: boolean) => {
+    if(success){
+      navigate("/clientes");
+    }else{
+      Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'No se pudo dar de alta el clinete, verifica que esten todos los campos con (*) llenos', showConfirmButton: true });
+    }
   }
   return (
     <Fragment>
@@ -28,7 +34,7 @@ function CreateCliente() {
           <div className="card-body">
             <div className='row'>
               <div className='col-12'>
-                  <ClienteForm returnFormCliente={responseClienteForm}/>
+                  <ClienteForm returnFormCliente={catchResponseForm}/>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { IClienteForm } from '../../../models/clientes/cliente-form.model';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Button, TextField } from '@mui/material';
 import { IRegFiscal } from '../../../models/cfdis/cfdi-form.model';
 import { getCatRegimenFiscal } from '../../../services/cfdi/cfdi.service';
 import { createCliente } from '../../../services/clientes/clientes.service';
@@ -22,7 +22,6 @@ const ClienteForm = ({returnFormCliente}: Props) => {
     const id_Empresa = userState.user.id_Empresa;
     const [load, setLoad] = useState<boolean>(false);
     const { callEndpoint } = useFetchAndLoad();
-
 
     //todo: variables del formulario
     const [clienteForm, setClienteForm] = useState<IClienteForm>({ st_RazonSocial: '', st_AliasCliente : '', id_RegimenFiscal : null, st_RFC: '', i_Status: 1, st_PersonaRepresenta: '', st_Celular: '', st_Correo: '', id_Empresa: id_Empresa});
@@ -77,9 +76,7 @@ const ClienteForm = ({returnFormCliente}: Props) => {
             console.log(service);
             returnFormCliente(true);
         } catch (error) {
-            alert("Error al crear el cliente");
             returnFormCliente(false);
-            console.log(error);
         }
         setLoad(false);
     }
@@ -119,17 +116,13 @@ const ClienteForm = ({returnFormCliente}: Props) => {
                 </div>
                 <div className="row mt-4">
                     <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
-                        <div className="form-group">
-                            {
-                                !load ? (
-                                <button onClick={ onSubmitForm } className="btn btn-success" type="button"><i className="fa fa-save"> Guardar</i> 
-                                </button>
-                                ) : (
-                                    <i className="fa fa-spinner fa-spin" style={{fontSize: "25px", color: "#038a68"}}>  </i>
-                                )
-                            }
-                            
-                        </div>
+                        {
+                            !load ? (
+                            <Button onClick={ (e) => onSubmitForm(e) } variant='contained' color='success' size='medium' type='button'>Alta Cliente </Button>
+                            ) : (
+                                <i className="fa fa-spinner fa-spin" style={{fontSize: "25px", color: "#038a68"}}>  </i>
+                            )
+                        }   
                     </div>
                 </div>
             </div>
@@ -137,8 +130,4 @@ const ClienteForm = ({returnFormCliente}: Props) => {
     );
 }
 
-export default ClienteForm
-
-function callEndpoint(arg0: { call: Promise<import("axios").AxiosResponse<any, any>>; controller: AbortController; }) {
-    throw new Error('Function not implemented.');
-}
+export default ClienteForm;

@@ -73,7 +73,7 @@ function App() {
 
           {/* VIAJES */}
           <Route path={PrivateRoutes.viajes} element={<ViajesScreen />} />
-          <Route path={PrivateRoutes.viajes} element={<CreateViajesScreen />} />
+          <Route path={PrivateRoutes.newViaje} element={<CreateViajesScreen />} />
 
           {/* CARTA PORTE */}
           <Route path={PrivateRoutes.cartaPorte} element={<CartaPortesScreen />}/>

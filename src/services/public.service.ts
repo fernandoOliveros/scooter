@@ -3,6 +3,18 @@ import loadAbort from "../utils/load-abort.util"
 import baseUrl from "../utils/base-url.utils";
 
 
+
+export const getUltimoFolioViaje = (id_Empresa: string) => {
+    const controller = loadAbort();
+    //Peticion
+    const urlGet = baseUrl + "viajes/getLatestFolio/" + id_Empresa;
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+    
+}
+
 export const getTipoPermisoSct = () =>{
     const controller = loadAbort();
     //Peticion

@@ -1,13 +1,19 @@
 import { Fragment } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import MenuBar from "../../components/shared/Menu"
 import UnidadForms from './Form/UnidadForm';
+import Swal from 'sweetalert2';
 
 const EditUnidad = () => {
     const { idUnidad } = useParams();
+    const navigate = useNavigate();
 
     const catchResponseForm = (resp: boolean) => {
-        console.log(resp)
+        if(resp){
+            navigate("/unidades");
+        }else{
+            Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'No se pudo dar de alta la unidad, verifica que esten todos los campos con (*) llenos', showConfirmButton: true });
+        }
     }
     return (
     <Fragment>
