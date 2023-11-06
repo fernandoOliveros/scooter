@@ -1,9 +1,9 @@
-import { Dialog, DialogActions, DialogContent } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 import React, { Fragment } from 'react'
 
 export interface Props {
   open: boolean,
-  children?: JSX.Element | JSX.Element[] | any[] | React.ReactNode,
+  children: React.ReactNode,
   returnCloseDialog: (close: boolean) => void,
 }
 
@@ -16,7 +16,7 @@ function DialogShared({open, returnCloseDialog, children}: Props) {
           {children}
         </DialogContent>
         <DialogActions>
-          <button className='btn btn-danger' onClick={() => returnCloseDialog(false)}>Salir sin guardar</button>
+          <Button variant='contained' color='warning' size='medium' type="button" onClick={() => returnCloseDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
     </Fragment>

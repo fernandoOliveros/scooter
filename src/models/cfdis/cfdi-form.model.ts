@@ -3,21 +3,13 @@ export interface ICfdiForm {
     id_Moneda : number | null;
     id_FormaPago : number | null;
     id_MetodoPago: number | null;
-    id_ClaveProdServCFDI : number | null;
-    id_ClaveUnidadPeso : number | null;
     id_UsoCFDI : number | null;
     id_TipoComprobante : number | null;
     id_Viaje : number | null;
     id_Cliente : number | null;
-    st_nombreCrudoXML?: string;
     dec_SubTotal: number | null;
     dec_Total: number | null;
-    st_nombre_receptor: string | null;
-    st_nombre_emisor: string | null;
     st_CondicionesPago: string | null;
-    st_RFC_emisor: string | null;
-    st_RFC_receptor: string | null;
-    st_LugarExpedicion: string | null;
 }
 
 export interface IProducServicioCfdiForm {

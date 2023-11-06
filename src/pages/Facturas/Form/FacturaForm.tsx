@@ -1,13 +1,13 @@
-import { ChangeEvent, useEffect, useState } from 'react'
-import { ICatMoneda, ICfdiForm, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, IProducServicioCfdiForm, IRegFiscal, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
-import config from '../../../utils/config-cfdi.json';
-import { getCatTipoMonedas, getCatRegimenFiscal, getCatFormaPago, getCatMetodosPago, getCatProdServicioCFDI, getCatUnidadPesoCFDI, getCatUsoCFDI, getCatTipoImpuestos, getCatObjetoImpuesto, getCatTipoFactor } from '../../../services/cfdi/cfdi.service';
+import { ChangeEvent, Fragment, useEffect, useState, ReactNode } from 'react'
+import { ICatMoneda, ICfdiForm, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, IProducServicioCfdiForm, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
+import { getCatTipoMonedas, getCatFormaPago, getCatMetodosPago, getCatProdServicioCFDI, getCatUnidadPesoCFDI, getCatUsoCFDI, getCatTipoImpuestos, getCatObjetoImpuesto, getCatTipoFactor } from '../../../services/cfdi/cfdi.service';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
 import { ICliente } from '../../../models/clientes/cliente.model';
-import { getClientes } from '../../../services/clientes/clientes.service';
-import { Autocomplete, TextField } from '@mui/material';
+import { getClientesEmpresa } from '../../../services/clientes/clientes.service';
+import { Autocomplete, Button, TextField } from '@mui/material';
 import Swal from 'sweetalert2';
+import DialogShared from '../../../components/shared/DialogShared';
 
 let ITipoComprobanteArray = [
   {
@@ -60,28 +60,30 @@ let catTasaCuotaJson: ITasaCuota[] = [
   }
 ];
 
+const ProductoServicioCfdiEmpty = {
+  id_ClaveProdServCFDI: null, dec_Cantidad: null, id_ClaveUnidadPeso: null, st_Descripcion: null, dec_ValorUnitario: null, dec_Importe: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, c_ImpuestoTraslado: null, c_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, st_TipoFactorTraslado: null, st_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
+};
+
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
 function FacturaForm() {
-  //todo: Validaciones
-  const validates = config.Comprobante;
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
 
+  // todo: Arreglo para Producto servicio CFDI
+  const [ arrServicioCfdi, setArrServicioCfdi] = useState<IProducServicioCfdiForm[]>([]);
+
   //todo _variables globales
-  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_ClaveProdServCFDI : null, id_ClaveUnidadPeso : null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, st_nombreCrudoXML: '', dec_SubTotal: null, dec_Total: null, st_RFC_emisor: null, st_RFC_receptor: null, st_LugarExpedicion: null,  st_nombre_receptor: null, st_nombre_emisor: null, st_CondicionesPago: null });
+  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
 
   //string global para tipo de comprobante
   const [tipoComprobante, setTipoComprobante] = useState<string>("");
-
-  const [productoServicioCfdi, setProductoServicioCfdi] = useState<IProducServicioCfdiForm>({ id_ClaveProdServCFDI: null, dec_Cantidad: null, id_ClaveUnidadPeso: null, st_Descripcion: null, dec_ValorUnitario: null, dec_Importe: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, c_ImpuestoTraslado: null, c_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, st_TipoFactorTraslado: null, st_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null});
-
+  const [productoServicioCfdi, setProductoServicioCfdi] = useState<IProducServicioCfdiForm>(ProductoServicioCfdiEmpty);
   const [showImpuestos, setShowImpuestos] = useState<boolean>(false);
 
   //todo: catalogos para Formulario
   const [catClientes, setCatClientes] = useState<ICliente[]>([]);
   const [catMonedas, setCatMonedas] = useState<ICatMoneda[]>([]);
-  const [catRegFiscal, setCatRegFiscal] = useState<IRegFiscal[]>([]);
   const [catFormasPago, setCatFormasPago] = useState<IFormasPago[]>([]);
   const [catMetodosPago, setCatMetodosPago] = useState<IMetodosPago[]>([]);
   const [catProdServicioCFDI, setCatProdServicioCFDI] = useState<IProdServicioCFDI[]>([]);
@@ -96,7 +98,6 @@ function FacturaForm() {
   //todo: variables para formulario <Autocomplete />
   const [selectClientes, setSelectClientes] = useState< ICliente | null>(null);
   const [selectMonedas, setSelectMonedas] = useState< ICatMoneda | null>(null);
-  const [selectRegFiscal, setSelectRegFiscal] = useState< IRegFiscal | null>(null);
   const [selectFormasPago, setSelectFormasPago] = useState< IFormasPago | null>(null);
   const [selectMetodosPago, setSelectMetodosPago] = useState< IMetodosPago | null>(null);
   const [selectProdServicioCfdi, setSelectProdServicioCfdi] = useState< IProdServicioCFDI | null>(null);
@@ -136,15 +137,12 @@ function FacturaForm() {
       dec_BaseRetencion: productoServicioCfdi.dec_Importe
     });
   },[productoServicioCfdi.dec_Importe]);
-
-  //todo: Funcion para editar formulario general de cfdi
-  const onChangeCfdiForm = ({ target: { name, value } }: handleChangeForm) => setCfdiForm({...cfdiForm, [name]: value});
+  
   // todo: FUNCION INICIAL PARA CARGAR SERVICIOS PARA LOS AUTOCOMPLETE'S
   useEffect(() => {
     // ? Services
-    const loadClientes = getClientes(id_Empresa);
+    const loadClientes = getClientesEmpresa(id_Empresa);
     const loadMonedas = getCatTipoMonedas();
-    const loadRegFiscal = getCatRegimenFiscal();
     const loadFormasPago = getCatFormaPago();
     const loadMetodosPago = getCatMetodosPago();
     const loadProdServicioCfdi = getCatProdServicioCFDI();
@@ -167,14 +165,6 @@ function FacturaForm() {
       if(result.data.success){
         let response = result.data;
         setCatMonedas( response.data );
-      }
-    }
-
-    const _getRegFiscal = async() => {
-      let result = await loadRegFiscal.call;
-      if(result.data.success){
-        let response = result.data;
-        setCatRegFiscal( response.data );
       }
     }
 
@@ -253,7 +243,6 @@ function FacturaForm() {
     //todo: llamamos a los servicios de catálogos
     _getClientes();
     _getMonedas();
-    _getRegFiscal();
     _getFormasPago();
     _getMetodosPago();
     _getProdServiciosCfdi();
@@ -277,6 +266,10 @@ function FacturaForm() {
     setCfdiForm({...cfdiForm, id_Moneda: (selectMonedas !== null) ? selectMonedas.id_Moneda : null});
   },[selectMonedas]);
 
+  useEffect(() => {
+    setCfdiForm({...cfdiForm, id_UsoCFDI: (selectUsoCfdi) !== null ? selectUsoCfdi.id_UsoCFDI : null});
+  },[selectUsoCfdi]);
+
   //todo: Effect para select cat - Tipo Comprobante
   useEffect(() => {
     //* seteamos el tipo de comprobante en la variable del formulario
@@ -296,7 +289,7 @@ function FacturaForm() {
   useEffect(() => {
     setCfdiForm({...cfdiForm, id_MetodoPago: (selectMetodosPago !== null) ? selectMetodosPago.id_MetodoPago : null});
   },[selectMetodosPago]);
-
+6
   //todo: Effect para que se ejecuta cada vez que cambiemos de tipo de comprobante
   useEffect(() => {
     // //todo: Validación si es comprobante es "Traslado" o "Pago" el subtotal y total lo ponemos en 0
@@ -356,21 +349,17 @@ function FacturaForm() {
     setProductoServicioCfdi({...productoServicioCfdi, dec_TasaOCuotaTraslado: (selectTasaCuotaTraslado !== null) ? selectTasaCuotaTraslado.dec_ValorAplica : null });
   },[selectTasaCuotaTraslado]);
 
-  //todo: Calculado el impuesto de Traslado respecto a la Tasa Cuota
+  //todo: Calculado el impuesto de Traslado respecto: Base, tasa Cuota
   useEffect( () => {
-    if(productoServicioCfdi.dec_BaseTraslado !== null && selectTasaCuotaTraslado !== null){
-      let impuesto: number = productoServicioCfdi.dec_BaseTraslado * selectTasaCuotaTraslado.dec_ValorAplica;
-      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteTraslado: impuesto});
-    }
-  },[productoServicioCfdi.dec_TasaOCuotaTraslado]);
+    calculateTrasladoImporte();
+  },[productoServicioCfdi.dec_BaseTraslado, productoServicioCfdi.dec_TasaOCuotaTraslado]);
 
-  //todo: Calculado el impuesto de Traslado respecto a la base
-  useEffect( () => {
+  const calculateTrasladoImporte = () =>{
     if(productoServicioCfdi.dec_BaseTraslado !== null && selectTasaCuotaTraslado !== null){
       let impuesto: number = productoServicioCfdi.dec_BaseTraslado * selectTasaCuotaTraslado.dec_ValorAplica;
       setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteTraslado: impuesto});
-    }
-  },[productoServicioCfdi.dec_BaseTraslado]);
+    }  
+  }
 
   /* ================== AREA DE SELECT DE IMPUESTOS RETENCIÓN =========================== */
 
@@ -389,103 +378,140 @@ function FacturaForm() {
     setProductoServicioCfdi({...productoServicioCfdi, dec_TasaOCuotaRetencion: (selectTasaCuotaRetencion !== null) ? selectTasaCuotaRetencion.dec_ValorAplica : null });
   },[selectTasaCuotaRetencion]);
 
-  //todo: Calculado el impuesto de Retención respecto a la Tasa Cuota
+  //todo: Calculado el impuesto de Retención respecto: base, Tasa Cuota
   useEffect( () => {
-    if(productoServicioCfdi.dec_BaseRetencion !== null && selectTasaCuotaRetencion !== null){
-      let impuesto: number = productoServicioCfdi.dec_BaseRetencion* selectTasaCuotaRetencion.dec_ValorAplica;
-      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteRetencion: impuesto});
-    }
-  },[productoServicioCfdi.dec_TasaOCuotaRetencion]);
+    calculateRetencionImporte();
+  },[productoServicioCfdi.dec_BaseRetencion, productoServicioCfdi.dec_TasaOCuotaRetencion]);
 
-  //todo: Calculado el impuesto de Retención respecto a la base 
-  useEffect( () => {
+  const calculateRetencionImporte = () => {
     if(productoServicioCfdi.dec_BaseRetencion !== null && selectTasaCuotaRetencion !== null){
       let impuesto: number = productoServicioCfdi.dec_BaseRetencion * selectTasaCuotaRetencion.dec_ValorAplica;
       setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteRetencion: impuesto});
     }
-  },[productoServicioCfdi.dec_BaseRetencion]);
+  }
 
   /* ================ VALIDACIONES PARA EL FORMULARIO ===============================*/
   useEffect(()=> {
     if( productoServicioCfdi?.dec_Importe!== null && productoServicioCfdi?.dec_Importe <= 0){
+      cleanFieldNumber(); // * Limpiamos campos numéricos
       Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'El importe no puede ser un número negativo, verifica la cantidad, y el valor unitario del servicio de la factura', showConfirmButton: true });
     }
   },[productoServicioCfdi.dec_Importe]);
-  
+
+  //todo: Función para limpiar campos de traslados, retención y descuento por error de numeros negativos
+  const cleanFieldNumber = () => {
+    setProductoServicioCfdi({...productoServicioCfdi, dec_BaseTraslado: null, dec_BaseRetencion: null, c_ImpuestoTraslado: null, c_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null, dec_Descuento: null});
+  }
+
+  //todo: 
+  const cleanSelectCat = () => {
+    setSelectProdServicioCfdi(null);
+    setSelectUnidadPesoCfdi(null);
+    setSelectObjetoImpuesto(null);
+    setSelectTipoImpuestosTraslado(null);
+    setSelectTipoFactorTraslado(null);
+    setSelectTasaCuotaTraslado(null);
+    setSelectTipoImpuestosRetencion(null);
+    setSelectTipoFactorRetencion(null);
+    setSelectTasaCuotaRetencion(null);
+  }
+
+  /* =========================== SUBMIT ======================================= */
+
+  const addServiceCfdi = () => {
+    setArrServicioCfdi([...arrServicioCfdi, productoServicioCfdi]);
+    setProductoServicioCfdi(ProductoServicioCfdiEmpty);
+    cleanSelectCat();
+  }
+  const saveCfdi = () => {
+    console.log(cfdiForm);
+    console.log(arrServicioCfdi);
+  }
+  const [open, setOpen] = useState<boolean>(false);
   return (
-    <form className='form-horizontal'>
-      <div className='form-body'>
-        <h4 className="card-title">Información General de la Factura</h4>
-        <div className='row'>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <Autocomplete
-                value={selectTipoComprobante}
-                options={catTipoComprobante}
-                onChange={(_option, value) => setSelectTipoComprobante(value)}
-                getOptionLabel={(option) => option.c_TipoDeComprobante + " - " + option.st_TipoComprobante}
-                isOptionEqualToValue={(option, value) => option.id_TipoComprobante === value.id_TipoComprobante}
-                renderInput={(params) => <TextField {...params} label="Tipo Comprobante" variant="outlined" />}
-              />
+    <Fragment>
+      <DialogShared open={open} children={<ProductosFacturasView productos={arrServicioCfdi} />} returnCloseDialog={ (e) => setOpen(e)} />
+      <form className='form-horizontal'>
+        <div className='form-body'>
+          <h4 className="card-title">Información General de la Factura</h4>
+          <div className='row'>
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectTipoComprobante}
+                  options={catTipoComprobante}
+                  onChange={(_option, value) => setSelectTipoComprobante(value)}
+                  getOptionLabel={(option) => option.c_TipoDeComprobante + " - " + option.st_TipoComprobante}
+                  isOptionEqualToValue={(option, value) => option.id_TipoComprobante === value.id_TipoComprobante}
+                  renderInput={(params) => <TextField {...params} label="Tipo Comprobante" variant="outlined" required />}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <Autocomplete
-                value={selectClientes}
-                options={catClientes}   
-                onChange={(_option, value) => setSelectClientes(value)}
-                getOptionLabel={(option) => option.st_RazonSocial}
-                isOptionEqualToValue={(option, value) => option.id_Cliente === value.id_Cliente}
-                renderInput={(params) => <TextField {...params} label="Cliente Factura" variant="outlined" />}
-              />
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectClientes}
+                  options={catClientes}   
+                  onChange={(_option, value) => setSelectClientes(value)}
+                  getOptionLabel={(option) => option.st_RazonSocial}
+                  isOptionEqualToValue={(option, value) => option.id_Cliente === value.id_Cliente}
+                  renderInput={(params) => <TextField {...params} label="Cliente Factura" variant="outlined" required/>}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <TextField onChange={onChangeCfdiForm} id='st_LugarExpedicion' className="form-control" variant="outlined" label="Lugar expedicion"  type="text" inputProps={{ autoComplete: "off" }} name="st_LugarExpedicion" value={cfdiForm.st_LugarExpedicion || ''} required  helperText="Ingresa el código postal"/>
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectMonedas}
+                  options={catMonedas}
+                  onChange={(_option, value) => setSelectMonedas(value)}
+                  getOptionLabel={(option) => option.c_Moneda + " - " + option.st_Descripcion}
+                  isOptionEqualToValue={(option, value) => option.id_Moneda === value.id_Moneda}
+                  renderInput={(params) => <TextField {...params} label="Moneda" variant="outlined" required/>}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <Autocomplete
-                value={selectMonedas}
-                options={catMonedas}
-                onChange={(_option, value) => setSelectMonedas(value)}
-                getOptionLabel={(option) => option.c_Moneda + " - " + option.st_Descripcion}
-                isOptionEqualToValue={(option, value) => option.id_Moneda === value.id_Moneda}
-                renderInput={(params) => <TextField {...params} label="Moneda" variant="outlined" />}
-              />
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectFormasPago}
+                  options={catFormasPago}
+                  onChange={(_option, value) => setSelectFormasPago(value)}
+                  getOptionLabel={(option) => option.c_FormaPago + " - " + option.st_descripcion}
+                  isOptionEqualToValue={(option, value) => option.id_FormaPago === value.id_FormaPago}
+                  renderInput={(params) => <TextField {...params} label="Formas de Pago" variant="outlined" required/>}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <Autocomplete
-                value={selectFormasPago}
-                options={catFormasPago}
-                onChange={(_option, value) => setSelectFormasPago(value)}
-                getOptionLabel={(option) => option.c_FormaPago + " - " + option.st_descripcion}
-                isOptionEqualToValue={(option, value) => option.id_FormaPago === value.id_FormaPago}
-                renderInput={(params) => <TextField {...params} label="Formas de Pago" variant="outlined" />}
-              />
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectMetodosPago}
+                  options={catMetodosPago}
+                  onChange={(_option, value) => setSelectMetodosPago(value)}
+                  getOptionLabel={(option) => option.c_MetodoPago + " - " + option.st_Descripcion}
+                  isOptionEqualToValue={(option, value) => option.id_MetodoPago === value.id_MetodoPago}
+                  renderInput={(params) => <TextField {...params} label="Metodo de Pago" variant="outlined" required/>}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-            <div className="form-group">
-              <Autocomplete
-                value={selectMetodosPago}
-                options={catMetodosPago}
-                onChange={(_option, value) => setSelectMetodosPago(value)}
-                getOptionLabel={(option) => option.c_MetodoPago + " - " + option.st_Descripcion}
-                isOptionEqualToValue={(option, value) => option.id_MetodoPago === value.id_MetodoPago}
-                renderInput={(params) => <TextField {...params} label="Metodo de Pago" variant="outlined" />}
-              />
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectUsoCfdi}
+                  options={catUsoCFDI}
+                  onChange={(_option, value) => setSelectUsoCfdi(value)}
+                  getOptionLabel={(option) => option.c_UsoCFDI + " - " + option.st_Descripcion}
+                  isOptionEqualToValue={(option, value) => option.id_UsoCFDI === value.id_UsoCFDI}
+                  renderInput={(params) => <TextField {...params} label="Uso CFDI" variant="outlined" required/>}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className='borderForm'>
-        <div className="form-body">
+        <div className='borderForm'>
+          <div className="form-body">
+            <Button onClick={() => setOpen(true)} variant='contained' color='primary' size='medium' type="button">Ver lista de servicios</Button> 
             <h4 className="card-title mt-5">Producto servicio de la Factura</h4>
             <div className="row">
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -496,7 +522,7 @@ function FacturaForm() {
                     onChange={(_option, value) => setSelectProdServicioCfdi(value)}
                     getOptionLabel={(option) => option.c_ClaveProdServ + " - " + option.Descripcion}
                     isOptionEqualToValue={(option, value) => option.id_ClaveProdServCFDI === value.id_ClaveProdServCFDI}
-                    renderInput={(params) => <TextField {...params} label="Producto Servicio" variant="outlined" />}
+                    renderInput={(params) => <TextField {...params} label="Producto Servicio" variant="outlined" required/>}
                   />
                 </div>
               </div>
@@ -513,13 +539,13 @@ function FacturaForm() {
                     onChange={(_option, value) => setSelectUnidadPesoCfdi(value)}
                     getOptionLabel={(option) => option.c_ClaveUnidad + " - " + option.st_Nombre}
                     isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPesoCFDI === value.id_ClaveUnidadPesoCFDI}
-                    renderInput={(params) => <TextField {...params} label="Unidad Peso" variant="outlined" />}
+                    renderInput={(params) => <TextField {...params} label="Unidad Peso" variant="outlined" required/>}
                   />
                 </div>
               </div>
               <div className="col-md-8 col-lg-8 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField size='medium' fullWidth onChange={onChangeFormPoductoServicio} id='st_Descripcion' className="form-control" variant="outlined" label="Descripción"  type="text" inputProps={{ autoComplete: "off" }} name="st_Descripcion" value={productoServicioCfdi.st_Descripcion || ''} required/>
+                  <TextField size='medium' fullWidth onChange={onChangeFormPoductoServicio} id='st_Descripcion' className="form-control" variant="outlined" label="Descripción"  type="text" inputProps={{ autoComplete: "off" }} name="st_Descripcion" value={productoServicioCfdi.st_Descripcion || ''} />
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -530,7 +556,7 @@ function FacturaForm() {
                     onChange={(_option, value) => setSelectObjetoImpuesto(value)}
                     getOptionLabel={(option) => option.c_ObjetoImp + " - " + option.st_descripcion}
                     isOptionEqualToValue={(option, value) => option.id_ObjetoImp === value.id_ObjetoImp}
-                    renderInput={(params) => <TextField {...params} label="Objeto de impuesto" variant="outlined" />}
+                    renderInput={(params) => <TextField {...params} label="Objeto de impuesto" variant="outlined" required/>}
                   />
                 </div>
               </div>
@@ -542,7 +568,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_Descuento' className="form-control" variant="outlined" label="Descuento"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} name="dec_Descuento" value={productoServicioCfdi.dec_Descuento || ''} required/>
+                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_Descuento' className="form-control" variant="outlined" label="Descuento"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} name="dec_Descuento" value={productoServicioCfdi.dec_Descuento || ''}/>
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -551,119 +577,173 @@ function FacturaForm() {
                 </div>
               </div>
             </div>
+          </div>
+          {
+            (tipoComprobante === "Ingreso" || tipoComprobante === "Egreso") && showImpuestos ? (
+              <div className="form-body">
+                <h4 className="card-title mt-5">Impuestos</h4>
+                <div className="row">
+                  <div className="col-12">
+                    <h5 className="card-title mt-3">Impuestos Traslados</h5>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <TextField id='dec_BaseTraslado' className="form-control" variant="outlined" label="Base Traslado"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1, readOnly: true }} name="dec_BaseTraslado" value={productoServicioCfdi.dec_BaseTraslado || ''} required />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTipoImpuestosTraslado}
+                        options={catTipoImpuestos}   
+                        onChange={(_option, value) => setSelectTipoImpuestosTraslado(value)}
+                        getOptionLabel={(option) => option.c_Impuesto + " - " + option.st_Descripcion}
+                        isOptionEqualToValue={(option, value) => option.id_Impuesto === value.id_Impuesto}
+                        renderInput={(params) => <TextField {...params} label="Impuesto aplicado" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTipoFactorTraslado}
+                        options={catTipoFactor}   
+                        onChange={(_option, value) => setSelectTipoFactorTraslado(value)}
+                        getOptionLabel={(option) => option.c_TipoFactor}
+                        isOptionEqualToValue={(option, value) => option.id_TipoFactor === value.id_TipoFactor}
+                        renderInput={(params) => <TextField {...params} label="Tipo de factor" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTasaCuotaTraslado}
+                        options={catTasaCuota}   
+                        onChange={(_option, value) => setSelectTasaCuotaTraslado(value)}
+                        getOptionLabel={(option) => option.c_TasaCuota}
+                        isOptionEqualToValue={(option, value) => option.id_TasaCuotaJson === value.id_TasaCuotaJson}
+                        renderInput={(params) => <TextField {...params} label="Tasa Cuota (%)" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <TextField className="form-control" label="Importe" id="dec_ImporteTraslado" name="dec_ImporteTraslado" type="text" value={productoServicioCfdi.dec_ImporteTraslado || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }} required/>
+                    </div>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-12">
+                    <h5 className="card-title mt-3">Impuestos Retención</h5>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <TextField id='dec_BaseRetencion' className="form-control" variant="outlined" label="Base Retención"  type="number" inputProps={{ autoComplete: "off", min: 1, readOnly: true}} name="dec_BaseRetencion" value={productoServicioCfdi.dec_BaseRetencion || ''} required/>
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTipoImpuestosRetencion}
+                        options={catTipoImpuestos}   
+                        onChange={(_option, value) => setSelectTipoImpuestosRetencion(value)}
+                        getOptionLabel={(option) => option.c_Impuesto + " - " + option.st_Descripcion}
+                        isOptionEqualToValue={(option, value) => option.id_Impuesto === value.id_Impuesto}
+                        renderInput={(params) => <TextField {...params} label="Impuesto aplicado" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTipoFactorRetencion}
+                        options={catTipoFactor}   
+                        onChange={(_option, value) => setSelectTipoFactorRetencion(value)}
+                        getOptionLabel={(option) => option.c_TipoFactor}
+                        isOptionEqualToValue={(option, value) => option.id_TipoFactor === value.id_TipoFactor}
+                        renderInput={(params) => <TextField {...params} label="Tipo de factor" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <Autocomplete
+                        value={selectTasaCuotaRetencion}
+                        options={catTasaCuota}   
+                        onChange={(_option, value) => setSelectTasaCuotaRetencion(value)}
+                        getOptionLabel={(option) => option.c_TasaCuota}
+                        isOptionEqualToValue={(option, value) => option.id_TasaCuotaJson === value.id_TasaCuotaJson}
+                        renderInput={(params) => <TextField {...params} label="Tasa Cuota(%)" variant="outlined" required/>}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
+                    <div className="form-group">
+                      <TextField className="form-control" label="Importe" id="dec_ImporteRetencion" name="dec_ImporteRetencion" type="text" value={productoServicioCfdi.dec_ImporteRetencion || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }} required/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : void(0)
+          }
+          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+            <Button onClick={addServiceCfdi} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-plus"></i>Agregar Servicio Cfdi</Button>              
+          </div>
         </div>
-        {
-          (tipoComprobante === "Ingreso" || tipoComprobante === "Egreso") && showImpuestos ? (
-            <div className="form-body">
-              <h4 className="card-title mt-5">Impuestos</h4>
-              <div className="row">
-                <div className="col-12">
-                  <h5 className="card-title mt-3">Impuestos Traslados</h5>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <TextField id='dec_BaseTraslado' className="form-control" variant="outlined" label="Base Traslado"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1, readOnly: true }} name="dec_BaseTraslado" value={productoServicioCfdi.dec_BaseTraslado || ''} required />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTipoImpuestosTraslado}
-                      options={catTipoImpuestos}   
-                      onChange={(_option, value) => setSelectTipoImpuestosTraslado(value)}
-                      getOptionLabel={(option) => option.c_Impuesto + " - " + option.st_Descripcion}
-                      isOptionEqualToValue={(option, value) => option.id_Impuesto === value.id_Impuesto}
-                      renderInput={(params) => <TextField {...params} label="Impuesto aplicado" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTipoFactorTraslado}
-                      options={catTipoFactor}   
-                      onChange={(_option, value) => setSelectTipoFactorTraslado(value)}
-                      getOptionLabel={(option) => option.c_TipoFactor}
-                      isOptionEqualToValue={(option, value) => option.id_TipoFactor === value.id_TipoFactor}
-                      renderInput={(params) => <TextField {...params} label="Tipo de factor" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTasaCuotaTraslado}
-                      options={catTasaCuota}   
-                      onChange={(_option, value) => setSelectTasaCuotaTraslado(value)}
-                      getOptionLabel={(option) => option.c_TasaCuota}
-                      isOptionEqualToValue={(option, value) => option.id_TasaCuotaJson === value.id_TasaCuotaJson}
-                      renderInput={(params) => <TextField {...params} label="Tasa Cuota (%)" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <TextField className="form-control" label="Importe" id="dec_ImporteTraslado" name="dec_ImporteTraslado" type="text" value={productoServicioCfdi.dec_ImporteTraslado || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }}/>
-                  </div>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-12">
-                  <h5 className="card-title mt-3">Impuestos Retención</h5>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <TextField id='dec_BaseRetencion' className="form-control" variant="outlined" label="Base Retención"  type="number" inputProps={{ autoComplete: "off", min: 1, readOnly: true}} name="dec_BaseRetencion" value={productoServicioCfdi.dec_BaseRetencion || ''} required/>
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTipoImpuestosRetencion}
-                      options={catTipoImpuestos}   
-                      onChange={(_option, value) => setSelectTipoImpuestosRetencion(value)}
-                      getOptionLabel={(option) => option.c_Impuesto + " - " + option.st_Descripcion}
-                      isOptionEqualToValue={(option, value) => option.id_Impuesto === value.id_Impuesto}
-                      renderInput={(params) => <TextField {...params} label="Impuesto aplicado" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTipoFactorRetencion}
-                      options={catTipoFactor}   
-                      onChange={(_option, value) => setSelectTipoFactorRetencion(value)}
-                      getOptionLabel={(option) => option.c_TipoFactor}
-                      isOptionEqualToValue={(option, value) => option.id_TipoFactor === value.id_TipoFactor}
-                      renderInput={(params) => <TextField {...params} label="Tipo de factor" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <Autocomplete
-                      value={selectTasaCuotaRetencion}
-                      options={catTasaCuota}   
-                      onChange={(_option, value) => setSelectTasaCuotaRetencion(value)}
-                      getOptionLabel={(option) => option.c_TasaCuota}
-                      isOptionEqualToValue={(option, value) => option.id_TasaCuotaJson === value.id_TasaCuotaJson}
-                      renderInput={(params) => <TextField {...params} label="Tasa Cuota(%)" variant="outlined" />}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
-                  <div className="form-group">
-                    <TextField className="form-control" label="Importe" id="dec_ImporteRetencion" name="dec_ImporteRetencion" type="text" value={productoServicioCfdi.dec_ImporteRetencion || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }}/>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : void(0)
-        }
-      </div>
-    </form>
+        <div className="row">
+          <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-5">
+            {
+              arrServicioCfdi.length > 0 ? (
+                <Button onClick={saveCfdi} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> Crear Factura</Button>                  
+              ): void(0)
+            }
+          </div>
+        </div>
+      </form>
+    </Fragment>
   )
 }
-
 export default FacturaForm;
+
+/* =============================== View para producto y servicio CFDI ======================= */
+interface ProductosProps {
+  productos: IProducServicioCfdiForm[];
+}
+
+export const ProductosFacturasView = ({ productos }: ProductosProps): ReactNode => {
+
+  const returnIdDelete = (position: number) => {
+    console.log(position);
+  }
+  return (
+    <div className="table-responsive">
+      <table className='table color-table dark-table'>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Id Producto Servicio</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Deescripción</th>
+            <th>Acc</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            productos.map( (item, index) => (
+              <tr>
+                <td>{++index}</td>
+                <td>{item.id_ClaveProdServCFDI}</td>
+                <td>{item.dec_Cantidad}</td>
+                <td>{item.dec_ValorUnitario}</td>
+                <td>{item.st_Descripcion}</td>
+                <td><Button onClick={() => returnIdDelete(index)}  variant='contained' color='error' size='medium' type="button"> Borrar Producto</Button></td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  );
+}

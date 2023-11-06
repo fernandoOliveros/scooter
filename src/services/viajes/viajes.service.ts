@@ -5,6 +5,14 @@ import { IViajeForm } from "../../models/viajes/viaje-form.model";
 
 
 
+export const getViajesEmpresa = (idEmpresa: string) => {
+    const controller = loadAbort();
+    return {
+        call: axios.get(baseUrl + "viajes/readByEmpresa/" + idEmpresa,  { signal: controller.signal, }),
+        controller
+    }
+}
+
 export const createViaje = (dataViaje: IViajeForm) => {
     const controller = loadAbort();
     return {
