@@ -75,7 +75,7 @@ export const createOperador = (operador: IOperadorForm) => {
 export const insertDireccion = (direccion: IOperadorDireccion) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "direccionOperador/create", direccion, { signal: controller.signal }),
+        call: axios.post(baseUrl + "direccionOperadores/create", direccion, { signal: controller.signal }),
         controller
     }
 }
@@ -83,7 +83,7 @@ export const insertDireccion = (direccion: IOperadorDireccion) => {
 export const insertTelefono = (telefono: IOperadorTelefono) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "telefonosOperador/create", telefono, { signal: controller.signal }),
+        call: axios.post(baseUrl + "telefonosOperadores/create", telefono, { signal: controller.signal }),
         controller
     }
 }

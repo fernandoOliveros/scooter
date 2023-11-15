@@ -13,24 +13,25 @@ export interface ICfdiForm {
 }
 
 export interface IProducServicioCfdiForm {
+    id_CFDI: number | null;
     id_ClaveProdServCFDI: number | null;
-    dec_Cantidad: number | null;
-    id_ClaveUnidadPeso: number | null;
-    st_Descripcion: string | null;
-    dec_ValorUnitario: number | null;
-    dec_Importe: number | null;
-    dec_Descuento: number | null;
+    id_ClaveUnidadPesoCFDI: number | null;
     id_ObjetoImp: number | null;
+    dec_ImporteConcepto: number | null;
+    dec_ValorUnitarioConcepto: number | null;
+    st_DescripcionConcepto: string | null;
+    id_ImpuestoTraslado: number | null;
+    id_ImpuestoRetencion: number | null;
+    id_TipoFactorTraslado: number | null;
+    id_TipoFactorRetencion: number | null;
     dec_BaseTraslado: number | null;
-    c_ImpuestoTraslado: string | null;
-    dec_ImporteTraslado: number | null;
-    st_TipoFactorTraslado: string | null;
-    dec_TasaOCuotaTraslado: number | null;
     dec_BaseRetencion: number | null;
-    c_ImpuestoRetencion: string | null;
+    dec_ImporteTraslado:  number | null;
     dec_ImporteRetencion: number | null;
-    st_TipoFactorRetencion: string | null;
+    dec_TasaOCuotaTraslado: number | null;
     dec_TasaOCuotaRetencion: number | null;
+    i_Cantidad: number | null;
+    dec_Descuento: number | null;
 }
 
 

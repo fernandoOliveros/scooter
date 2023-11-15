@@ -324,15 +324,6 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
 
       //todo: ID DLE OPERADOR CORRECTO?
       if(id_OperadorTemp !== '' || id_OperadorTemp !== null || id_OperadorTemp !== undefined){
-        //todo: LLENAMOS TODOS LOS ARREGLO CON EL ID_OPERADOR DEL API
-        setDireccion({...direccion, id_Operador: id_OperadorTemp});
-        setTelefono({...telefono, id_Operador: id_OperadorTemp});
-        setContacto({...contacto, id_Operador: id_OperadorTemp});
-
-        //todo: INSERT DE DIRECCION, TELEFONO, CONTACTO DE EMERGENCIA
-        createrDireccion = await callEndpoint(insertDireccion(direccion));
-        createrTelefono = await callEndpoint(insertTelefono(telefono));
-        createrContacto = await callEndpoint(insertContacto(contacto));
 
         //todo: CREAMOS EL REGISTRO DE LOS DOCUMENTOS
         createrDocuments = await callEndpoint(uploadFilesOperador(documentos, id_OperadorTemp));
@@ -341,11 +332,48 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
         let DocumentoId = createrDocuments.data.data.id_Documento;
         updaterDocuments = await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
 
+        //todo: LLENAMOS TODOS LOS ARREGLO CON EL ID_OPERADOR DEL API
+        setDireccion({...direccion, id_Operador: id_OperadorTemp});
+        setTelefono({...telefono, id_Operador: id_OperadorTemp});
+        setContacto({...contacto, id_Operador: id_OperadorTemp});
+
+        //todo: INSERT DE DIRECCION, TELEFONO, CONTACTO DE EMERGENCIA
+        //createrDireccion = await callEndpoint(insertDireccion(direccion));
+        //createrTelefono = await callEndpoint(insertTelefono(telefono));
+        //createrContacto = await callEndpoint(insertContacto(contacto));
+
         // * Retornamos boolean de respuesta
         returnFormOperador(true);
       }else{ returnFormOperador(false); }
     } catch (error) { returnFormOperador(false); }
   }
+
+  //todo: Generamos los POST de Dirección, Telefono, Contacto del Operador nuevo
+  useEffect( () => {
+    const postDireccion = async() => {
+      let createrDireccion = await callEndpoint(insertDireccion(direccion));
+      console.log(createrDireccion);
+    }
+    postDireccion();
+  },[direccion.id_Operador]);
+
+
+  useEffect(() => {
+    const postTelefono = async() => {
+      let createrTelefono = await callEndpoint(insertTelefono(telefono));
+      console.log(createrTelefono);
+    }
+    postTelefono();
+  },[telefono.id_Operador]);
+
+  useEffect(() => {
+    const postContacto = async() => {
+      let createrContacto = await callEndpoint(insertContacto(contacto));
+      console.log(createrContacto);
+    }
+    postContacto();
+  },[contacto.id_Operador]);
+
 
   const HandleEditSubmit = async (e: any) => {
     e.preventDefault();

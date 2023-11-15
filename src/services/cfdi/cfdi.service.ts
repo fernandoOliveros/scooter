@@ -1,6 +1,37 @@
 import axios from "axios";
 import baseUrl from "../../utils/base-url.utils"
 import loadAbort from "../../utils/load-abort.util";
+import { ICfdiForm, IProducServicioCfdiForm } from "../../models/cfdis/cfdi-form.model";
+
+
+export const createCfdiGeneral = (data: ICfdiForm) => {
+    const controller = loadAbort(); //Opcion para cancelar solicitud
+    let uri = baseUrl + "cfdi/create";
+    return {
+        call: axios.post(uri, data, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const createServicesCfdi = (idCfdi: string, productos: IProducServicioCfdiForm) => {
+    const controller = loadAbort(); //Opcion para cancelar solicitud
+    let uri = baseUrl + "prodServCFDI/create";
+    productos.id_CFDI = Number(idCfdi);
+    console.log(productos);
+    return {
+        call: axios.post(uri, productos, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const createXmlCfdi = (idCfdi: string) => {
+    const controller = loadAbort(); //Opcion para cancelar solicitud
+    let uri = baseUrl + "cfdi/create/" + idCfdi;
+    return {
+        call: axios.get(uri, {signal: controller.signal}),
+        controller
+    }
+}
 
 export const getCatTipoMonedas = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
@@ -19,7 +50,6 @@ export const getCatRegimenFiscal = () => {
         controller
     }
 }
-
 
 export const getCatFormaPago = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud

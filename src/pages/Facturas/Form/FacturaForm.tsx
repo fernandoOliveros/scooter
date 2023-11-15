@@ -1,6 +1,6 @@
 import { ChangeEvent, Fragment, useEffect, useState, ReactNode } from 'react'
 import { ICatMoneda, ICfdiForm, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, IProducServicioCfdiForm, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
-import { getCatTipoMonedas, getCatFormaPago, getCatMetodosPago, getCatProdServicioCFDI, getCatUnidadPesoCFDI, getCatUsoCFDI, getCatTipoImpuestos, getCatObjetoImpuesto, getCatTipoFactor } from '../../../services/cfdi/cfdi.service';
+import { getCatTipoMonedas, getCatFormaPago, getCatMetodosPago, getCatProdServicioCFDI, getCatUnidadPesoCFDI, getCatUsoCFDI, getCatTipoImpuestos, getCatObjetoImpuesto, getCatTipoFactor, createCfdiGeneral, createServicesCfdi, createXmlCfdi } from '../../../services/cfdi/cfdi.service';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
 import { ICliente } from '../../../models/clientes/cliente.model';
@@ -8,6 +8,7 @@ import { getClientesEmpresa } from '../../../services/clientes/clientes.service'
 import { Autocomplete, Button, TextField } from '@mui/material';
 import Swal from 'sweetalert2';
 import DialogShared from '../../../components/shared/DialogShared';
+import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 
 let ITipoComprobanteArray = [
   {
@@ -60,8 +61,8 @@ let catTasaCuotaJson: ITasaCuota[] = [
   }
 ];
 
-const ProductoServicioCfdiEmpty = {
-  id_ClaveProdServCFDI: null, dec_Cantidad: null, id_ClaveUnidadPeso: null, st_Descripcion: null, dec_ValorUnitario: null, dec_Importe: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, c_ImpuestoTraslado: null, c_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, st_TipoFactorTraslado: null, st_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
+const ProductoServicioCfdiEmpty: IProducServicioCfdiForm = {
+  id_CFDI: null, id_ClaveProdServCFDI: null, i_Cantidad: null, id_ClaveUnidadPesoCFDI: null, st_DescripcionConcepto: null, dec_ValorUnitarioConcepto: null, dec_ImporteConcepto: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, id_TipoFactorTraslado: null, id_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
 };
 
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -70,11 +71,13 @@ function FacturaForm() {
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
 
+  const [open, setOpen] = useState<boolean>(false);
+
   // todo: Arreglo para Producto servicio CFDI
   const [ arrServicioCfdi, setArrServicioCfdi] = useState<IProducServicioCfdiForm[]>([]);
 
   //todo _variables globales
-  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
+  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : 1, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
 
   //string global para tipo de comprobante
   const [tipoComprobante, setTipoComprobante] = useState<string>("");
@@ -116,27 +119,33 @@ function FacturaForm() {
   const [selectTipoFactorRetencion, setSelectTipoFactorRetencion] = useState<ITipoFactor | null>(null);
   const [selectTasaCuotaRetencion, setSelectTasaCuotaRetencion] = useState<ITasaCuota | null>(null);
 
+  //todo: Custom Hooks
+  const { callEndpoint } = useFetchAndLoad();
+
   //todo: Funcion para calcular el importe del producto / servicio cfdi
   const ImporteCalculate = () => {
     //todo: importe antes de descuento
     let importe: number;
     //todo: importe si se aplica descuento sino toma el valor del importe normal
     let importeWithDescuento: number;
-    if(productoServicioCfdi.dec_ValorUnitario !== null && productoServicioCfdi.dec_Cantidad !== null ){
-      importe = productoServicioCfdi.dec_ValorUnitario * productoServicioCfdi.dec_Cantidad;
+    if(productoServicioCfdi.dec_ValorUnitarioConcepto !== null && productoServicioCfdi.i_Cantidad !== null ){
+      importe = productoServicioCfdi.dec_ValorUnitarioConcepto * productoServicioCfdi.i_Cantidad;
       importeWithDescuento = (productoServicioCfdi.dec_Descuento !== null ) 
-      ? (importe - productoServicioCfdi.dec_Descuento) 
+      ? (importe - productoServicioCfdi.dec_Descuento)
       : importe;
-      setProductoServicioCfdi({...productoServicioCfdi, dec_Importe: importeWithDescuento});
+      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteConcepto: importeWithDescuento});
     }
   }
-  // seteamos la basde traslado y retención cuando cambia el importe del producto / servicio del cfdi
+  //todo: seteamos la base traslado y retención cuando cambia el importe del producto / servicio del cfdi
   useEffect(()=>{
-    setProductoServicioCfdi({...productoServicioCfdi, 
-      dec_BaseTraslado: productoServicioCfdi.dec_Importe, 
-      dec_BaseRetencion: productoServicioCfdi.dec_Importe
-    });
-  },[productoServicioCfdi.dec_Importe]);
+    // ? validamos si el objeto de impuesto es con detalle que guarde el base Trasldo y Retención
+    if(selectObjetoImpuesto?.id_ObjetoImp === 2){
+      setProductoServicioCfdi({...productoServicioCfdi, 
+        dec_BaseTraslado: productoServicioCfdi.dec_ImporteConcepto, 
+        dec_BaseRetencion: productoServicioCfdi.dec_ImporteConcepto
+      });
+    }
+  },[productoServicioCfdi.dec_ImporteConcepto]);
   
   // todo: FUNCION INICIAL PARA CARGAR SERVICIOS PARA LOS AUTOCOMPLETE'S
   useEffect(() => {
@@ -311,7 +320,7 @@ function FacturaForm() {
 
   //todo: Effect para select cat - productoServicio CFDI
   useEffect(()=>{
-    setProductoServicioCfdi({...productoServicioCfdi, id_ClaveUnidadPeso: (selectUnidadPesoCfdi !== null) ? selectUnidadPesoCfdi.id_ClaveUnidadPesoCFDI : null });
+    setProductoServicioCfdi({...productoServicioCfdi, id_ClaveUnidadPesoCFDI: (selectUnidadPesoCfdi !== null) ? selectUnidadPesoCfdi.id_ClaveUnidadPesoCFDI : null });
   },[selectUnidadPesoCfdi]);
 
   //todo: Effect para select cat- Objeto de impuesto
@@ -331,17 +340,17 @@ function FacturaForm() {
   },[productoServicioCfdi.id_ObjetoImp]);
 
   //todo:Effect para calcular el importe si cambian los campos: valor Unitarios, descuento, cantidad
-  useEffect(()=> ImporteCalculate(), [productoServicioCfdi.dec_ValorUnitario, productoServicioCfdi.dec_Descuento, productoServicioCfdi.dec_Cantidad]);
+  useEffect(()=> ImporteCalculate(), [productoServicioCfdi.dec_ValorUnitarioConcepto, productoServicioCfdi.dec_Descuento, productoServicioCfdi.i_Cantidad]);
 
   /* ================== AREA DE SELECT DE IMPUESTOS TRASLADOS =========================== */
   //todo:Effect para select cat - Tipo Impuesto traslado
   useEffect(() => {
-    setProductoServicioCfdi({...productoServicioCfdi, c_ImpuestoTraslado: (selectTipoImpuestosTraslado !== null) ? selectTipoImpuestosTraslado.c_Impuesto : null});
+    setProductoServicioCfdi({...productoServicioCfdi, id_ImpuestoTraslado: (selectTipoImpuestosTraslado !== null) ? selectTipoImpuestosTraslado.id_Impuesto : null});
   },[selectTipoImpuestosTraslado]);
 
   //todo:Effect para select cat - Tipo Factor Traslado
   useEffect(() => {
-    setProductoServicioCfdi({...productoServicioCfdi, st_TipoFactorTraslado: (selectTipoFactorTraslado !== null) ? selectTipoFactorTraslado.c_TipoFactor : null});
+    setProductoServicioCfdi({...productoServicioCfdi, id_TipoFactorTraslado: (selectTipoFactorTraslado !== null) ? selectTipoFactorTraslado.id_TipoFactor : null});
   },[selectTipoFactorTraslado]);
 
   //todo: Effect para select Tasa Cuota Traslado
@@ -365,12 +374,12 @@ function FacturaForm() {
 
   //todo:Effect para select cat - Tipo Impuesto retención
   useEffect(() => {
-    setProductoServicioCfdi({...productoServicioCfdi, c_ImpuestoRetencion: (selectTipoImpuestosRetencion !== null) ? selectTipoImpuestosRetencion.c_Impuesto : null});
+    setProductoServicioCfdi({...productoServicioCfdi, id_ImpuestoRetencion: (selectTipoImpuestosRetencion !== null) ? selectTipoImpuestosRetencion.id_Impuesto : null});
   },[selectTipoImpuestosRetencion]);
 
   //todo:Effect para select cat - Tipo Factor Traslado
   useEffect(() => {
-    setProductoServicioCfdi({...productoServicioCfdi, st_TipoFactorRetencion: (selectTipoFactorRetencion !== null) ? selectTipoFactorRetencion.c_TipoFactor : null});
+    setProductoServicioCfdi({...productoServicioCfdi, id_TipoFactorRetencion: (selectTipoFactorRetencion !== null) ? selectTipoFactorRetencion.id_TipoFactor : null});
   },[selectTipoFactorRetencion]);
 
   //todo: Effect para select Tasa Cuota Traslado
@@ -392,15 +401,15 @@ function FacturaForm() {
 
   /* ================ VALIDACIONES PARA EL FORMULARIO ===============================*/
   useEffect(()=> {
-    if( productoServicioCfdi?.dec_Importe!== null && productoServicioCfdi?.dec_Importe <= 0){
+    if( productoServicioCfdi?.dec_ImporteConcepto!== null && productoServicioCfdi?.dec_ImporteConcepto <= 0){
       cleanFieldNumber(); // * Limpiamos campos numéricos
       Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'El importe no puede ser un número negativo, verifica la cantidad, y el valor unitario del servicio de la factura', showConfirmButton: true });
     }
-  },[productoServicioCfdi.dec_Importe]);
+  },[productoServicioCfdi.dec_ImporteConcepto]);
 
   //todo: Función para limpiar campos de traslados, retención y descuento por error de numeros negativos
   const cleanFieldNumber = () => {
-    setProductoServicioCfdi({...productoServicioCfdi, dec_BaseTraslado: null, dec_BaseRetencion: null, c_ImpuestoTraslado: null, c_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null, dec_Descuento: null});
+    setProductoServicioCfdi({...productoServicioCfdi, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null, dec_Descuento: null});
   }
 
   //todo: 
@@ -423,11 +432,65 @@ function FacturaForm() {
     setProductoServicioCfdi(ProductoServicioCfdiEmpty);
     cleanSelectCat();
   }
-  const saveCfdi = () => {
-    console.log(cfdiForm);
-    console.log(arrServicioCfdi);
+  const calculateSubAndTotal = () => {
+    let retenciones: number = 0;
+    let traslados: number = 0;
+    let importesBeforeTaxes: number = 0;
+
+    // iteramos los productos/servicios de la factura
+    arrServicioCfdi.forEach(element => {
+      retenciones += (element.dec_ImporteRetencion !== null) ? Number(element.dec_ImporteRetencion) :  0;
+      traslados += (element.dec_ImporteTraslado !== null) ? Number(element.dec_ImporteTraslado) :  0;
+      importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? Number(element.dec_ImporteConcepto) :  0;
+    });
+
+    let subTotal: number;
+    let total: number;
+
+    //Actualizamos total subtotal
+    if(cfdiForm.dec_SubTotal !== null && cfdiForm.dec_Total !== null){
+      subTotal = cfdiForm.dec_SubTotal + importesBeforeTaxes;
+      total = cfdiForm.dec_Total + ((subTotal + traslados) - retenciones);
+    }else{
+      subTotal = importesBeforeTaxes;
+      total = (subTotal + traslados) - retenciones;
+    }
+
+    // Actualizamos subtotal y total
+    setCfdiForm({...cfdiForm, dec_SubTotal: subTotal, dec_Total: total});
   }
-  const [open, setOpen] = useState<boolean>(false);
+
+  const generateCFDI = async() => {
+    try {
+      //todo: creamos el cfdi general
+      let result = await callEndpoint(createCfdiGeneral(cfdiForm));
+      console.log(result.data);
+
+      //guardamos temporalmente el id_Cfdi
+      let idCfdi = result.data.data.id_CFDI.toString();
+      console.log(idCfdi);
+
+      let result_productos: any;  
+      //todo: Guardamos producto / servicio del cfdi
+      arrServicioCfdi.forEach( async (element) => {
+        result_productos = await callEndpoint(createServicesCfdi(idCfdi, element));
+      });
+
+      //todo: Generamos el XML
+      let xml = await callEndpoint(createXmlCfdi(idCfdi));
+      console.log(xml);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  //todo: generamod el CFDI general
+  useEffect(() => {
+    if(cfdiForm.dec_Total !== null && cfdiForm.dec_SubTotal !== null){
+      generateCFDI();
+    }
+  },[cfdiForm.dec_Total, cfdiForm.dec_SubTotal]);
+  
   return (
     <Fragment>
       <DialogShared open={open} children={<ProductosFacturasView productos={arrServicioCfdi} />} returnCloseDialog={ (e) => setOpen(e)} />
@@ -528,7 +591,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField onChange={onChangeFormPoductoServicio} id='dec_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1}} name="dec_Cantidad" value={productoServicioCfdi.dec_Cantidad || ''} required/>
+                  <TextField onChange={onChangeFormPoductoServicio} id='i_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1}} name="i_Cantidad" value={productoServicioCfdi.i_Cantidad || ''} required/>
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -545,7 +608,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-8 col-lg-8 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField size='medium' fullWidth onChange={onChangeFormPoductoServicio} id='st_Descripcion' className="form-control" variant="outlined" label="Descripción"  type="text" inputProps={{ autoComplete: "off" }} name="st_Descripcion" value={productoServicioCfdi.st_Descripcion || ''} />
+                  <TextField size='medium' fullWidth onChange={onChangeFormPoductoServicio} id='st_DescripcionConcepto' className="form-control" variant="outlined" label="Descripción"  type="text" inputProps={{ autoComplete: "off" }} name="st_DescripcionConcepto" value={productoServicioCfdi.st_DescripcionConcepto || ''} />
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -562,8 +625,8 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitario' className="form-control" variant="outlined" label="Precio Unitario"  type="number" 
-                  inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitario" value={productoServicioCfdi.dec_ValorUnitario || ''} required/>
+                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Precio Unitario"  type="number" 
+                  inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitarioConcepto" value={productoServicioCfdi.dec_ValorUnitarioConcepto || ''} required/>
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -573,7 +636,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField fullWidth  id='dec_ValorUnitario'  name="dec_ValorUnitario" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1, readOnly: true}} value={productoServicioCfdi.dec_Importe || ''} required/>
+                  <TextField fullWidth  id='dec_ValorUnitarioConcepto'  name="dec_ValorUnitarioConcepto" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1, readOnly: true}} value={productoServicioCfdi.dec_ImporteConcepto || ''} required/>
                 </div>
               </div>
             </div>
@@ -695,7 +758,7 @@ function FacturaForm() {
           <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12 mt-5">
             {
               arrServicioCfdi.length > 0 ? (
-                <Button onClick={saveCfdi} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> Crear Factura</Button>                  
+                <Button onClick={calculateSubAndTotal} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> Crear Factura</Button>                  
               ): void(0)
             }
           </div>
@@ -735,9 +798,9 @@ export const ProductosFacturasView = ({ productos }: ProductosProps): ReactNode 
               <tr>
                 <td>{++index}</td>
                 <td>{item.id_ClaveProdServCFDI}</td>
-                <td>{item.dec_Cantidad}</td>
-                <td>{item.dec_ValorUnitario}</td>
-                <td>{item.st_Descripcion}</td>
+                <td>{item.i_Cantidad}</td>
+                <td>{item.dec_ValorUnitarioConcepto}</td>
+                <td>{item.st_DescripcionConcepto}</td>
                 <td><Button onClick={() => returnIdDelete(index)}  variant='contained' color='error' size='medium' type="button"> Borrar Producto</Button></td>
               </tr>
             ))
