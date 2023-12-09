@@ -36,6 +36,16 @@ export const getTipoUnidad = () => {
     }
 }
 
+export const getAseguradoras = () => {
+    const controller = loadAbort();
+    //Peticion
+    const urlGet = baseUrl + "catalogos/readAseguradora";
+    return {
+        call: axios.get(urlGet, {signal: controller.signal}),
+        controller
+    }
+}
+
 export const getTipoRemolque = () => {
     const controller = loadAbort();
     const urlGet = baseUrl + "remolques/readTypes";

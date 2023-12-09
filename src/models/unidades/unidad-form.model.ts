@@ -14,4 +14,5 @@ export interface IUnidadForm{
     id_Empresa: number |  null,
     id_Candado: number,
     id_TipoPermiso: number | null;
+    id_AseguradoraRespCivil: number | null;
 }

@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { ITipoUnidad } from '../../../models/shared/tipo-unidad.model';
-import { getTipoPermisoSct, getTipoUnidad } from '../../../services/public.service';
+import { getAseguradoras, getTipoPermisoSct, getTipoUnidad } from '../../../services/public.service';
 import { IUnidadForm } from '../../../models/unidades/unidad-form.model';
 import { IUnidadDocumentos } from '../../../models/unidades/unidad-docs.model';
 import { ITipoPermiso } from '../../../models/unidades/unidad.tipo.permiso.model';
@@ -10,6 +10,7 @@ import { Autocomplete, Button, TextField } from '@mui/material';
 import {createUnidad, editUnidad, getIdUnidad, updateFilesUnidad, uploadFilesUnidad} from '../../../services/unidades/unidades.service';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 import ViewDocuments from '../Documents/ViewDocuments';
+import { IAseguradoras } from '../../../models/shared/aseguradoras.model';
 
 //todo: interfaz de Props
 export interface Props {
@@ -23,24 +24,30 @@ const MAX_FILE_SIZE = 5002400;
 const nameDocumentsUnidad = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
 const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
-  console.log("Render Unidades Form");
   //Variables globales
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
   const [load, setLoad] = useState<boolean>(false);
   const [idDocumento, setIdDocumento] = useState<number>(0);
 
+  //Service to get Specific Unidad
+  const loadSpecificUnidad = getIdUnidad(id_Unidad);
+  const loadTipoUnidades = getTipoUnidad();
+  const loadTipoPermisoSct = getTipoPermisoSct();
+
   // todo: Formulario
-  const [unidadForm, setUnidadForm] = useState<IUnidadForm>({st_Marca: '', st_SubMarca:'', id_TipoUnidad: 0, st_PermisoSCT: '', st_Economico: '', st_Placa: '', st_Anio: '', st_NumMotor: '', st_NumSerie: '', st_NumPoliza: '', date_Mecanico:  null, date_Ecologico: null, id_Empresa: id_Empresa, id_Candado: 1, id_TipoPermiso: null});
+  const [unidadForm, setUnidadForm] = useState<IUnidadForm>({st_Marca: '', st_SubMarca:'', id_TipoUnidad: 0, st_PermisoSCT: '', st_Economico: '', st_Placa: '', st_Anio: '', st_NumMotor: '', st_NumSerie: '', st_NumPoliza: '', date_Mecanico:  null, date_Ecologico: null, id_Empresa: id_Empresa, id_Candado: 1, id_TipoPermiso: null, id_AseguradoraRespCivil: null});
   const [documentos, setDocumentos] = useState<IUnidadDocumentos>({url_TarjetaCirculacion: '', url_Factura: '', url_PermisoSCT: ''});
 
   //todo: select - catálogos
   const [selectTipoUnidad, setSelectTipoUnidad] = useState<ITipoUnidad | null>(null);
   const [selectTipoPermiso, setSelectTipoPermiso] = useState<ITipoPermiso | null>(null);
+  const [selectAseguradora, setSelectAseguradora] = useState<IAseguradoras | null>(null);
 
   //todo: Catálogos
   const [ tipoUnidades, setTipoUnidades] = useState<ITipoUnidad[]>([]);
   const [ tipoPermisosSct, setTipoPermisosSCT] = useState<ITipoPermiso[]>([]);
+  const [ aseguradoras, setAseguradoras] = useState<IAseguradoras[]>([]);
 
   //todo: Custom Hooks
   const { callEndpoint } = useFetchAndLoad();
@@ -59,6 +66,7 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
     //services
     const apiTipoUnidades = getTipoUnidad();
     const apiTipoPermiso = getTipoPermisoSct();
+    const apiAseguradoras = getAseguradoras();
 
     const catTipoUnidades = async () => {
       let result = await apiTipoUnidades.call
@@ -76,24 +84,30 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
       }
     }
 
+    const catAseguradoras = async () => {
+      let result = await apiAseguradoras.call
+      if(result.data.success){
+        let response = result.data;
+        setAseguradoras( response.data );
+      }
+    }
+
     //llamamos las funciones
     catTipoUnidades();
     catTipoPermisoSct();
+    catAseguradoras();
 
     //destruccción de componente
     return () => {
       apiTipoUnidades.controller.abort();
       apiTipoPermiso.controller.abort();
+      apiAseguradoras.controller.abort();
     }
   },[]);
 
   //Se ejecuta solo cuando el id_Unidad cambia
   useEffect(() => {
     console.log("effect para editar unidad");
-    //Service to get Specific Unidad
-    const loadSpecificUnidad = getIdUnidad(id_Unidad);
-    const loadTipoUnidades = getTipoUnidad();
-    const loadTipoPermisoSct = getTipoPermisoSct();
 
     const getUnidadWithId = async () => {
       try {
@@ -103,7 +117,7 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
           const validateEmpresa = validateUnidadEmpresa(dataUnidad.id_Empresa);
           if(validateEmpresa){
             setIdDocumento(dataUnidad.id_Documento);
-            const arregloUnidad = {
+            const arregloUnidad  = {
               st_Marca: dataUnidad.st_Marca, 
               st_SubMarca:dataUnidad.st_SubMarca,
               id_TipoUnidad: dataUnidad.id_TipoUnidad, 
@@ -118,7 +132,8 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
               date_Ecologico: dataUnidad.date_Ecologico, 
               id_Empresa: dataUnidad.id_Empresa, 
               id_Candado: dataUnidad.id_Candado,
-              id_TipoPermiso: dataUnidad.id_TipoPermiso
+              id_TipoPermiso: dataUnidad.id_TipoPermiso,
+              id_AseguradoraRespCivil: dataUnidad.id_AseguradoraRespCivil
             };
             getSelectTipoUnidad(arregloUnidad.id_TipoUnidad);
             getSelectTipoPermisoSct(dataUnidad.id_TipoPermiso);
@@ -131,6 +146,7 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
         }
       } catch (error) {
         alert("Error al recuperar la información de la unidad");
+        
       }
     }
 
@@ -176,14 +192,19 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
     }
   }
 
-  //todo: Change Tipo Permiso
+  //todo: Change <AutoComplete />
   useEffect(()=>{
-    setUnidadForm({...unidadForm, id_TipoPermiso: (selectTipoPermiso !== null) ? selectTipoPermiso.id_TipoPermiso : null});
+    setUnidadForm({...unidadForm, id_TipoPermiso: (selectTipoPermiso !== null) ? selectTipoPermiso.id_TipoPermiso : null });
   },[selectTipoPermiso]);
 
   useEffect(() => {
-    setUnidadForm({...unidadForm, id_TipoUnidad: (selectTipoUnidad !== null) ? selectTipoUnidad.id_TipoUnidad : null});
+    setUnidadForm({...unidadForm, id_TipoUnidad: (selectTipoUnidad !== null) ? selectTipoUnidad.id_TipoUnidad : null });
   },[selectTipoUnidad]);
+
+  useEffect( () => {
+    setUnidadForm({...unidadForm, id_AseguradoraRespCivil: (selectAseguradora !== null) ? selectAseguradora.id_Aseguradora : null });
+  },[selectAseguradora]);
+
  
   const onSubmit = async (e: any) => {
     e.preventDefault();
@@ -268,11 +289,6 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
                   <TextField id='st_NumSerie' className="form-control" variant="outlined" label="Número de Serie"  type="text" name="st_NumSerie" onChange={onChangeUnidadForm} value={unidadForm.st_NumSerie || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
             </div>
-            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-              <div className="form-group">
-                  <TextField id='st_NumPoliza' className="form-control" variant="outlined" label="Número de Póliza"  type="text" name="st_NumPoliza" onChange={onChangeUnidadForm} value={unidadForm.st_NumPoliza || ''} inputProps={{ autoComplete: "off" }} required/>
-              </div>
-            </div>
             <div className='col-md-4 col-lg-4 col-sm-12 col-xs-12'>
               <div className="form-group">
                 <Autocomplete
@@ -298,6 +314,25 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
               <div className="form-group">
                   <TextField fullWidth id="date_Ecologico" name="date_Ecologico" label="Fecha de Ventimiento Ecológica" InputLabelProps={{ shrink: true }} type="date" onChange={onChangeUnidadForm} value={unidadForm.date_Ecologico || ''}  inputProps={{ autoComplete: "off" }} required/>
+              </div>
+            </div>
+          </div>
+          <h4 className="card-title">Información General de la Unidad</h4>
+          <hr></hr>
+          <div className="row">
+            <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+              <Autocomplete
+                value={selectAseguradora}
+                options={aseguradoras}
+                onChange={(_option, value) => setSelectAseguradora(value)}
+                getOptionLabel={(option) => option.st_NombreAseguradora}
+                isOptionEqualToValue={(option, value) => option.id_Aseguradora=== value.id_Aseguradora}
+                renderInput={(params) => <TextField {...params} label="Selecciona una aseguradora" variant="outlined" />}
+              />
+            </div>
+            <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+              <div className="form-group">
+                  <TextField id='st_NumPoliza' className="form-control" variant="outlined" label="Número de Póliza"  type="text" name="st_NumPoliza" onChange={onChangeUnidadForm} value={unidadForm.st_NumPoliza || ''} inputProps={{ autoComplete: "off" }} required/>
               </div>
             </div>
           </div>

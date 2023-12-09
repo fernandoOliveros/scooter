@@ -16,7 +16,6 @@ const Viajes = () => {
     //todo: Inital function
     useEffect(() => {
         const loadViajes = getViajesEmpresa(userState.user.id_Empresa);
-
         const getViajes = async () => {
             let response = await loadViajes.call;
             console.log(response.data.data);
@@ -34,8 +33,8 @@ const Viajes = () => {
     }
 
     const colums: GridColDef[] = [
-        { field: 'folio_int_viaje', headerName: 'Folio viaje'},
-        { field: 'i_km_totales', headerName: 'KM Recorridos', sortable: false},
+        { field: 'folio_int_viaje', headerName: 'Folio viaje', width: 200,},
+        { field: 'i_km_totales', headerName: 'KM Recorridos', width: 200, sortable: false},
         { field: 'createdAt', headerName: 'Creado', width: 200,
             valueGetter: (params: GridValueGetterParams) => formatDate(params.row.createdAt),
             sortable: true
@@ -67,21 +66,15 @@ const Viajes = () => {
                 </div>
             </div>
             <div className='card'>
-                <div className='card-body'>
-                    <div className='row'>
+                <div className="card-body">
+                    <div className="row" >
                         <div className='col-md-5 col-sm-12 col-xs-12'>
                             <h4 className="card-title">Viajes Registrados</h4>
                         </div>
                         <div className='col-md-7 col-sm-12 col-xs-12 text-end'>
                             <button className="btn btn-primary btn-rounded" type="button"><i className="fa fa-plus-circle"></i> Viaje</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div className='card'>
-                <div className="card-body">
-                    <div className="row" >
-                        <div className="col-12">
+                        <div className="col-12 mt-3">
                             <DataGrid
                                 autoHeight 
                                 columns={colums}

@@ -444,6 +444,7 @@ function FacturaForm() {
       importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? Number(element.dec_ImporteConcepto) :  0;
     });
 
+    //todo: Variables para 
     let subTotal: number;
     let total: number;
 

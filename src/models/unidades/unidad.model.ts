@@ -15,4 +15,5 @@ export interface UnidadModel {
     date_Mecanico?: Date;
     date_Ecologico?: Date;
     st_DescripcionCandado: string;
+    id_AseguradoraRespCivil: number;
 }
