@@ -113,7 +113,7 @@ function DirOrigenForm({retornaOrigen, retornaVerOrigenes}: Props) {
 
   const guardarOrigen = (e: any) => {
     e.preventDefault();
-    selectColonia(null);
+    setSelectColonia(null);
     retornaOrigen(origen);
     setFormDireccion(FormHtmlDireccion);
     setOrigen(ArrOrigenEmpty)
