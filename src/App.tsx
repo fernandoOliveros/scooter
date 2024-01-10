@@ -82,8 +82,6 @@ function App() {
           {/* FACTURAS */}
           <Route path={PrivateRoutes.factura} element={<FacturasScreen />}/>
           <Route path={PrivateRoutes.newFactura} element={<CreateFactura />}/>
-
-
         </Route>
       </Routes>
     </Suspense>

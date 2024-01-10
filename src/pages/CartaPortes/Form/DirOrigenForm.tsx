@@ -13,7 +13,7 @@ export interface Props {
 }
 
 //todo: Arreglo para variables globales
-let ArrOrigenEmpty = { id_Estado: null, id_Localidad: null, id_Municipio:  null, id_Colonia: null, st_Calle : '', st_NoExterior : '', st_NoInterior : 'S/N', st_RefDomicilio : '', st_RemitenteNombre : '', date_FechaSalida: null, st_RemitenteRFC : '', c_codigoPostal : '', TipoUbicacion: 'Origen'};
+let ArrOrigenEmpty = { id_Estado: null, id_Localidad: null, id_Municipio:  null, id_Colonia: null, st_Calle : '', st_NoExterior : '', st_NoInterior : 'S/N', st_RefDomicilio : '', st_RemitenteNombre : '', date_FechaSalida: null, st_RemitenteRFC : '', c_codigoPostal : ''};
 let FormHtmlDireccion = {st_Colonia: '', st_Municipio: '', st_Localidad:'', st_Estado: ''};
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
@@ -192,7 +192,7 @@ function DirOrigenForm({retornaOrigen, retornaVerOrigenes}: Props) {
                   <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia"  type="text" name="st_RefDomicilio" onChange={onChangeOrigen} value={origen.st_RefDomicilio || ''} inputProps={{ autoComplete: "off"}} required/>
               </div>
           </div>
-          <div className="col-12 text-end">
+          <div className="col-12">
               <Button variant='contained' color='success' onClick={guardarOrigen}>Guardar Origen</Button>
           </div>
       </div>

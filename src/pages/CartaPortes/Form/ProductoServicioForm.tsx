@@ -9,17 +9,21 @@ import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 import Swal from 'sweetalert2';
 
 export interface Props {
-  retornaProducto: (producto: ICartaPorteProductoServicioForm) => void
+  retornaProducto: (producto: ICartaPorteProductoServicioForm) => void,
+  retornaVerProductos: (item: boolean) => void,
 }
 
 //todo: json iniciales
 let productoServicioEmpty: ICartaPorteProductoServicioForm = {
   id_ClaveProducto: null,
-  PesoEnKg: 1,
-  Cantidad: 1,
-  id_ClaveUnidadPeso:null,
-  deci_ValoeUnitario: 1,
-  MaterialPeligroso: "No",
+  id_ClaveUnidadPeso: null,
+  dec_PesoEnKg: 1,
+  i_Cantidad: 1,
+  st_Descripcion: '',
+  st_Dimensiones: null,
+  id_DirDestinoCP: null,
+  id_DirOrigenCP: null,
+  i_MaterialPeligroso: 0,
   id_MaterialesPeligrosos: null,
   id_TipoEmbalaje: null
 }
@@ -32,7 +36,7 @@ type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTM
 
 type enterKey = KeyboardEvent<HTMLInputElement>;
 
-function ProductoServicioForm({retornaProducto}: Props) {
+function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
 
   //todo: Custom Hooks to control http request
   const { callEndpoint } = useFetchAndLoad();
@@ -105,9 +109,9 @@ function ProductoServicioForm({retornaProducto}: Props) {
   // todo: SE EJECUTA CADA VEZ QUE MOVEMOS EL SWITCH DE MATERIAL PELIGROSO O EL MATERIAL ES FORZOSO PELIGROSO
   useEffect(() => {
     if(isPeligroso){
-      setProductoServicio({...productoServicio, MaterialPeligroso: 'Si'});
+      setProductoServicio({...productoServicio, i_MaterialPeligroso: 1});
     }else{
-      setProductoServicio({...productoServicio, MaterialPeligroso: 'No'});
+      setProductoServicio({...productoServicio, i_MaterialPeligroso: 0});
     }
   },[isPeligroso]);
 
@@ -189,7 +193,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
 
   const handleSabeProductoServicio = (e: any) => {
     e.preventDefault();
-    if(productoServicio.MaterialPeligroso === 'Si' && 
+    if(productoServicio.i_MaterialPeligroso === 1 && 
       ( productoServicio.id_MaterialesPeligrosos === null || productoServicio.id_TipoEmbalaje === null ) &&
       ( matPeligroso.id_MaterialesPeligrosos === null || matPeligroso.id_TipoEmbalaje === null )
     ){
@@ -211,7 +215,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
   return (
     <Fragment>
       <h4 className="card-title mt-5">Bienes Transportado (registrados: 0)</h4>
-      <Button variant='contained' startIcon={<VisibilityIcon />} size='small'>Mostrar bienes transportados</Button>
+      <Button variant='contained' onClick={() => retornaVerProductos(true) } startIcon={<VisibilityIcon />} size='small'>Mostrar bienes transportados</Button>
       <hr></hr>
       <div className='row'>
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
@@ -230,22 +234,6 @@ function ProductoServicioForm({retornaProducto}: Props) {
             />
           </div>
         </div>
-        {
-          // ? Validamos que el el material sea: "0,1"
-          selectProducto !== null && selectProducto.st_MaterialPeligroso.search(",") !== -1 ?
-          (
-            <div className="col-md-2 col-lg-2 col-sm-12 col-xs-12">
-              <div className="form-group">
-              <FormControlLabel control={ <Switch value={isPeligroso} onChange={ () => setIsPeligroso(!isPeligroso)} />} label="Material Peligroso" />
-              </div>
-            </div>
-          ) : void(0)
-        }
-        <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
-          <div className="form-group">
-          <TextField id='PesoEnKg' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Peso en KG"  type="number" inputProps={{ autoComplete: "off", min: 1}} name="PesoEnKg" value={productoServicio.PesoEnKg || ''} required/>
-          </div>
-        </div>
         <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
             <Autocomplete
@@ -259,15 +247,36 @@ function ProductoServicioForm({retornaProducto}: Props) {
         </div>
         <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
-          <TextField id='Cantidad' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Cantidad"  type="number" name="Cantidad" value={productoServicio.Cantidad || ''} inputProps={{ autoComplete: "off", min: 1 }} required/>
+            <TextField id='i_Cantidad' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Cantidad"  type="number" name="i_Cantidad" value={productoServicio.i_Cantidad || ''} inputProps={{ autoComplete: "off", min: 1 }} required/>
           </div>
         </div>
         <div className="col-md-3 col-lg-3 col-sm-12 col-xs-12">
           <div className="form-group">
-          <TextField id='deci_ValoeUnitario' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Valor de la mercancia"  type="number" name="deci_ValoeUnitario" value={productoServicio.deci_ValoeUnitario || ''} inputProps={{ autoComplete: "off", min: 1}} required/>
+          <TextField id='dec_PesoEnKg' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Peso en KG"  type="number" inputProps={{ autoComplete: "off", min: 1}} name="dec_PesoEnKg" value={productoServicio.dec_PesoEnKg || ''} required/>
+          </div>
+        </div>
+        <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField multiline rows={3} id='st_Descripcion' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Descripcion"  type="text" inputProps={{ autoComplete: "off"}} name="st_Descripcion" value={productoServicio.st_Descripcion || ''} />
+          </div>
+        </div>
+        <div className="col-md-6 col-lg-6 col-sm-12 col-xs-12">
+          <div className="form-group">
+          <TextField multiline rows={3} id='st_Dimensiones' onChange={onChangeFormProducto} className="form-control" variant="outlined" label="Dimensiones"  type="text" inputProps={{ autoComplete: "off"}} name="st_Dimensiones" value={productoServicio.st_Dimensiones || ''} />
           </div>
         </div>
       </div>
+      {
+          // ? Validamos que el el material sea: "0,1"
+          selectProducto !== null && selectProducto.st_MaterialPeligroso.search(",") !== -1 ?
+          (
+            <div className="row">
+              <div className="form-group">
+              <FormControlLabel control={ <Switch value={isPeligroso} onChange={ () => setIsPeligroso(!isPeligroso)} />} label="Material Peligroso" />
+              </div>
+            </div>
+          ) : void(0)
+        }
       {
           isPeligroso ? (
           <Fragment>
@@ -297,7 +306,7 @@ function ProductoServicioForm({retornaProducto}: Props) {
           </Fragment>
           ) : void(0)
         }
-        <div className="col-12 text-end">
+        <div className="col-12">
           <Button variant='contained' onClick={handleSabeProductoServicio} color='success'>Guardar producto</Button>
         </div>
     </Fragment>

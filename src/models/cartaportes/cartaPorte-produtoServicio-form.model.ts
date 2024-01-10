@@ -1,10 +1,13 @@
 export interface ICartaPorteProductoServicioForm {
     id_ClaveProducto: number | null;
-    PesoEnKg: number;
-    Cantidad: number;
-    deci_ValoeUnitario: number;
     id_ClaveUnidadPeso: number | null;
-    MaterialPeligroso: String;
+    dec_PesoEnKg: number;
+    i_Cantidad: number;
+    id_DirDestinoCP: number|  null;
+    id_DirOrigenCP: number | null;
+    st_Descripcion: string | null;
+    st_Dimensiones: string | null;
+    i_MaterialPeligroso: number;
     id_MaterialesPeligrosos: number | null;
     id_TipoEmbalaje: number | null;
 }

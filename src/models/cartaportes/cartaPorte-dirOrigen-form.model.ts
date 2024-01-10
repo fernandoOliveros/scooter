@@ -11,5 +11,4 @@ export interface ICartaPorteDirOrigenForm {
     date_FechaSalida: Date | null;
     st_RemitenteRFC : string;
     c_codigoPostal : string;
-    TipoUbicacion: string;
 }

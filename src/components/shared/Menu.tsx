@@ -14,7 +14,7 @@ import { resetUser }  from '../../redux/auth/authSlicer';
 const actions = [
     { icon: <LogoutIcon />, name: 'Cerrar Sesión' , id: 'salir'  },
     { icon: <ArchiveIcon />, name: 'Gastos', id: 'gastos' },
-    { icon: <ArticleIcon />, name: 'Carta Porte', id: 'cartaPorte' },
+    { icon: <ArticleIcon />, name: 'Facturación', id: 'facturas' },
     { icon: <TelegramIcon />, name: 'Viajes' , id: 'viajes' },
     { icon: <GroupIcon />, name: 'Operadores' , id: 'operadores'  },
     { icon: <LocalShippingIcon />, name: 'Remolques' , id: 'remolques'  },

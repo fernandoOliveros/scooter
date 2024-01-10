@@ -22,11 +22,14 @@ const ModalRemolque = lazy( () => import('../../../components/Remolques/DialogRe
 const ModalOperador = lazy( () => import('../../../components/Operadores/DialogOperador'));
 const ModalCliente = lazy( () => import('../../../components/Clientes/DialogCliente'));
 
+export interface Props {
+    returnFormCreateViaje: (success: boolean) => void
+}
 
 // todo: VARIABLES GLOBALES
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
-const ViajeForm = () => {
+const ViajeForm = ({returnFormCreateViaje}: Props) => {
     const TipoViaje = [{id_TipoViaje: 1, st_Descripcion: "Local"}, {id_TipoViaje: 2, st_Descripcion: "Foráneo"}];
 
     //todo: Variables globales
@@ -102,7 +105,6 @@ const ViajeForm = () => {
             const response = await loadLastFolio.call;
             let tmpId = response.data.data.id_latest_folio;
             setViajeForm({...viajeForm, folio_int_viaje: (tmpId !== null) ? tmpId + 1 : viajeForm.folio_int_viaje});
-            console.log(tmpId);
         }
 
         //Call Functions
@@ -234,9 +236,10 @@ const ViajeForm = () => {
     const onSubmit = async(e: any) => {
         e.preventDefault();
         try {
-            let serviceCreate = await callEndpoint(createViaje(viajeForm));
-            console.log(serviceCreate);
+            await callEndpoint(createViaje(viajeForm));
+            returnFormCreateViaje(true);
         } catch (error) {
+            returnFormCreateViaje(false)
             console.log(error);
         }
     }

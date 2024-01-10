@@ -30,11 +30,6 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
   const [load, setLoad] = useState<boolean>(false);
   const [idDocumento, setIdDocumento] = useState<number>(0);
 
-  //Service to get Specific Unidad
-  const loadSpecificUnidad = getIdUnidad(id_Unidad);
-  const loadTipoUnidades = getTipoUnidad();
-  const loadTipoPermisoSct = getTipoPermisoSct();
-
   // todo: Formulario
   const [unidadForm, setUnidadForm] = useState<IUnidadForm>({st_Marca: '', st_SubMarca:'', id_TipoUnidad: 0, st_PermisoSCT: '', st_Economico: '', st_Placa: '', st_Anio: '', st_NumMotor: '', st_NumSerie: '', st_NumPoliza: '', date_Mecanico:  null, date_Ecologico: null, id_Empresa: id_Empresa, id_Candado: 1, id_TipoPermiso: null, id_AseguradoraRespCivil: null});
   const [documentos, setDocumentos] = useState<IUnidadDocumentos>({url_TarjetaCirculacion: '', url_Factura: '', url_PermisoSCT: ''});
@@ -64,9 +59,9 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
   useEffect(() => {
     console.log("effect initial");
     //services
-    const apiTipoUnidades = getTipoUnidad();
-    const apiTipoPermiso = getTipoPermisoSct();
-    const apiAseguradoras = getAseguradoras();
+    let apiTipoUnidades = getTipoUnidad();
+    let apiTipoPermiso = getTipoPermisoSct();
+    let apiAseguradoras = getAseguradoras();
 
     const catTipoUnidades = async () => {
       let result = await apiTipoUnidades.call
@@ -108,8 +103,13 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
   //Se ejecuta solo cuando el id_Unidad cambia
   useEffect(() => {
     console.log("effect para editar unidad");
+    //Service to get Specific Unidad
+    let loadSpecificUnidad = getIdUnidad(id_Unidad);
+    let loadTipoUnidades = getTipoUnidad();
+    let loadTipoPermisoSct = getTipoPermisoSct();
 
     const getUnidadWithId = async () => {
+      console.log("se ejecuto la función getUnidadWithId");
       try {
         const result = await loadSpecificUnidad.call;
         if(result.status === 200){
@@ -170,7 +170,7 @@ const UnidadForm = ({ id_Unidad = '', returnFormUnidad}: Props) => {
     
     if(id_Unidad.trim() !== '') { getUnidadWithId(); } // Preguntamos si vamos a editar?
     return () => {
-      if(id_Unidad.trim() !== '') { loadSpecificUnidad.controller.abort(); } // Preguntamos si vamos a editar?
+      if(id_Unidad.trim() !== '') { console.log("Abort editar unidad"); loadSpecificUnidad.controller.abort(); } // Preguntamos si vamos a editar?
     }
   },[id_Unidad]);
 

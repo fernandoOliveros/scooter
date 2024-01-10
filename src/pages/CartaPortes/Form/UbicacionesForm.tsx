@@ -24,7 +24,6 @@ let productoServicioEmpty: ICartaPorteProductoServicioForm = {
     Cantidad: 1,
     id_ClaveUnidadPeso:null,
     deci_ValoeUnitario: 1,
-    CantidadTransporta: { Cantidad: 1 },
     MaterialPeligroso: 'No'
   }
   let productoPeligroso: ICartaPorteMaterialPeligroso = {

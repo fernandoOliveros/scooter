@@ -13,7 +13,22 @@ export interface Props {
 }
 
 //TODO: variables globales
-let ArrDestinoEmpty = { id_Estado: null, id_Localidad: null, id_Municipio: null, id_Colonia: null, c_codigoPostal: '', st_Calle: '', st_NoExterior: '', st_NoInterior: 'S/N', st_RefDomicilio: '', st_DestinatarioNombre: '', date_FechaLlegada: null, st_DestinatarioRFC: '', dec_DistRe: '', TipoUbicacion: 'Destino', DistanciaRecorrida: '', DistanciaRecorridaSpecified: false};
+let ArrDestinoEmpty = { 
+  id_Estado: null, 
+  id_Localidad: null, 
+  id_Municipio: null, 
+  id_Colonia: null, 
+  c_codigoPostal: '', 
+  st_Calle: '', 
+  st_NoExterior: '', 
+  st_NoInterior: 'S/N', 
+  st_RefDomicilio: '', 
+  st_DestinatarioNombre: '',
+  st_IdUbicacion: '', 
+  date_FechaLlegada: null, 
+  st_DestinatarioRFC: '', 
+  dec_DistRe: 1,
+}
 let FormHtmlDireccion = {st_Colonia: '', st_Municipio: '', st_Localidad:'', st_Estado: ''};
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 
@@ -24,7 +39,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
   const [formDireccion, setFormDireccion] = useState(FormHtmlDireccion);
 
   //todo: vairables fijas para llebnar los arreglos
-  const [destino, setDestino] = useState<ICartaPorteDirDestinoForm>(ArrDestinoEmpty);
+  const [destino, setDestino] = useState<ICartaPorteDirDestinoForm>( ArrDestinoEmpty );
 
   //todo: conteno de cuantos origenes, destinos y servicios producto habrán en la carta porte
   const [countDestinos, setCountDestinos] = useState<number>(0);
@@ -122,7 +137,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
   return (
     <Fragment>
       <h4 className="card-title mt-5">Destinos (registrados: {countDestinos})</h4>
-      <Button variant='contained' startIcon={<VisibilityIcon />} size='small'>Mostrar destinos</Button>
+      <Button variant='contained' onClick={() => retornaVerDestinos(true)} startIcon={<VisibilityIcon />} size='small'>Mostrar destinos</Button>
       <hr></hr>
       <div className='row'>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
@@ -137,7 +152,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                <TextField fullWidth id='dec_DistRe' className="form-control" variant="outlined" label="Distancia Recorrida" type="text" name="dec_DistRe" onChange={onChangeDestino} value={destino.dec_DistRe || ''} inputProps={{ autoComplete: "off" }} required/>
+                <TextField fullWidth id='dec_DistRe' className="form-control" variant="outlined" label="Distancia Recorrida" type="number" name="dec_DistRe" onChange={onChangeDestino} value={destino.dec_DistRe || ''} inputProps={{ autoComplete: "off", min: 1}} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
@@ -196,7 +211,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
                   <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia"  type="text" name="st_RefDomicilio" onChange={onChangeDestino} value={destino.st_RefDomicilio || ''} inputProps={{ autoComplete: "off"}} required/>
               </div>
           </div>
-          <div className="col-12 text-end">
+          <div className="col-12">
               <Button variant='contained' color='success' onClick={guardarDireccion}>Guardar Destino</Button>
           </div>
       </div>
