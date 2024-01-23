@@ -10,14 +10,18 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ArticleIcon from '@mui/icons-material/Article';
 import Swal from 'sweetalert2';
 import { useDispatch } from 'react-redux';
+import WidgetsIcon from '@mui/icons-material/Widgets';
 import { resetUser }  from '../../redux/auth/authSlicer';
+import RvHookupIcon from '@mui/icons-material/RvHookup';
+
 const actions = [
     { icon: <LogoutIcon />, name: 'Cerrar Sesión' , id: 'salir'  },
     { icon: <ArchiveIcon />, name: 'Gastos', id: 'gastos' },
     { icon: <ArticleIcon />, name: 'Facturación', id: 'facturas' },
+    { icon: <WidgetsIcon />, name: 'Carta Porte', id: 'cartaPorte' },
     { icon: <TelegramIcon />, name: 'Viajes' , id: 'viajes' },
     { icon: <GroupIcon />, name: 'Operadores' , id: 'operadores'  },
-    { icon: <LocalShippingIcon />, name: 'Remolques' , id: 'remolques'  },
+    { icon: <RvHookupIcon />, name: 'Remolques' , id: 'remolques'  },
     { icon: <LocalShippingIcon />, name: 'Unidades' , id: 'unidades'  },
   ];
 
@@ -33,11 +37,8 @@ const Menu = () => {
     if ( e === "salir" ){
       //Limpiamos localSotrage
       dispatch(resetUser());
-      localStorage.clear();
       Swal.fire({ icon: 'success', title: 'Cerrando Sesión' , text: 'Saliendo del Sistema ...', timer: 1500, showConfirmButton:false});
-      setTimeout(function () {
-        navigate("/", { replace : true });
-      }, 2000);
+      navigate("/", { replace : true });
     } else { navigate("/" + e, { replace : true }) }
   }
   return (

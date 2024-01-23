@@ -7,16 +7,14 @@ import { useSelector } from 'react-redux';
 import { RootStore } from '../../redux/store';
 import { IViajeModel } from '../../models/viajes/viaje.model';
 import DateFormatFix from '../../utils/DateFormatFix';
-import SecurityIcon from '@mui/icons-material/Security';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
-import Swal from 'sweetalert2';
+import { PrivateRoutes } from '../../routes/routes';
 
 const Viajes = () => {
     //todo: variables
     const userState = useSelector((store: RootStore) => store.user);
     const [ viajes, setViajes ] = useState<IViajeModel[]>([])
-    let navigate = useNavigate();
-    const id_viaje_create_cp = useRef(null);
+    const navigate = useNavigate();
 
     
     //todo: Inital function
@@ -39,15 +37,11 @@ const Viajes = () => {
         return response;
     }
 
-    const viewFormCartaPorte = (idViaje: any) => {
-        id_viaje_create_cp.current = idViaje;
-        console.log(id_viaje_create_cp.current);
-    }
-
-    function returnFormCartaPorte (success: boolean) {
-        if(!success){
-            Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'No se pudo dar de alta la carta porte, verifica que esten todos los campos con (*) llenos', showConfirmButton: true });
-        }
+    const congifViaje = (idViaje: any) => {
+        const routeFull = PrivateRoutes.setUpViaje.split(":");
+        let routeClean = routeFull[0];
+        console.log(routeFull);
+        navigate("/" + routeClean + idViaje);
     }
 
     const columns: GridColDef[] = 
@@ -59,15 +53,9 @@ const Viajes = () => {
             width: 40,
             getActions: (params) => [
               <GridActionsCellItem
-                icon={<SecurityIcon />}
-                label="Generar carta porte del viaje"
-                onClick={() => viewFormCartaPorte(params.id)}
-                showInMenu
-              />,
-              <GridActionsCellItem
                 icon={<FileCopyIcon />}
-                label="Generar Factura del viaje"
-                onClick={() => console.log("copy")}
+                label="Configurar Viaje"
+                onClick={() => congifViaje(params.id)}
                 showInMenu
               />,
             ],

@@ -14,7 +14,8 @@ import { useDispatch } from 'react-redux';
 import loginService from '../../services/login/login.service';
 import { loginModel } from '../../models/login/login.model';
 import { createUser } from '../../redux/auth/authSlicer';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, redirect } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -34,9 +35,16 @@ const Login = () => {
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    const result = await callEndpoint(loginService(FormLogin));
-    dispatch(createUser(result.data.data));
-    navigate("/home");
+    try {
+        const result = await callEndpoint(loginService(FormLogin));
+        Swal.fire({ icon: 'success', title: 'Bienvenido' , text: 'entrando al sistema ...', timer: 1500, showConfirmButton:false});
+        let reduxResult = dispatch(createUser(result.data.data));
+        redirect("/home");
+        console.log(reduxResult);
+    } catch (error) {
+        console.log(error);
+        Swal.fire({ icon: 'error', title: 'Error' , text: 'Ocurrio un error, revise las credenciales', showConfirmButton: true});
+    }
   }
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
@@ -45,8 +53,6 @@ const Login = () => {
             sx={{
             backgroundImage: 'url(https://img.interempresas.net/fotos/2810933.jpeg)',
             backgroundRepeat: 'no-repeat',
-            backgroundColor: (t) =>
-                t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             }}

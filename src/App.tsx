@@ -29,6 +29,7 @@ const EditClientes = lazy( () => import('./pages/Clientes/EditCliente'));
 //todo: VIAJES
 const ViajesScreen = lazy(() => import('./pages/Viajes/Viajes'));
 const CreateViajesScreen = lazy(() => import('./pages/Viajes/CreateViaje'));
+const SetUpViaje = lazy(() => import('./pages/Viajes/SetUpViaje'));
 
 
 //todo: CARTA PORTES
@@ -82,6 +83,7 @@ function App() {
           {/* FACTURAS */}
           <Route path={PrivateRoutes.factura} element={<FacturasScreen />}/>
           <Route path={PrivateRoutes.newFactura} element={<CreateFactura />}/>
+          <Route path={PrivateRoutes.setUpViaje} element={<SetUpViaje />} />
         </Route>
       </Routes>
     </Suspense>

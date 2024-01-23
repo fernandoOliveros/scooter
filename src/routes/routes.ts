@@ -14,6 +14,7 @@ export const PrivateRoutes = {
     editCliente: 'cliente/editar/:idClientes',
     viajes: 'viajes',
     newViaje: 'viajes/crear',
+    setUpViaje: "viajes/configurar/:idViaje",
     cartaPorte: 'cartaPorte',
     cartaPorteNew: 'cartaPorte/crear',
     cartaPorteEdit: 'cartaPorte/editar',
