@@ -45,6 +45,7 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
   const [productoServicio, setProductoServicio] = useState<ICartaPorteProductoServicioForm>(productoServicioEmpty);
   const [matPeligroso, setMatPeligroso] = useState<ICartaPorteMaterialPeligroso>(productoPeligrosoEmpty);
   const [searchProducto, setSearchProducto] = useState<string>("");
+  const [countProductos, setCountProductos] = useState<number>(0);
 
   //todo: Catálogo
   const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
@@ -206,7 +207,7 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
       setProductoServicio(productoServicioEmpty);
       setSelectUnidadPeso(null);
       setSelectProducto(null);
-      
+      setCountProductos(countProductos + 1);
       //todo: Retorna el productos
       retornaProducto(arrayReturn);
     }
@@ -214,7 +215,7 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
 
   return (
     <Fragment>
-      <h4 className="card-title mt-5">Bienes Transportado (registrados: 0)</h4>
+      <h4 className="card-title mt-5">Bienes Transportado (registrados: {countProductos})</h4>
       <Button variant='contained' onClick={() => retornaVerProductos(true) } startIcon={<VisibilityIcon />} size='small'>Mostrar bienes transportados</Button>
       <hr></hr>
       <div className='row'>
