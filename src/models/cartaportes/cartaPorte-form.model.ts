@@ -6,7 +6,6 @@ export interface ICartaPorteForm {
     st_LugarExpedicion: string | null;
     dec_TotalDistRec: number | null; //debe la suma de las distancias recorridas
     dec_PesoBrutoTotalMercancias: number | null;
-    id_UnidadPeso: number | null;
     id_AseguraMedAmbiente: number | null;
     id_AseguraCarga: number | null;
     st_PolizaMedAmbiente: string | null;

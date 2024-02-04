@@ -121,31 +121,6 @@ function FacturaForm() {
 
   //todo: Custom Hooks
   const { callEndpoint } = useFetchAndLoad();
-
-  //todo: Funcion para calcular el importe del producto / servicio cfdi
-  const ImporteCalculate = () => {
-    //todo: importe antes de descuento
-    let importe: number;
-    //todo: importe si se aplica descuento sino toma el valor del importe normal
-    let importeWithDescuento: number;
-    if(productoServicioCfdi.dec_ValorUnitarioConcepto !== null && productoServicioCfdi.i_Cantidad !== null ){
-      importe = productoServicioCfdi.dec_ValorUnitarioConcepto * productoServicioCfdi.i_Cantidad;
-      importeWithDescuento = (productoServicioCfdi.dec_Descuento !== null ) 
-      ? (importe - productoServicioCfdi.dec_Descuento)
-      : importe;
-      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteConcepto: importeWithDescuento});
-    }
-  }
-  //todo: seteamos la base traslado y retención cuando cambia el importe del producto / servicio del cfdi
-  useEffect(()=>{
-    // ? validamos si el objeto de impuesto es con detalle que guarde el base Trasldo y Retención
-    if(selectObjetoImpuesto?.id_ObjetoImp === 2){
-      setProductoServicioCfdi({...productoServicioCfdi, 
-        dec_BaseTraslado: productoServicioCfdi.dec_ImporteConcepto, 
-        dec_BaseRetencion: productoServicioCfdi.dec_ImporteConcepto
-      });
-    }
-  },[productoServicioCfdi.dec_ImporteConcepto]);
   
   // todo: FUNCION INICIAL PARA CARGAR SERVICIOS PARA LOS AUTOCOMPLETE'S
   useEffect(() => {
@@ -298,7 +273,7 @@ function FacturaForm() {
   useEffect(() => {
     setCfdiForm({...cfdiForm, id_MetodoPago: (selectMetodosPago !== null) ? selectMetodosPago.id_MetodoPago : null});
   },[selectMetodosPago]);
-6
+
   //todo: Effect para que se ejecuta cada vez que cambiemos de tipo de comprobante
   useEffect(() => {
     // //todo: Validación si es comprobante es "Traslado" o "Pago" el subtotal y total lo ponemos en 0
@@ -332,15 +307,41 @@ function FacturaForm() {
   useEffect(() => {
     if(selectObjetoImpuesto?.c_ObjetoImp === "02"){
       setShowImpuestos(true);
-    } else if(selectObjetoImpuesto?.c_ObjetoImp === "03" || selectObjetoImpuesto?.c_ObjetoImp === "04"){
-      setShowImpuestos(false);
     }else{
       setShowImpuestos(false);
     }
   },[productoServicioCfdi.id_ObjetoImp]);
 
-  //todo:Effect para calcular el importe si cambian los campos: valor Unitarios, descuento, cantidad
-  useEffect(()=> ImporteCalculate(), [productoServicioCfdi.dec_ValorUnitarioConcepto, productoServicioCfdi.dec_Descuento, productoServicioCfdi.i_Cantidad]);
+  //todo:Effect para calcular el importe si cambian los campos: valor Unitario, descuento, cantidad
+  useEffect(()=> {
+    let importe: number = ImporteCalculate();
+    setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteConcepto: importe});
+  }, [productoServicioCfdi.dec_ValorUnitarioConcepto, productoServicioCfdi.dec_Descuento, productoServicioCfdi.i_Cantidad]);
+
+  //todo: Funcion para calcular el importe del producto / servicio cfdi
+  const ImporteCalculate = (): number => {
+    //todo: importe antes de descuento
+    let importe: number = 0;
+    //todo: importe si se aplica descuento sino toma el valor del importe normal
+    let importeWithDescuento: number = 0;
+    if(productoServicioCfdi.dec_ValorUnitarioConcepto !== null && productoServicioCfdi.i_Cantidad !== null ){
+      importe =  + (productoServicioCfdi.dec_ValorUnitarioConcepto * productoServicioCfdi.i_Cantidad).toFixed(3);
+      importeWithDescuento = (productoServicioCfdi.dec_Descuento !== null ) 
+      ? (importe - productoServicioCfdi.dec_Descuento)
+      : importe;
+    }
+    return importeWithDescuento;
+  }
+  //todo: seteamos la base traslado y retención cuando cambia el importe del producto / servicio del cfdi
+  useEffect(()=>{
+    // ? validamos si el objeto de impuesto es con detalle que guarde el base Trasldo y Retención
+    if(selectObjetoImpuesto?.id_ObjetoImp === 2){
+      setProductoServicioCfdi({...productoServicioCfdi, 
+        dec_BaseTraslado: productoServicioCfdi.dec_ImporteConcepto, 
+        dec_BaseRetencion: productoServicioCfdi.dec_ImporteConcepto
+      });
+    }
+  },[productoServicioCfdi.dec_ImporteConcepto]);
 
   /* ================== AREA DE SELECT DE IMPUESTOS TRASLADOS =========================== */
   //todo:Effect para select cat - Tipo Impuesto traslado
@@ -365,7 +366,7 @@ function FacturaForm() {
 
   const calculateTrasladoImporte = () =>{
     if(productoServicioCfdi.dec_BaseTraslado !== null && selectTasaCuotaTraslado !== null){
-      let impuesto: number = productoServicioCfdi.dec_BaseTraslado * selectTasaCuotaTraslado.dec_ValorAplica;
+      let impuesto: number =  + (productoServicioCfdi.dec_BaseTraslado * selectTasaCuotaTraslado.dec_ValorAplica).toFixed(3);
       setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteTraslado: impuesto});
     }  
   }
@@ -394,7 +395,7 @@ function FacturaForm() {
 
   const calculateRetencionImporte = () => {
     if(productoServicioCfdi.dec_BaseRetencion !== null && selectTasaCuotaRetencion !== null){
-      let impuesto: number = productoServicioCfdi.dec_BaseRetencion * selectTasaCuotaRetencion.dec_ValorAplica;
+      let impuesto: number =  + (productoServicioCfdi.dec_BaseRetencion * selectTasaCuotaRetencion.dec_ValorAplica).toFixed(3);
       setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteRetencion: impuesto});
     }
   }
@@ -626,7 +627,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Precio Unitario"  type="number" 
+                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Valor Unitario"  type="number" 
                   inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitarioConcepto" value={productoServicioCfdi.dec_ValorUnitarioConcepto || ''} required/>
                 </div>
               </div>
@@ -637,7 +638,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField fullWidth  id='dec_ValorUnitarioConcepto'  name="dec_ValorUnitarioConcepto" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1, readOnly: true}} value={productoServicioCfdi.dec_ImporteConcepto || ''} required/>
+                  <TextField fullWidth  id='dec_ImporteConcepto'  name="dec_ImporteConcepto" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1, readOnly: true}} value={productoServicioCfdi.dec_ImporteConcepto || ''} required/>
                 </div>
               </div>
             </div>
