@@ -11,7 +11,7 @@ import { ICartaPorteForm } from '../../../models/cartaportes/cartaPorte-form.mod
 import { Autocomplete, Button, TextField } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
-import { createCartaPorteService, createCfdiCartaPorte, createProductServiceCfdiCartaPorte, getViajesActivos } from '../../../services/cartaPorte/cartaPorte.service';
+import { createCartaPorteService, createCfdiCartaPorte, createDestinoCartaPorteService, createOrigenCartaPorteService, createProductServiceCfdiCartaPorte, createProductosCartaPorteService, getViajesActivos } from '../../../services/cartaPorte/cartaPorte.service';
 import { IViajesActivos } from '../../../models/cartaportes/cartaPorte.model';
 import { ICatMoneda, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
 import { ICartaPorteCfdiForm, IProducServicioCartaPorteCfdiForm } from '../../../models/cartaportes/cartaPorte-cfdi.model';
@@ -114,13 +114,13 @@ let catUnidadServicio : IUnidadPesoCFDI[] = [
   }
 ];
 
-//todo: Global
 function CartaPorteForm({ returnFormCartaPorte }: Props) {
+
   // todo: Recolectamos el id_Empresa de local storage
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
 
-  //todo: Custom Hooks
+  //todo: Custom Hooks POST
   const { callEndpoint } = useFetchAndLoad();
 
   //todo: Variable general carta porte
@@ -138,6 +138,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     st_PolizaAseguraCarga: null
   });
 
+  //todo: Variable general del cfdi de la carta porte
   const [cfdi, setCfdi] = useState<ICartaPorteCfdiForm>({
     id_Empresa : id_Empresa,
     id_Moneda : null,
@@ -151,6 +152,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     dec_Total: null
   });
 
+  //todo: Variable general del producto/servicio del cfdi
   const [productCfdi, setProductCfdi] = useState<IProducServicioCartaPorteCfdiForm>(productoServicioCfdiEmpty);
   
   //todo: Variables para abrir el modal
@@ -532,11 +534,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     console.log("Producto: " + position);
   }
 
-  const onSubmit = (e: any) => {
-    e.preventDefault();
-    returnFormCartaPorte(true);
-  }
-
+  //todo: Funcion para calcular el total del cfdi de la carta porte
   const addSubAndTotal = () : number => {
     //total = (importe + traslados(16%)) - retención (04%)
     let total : number = 0;
@@ -546,52 +544,83 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     return total;
   }
 
-  const createCfdi = async (e: any) => {
+  //todo: Funcioón para crear y guardar el cfdi
+  const createCfdi = async(e: any) => {
     e.preventDefault();
     let total = addSubAndTotal();
-    setCfdi({...cfdi, dec_SubTotal: productCfdi.dec_ImporteConcepto, dec_Total: total});
+    let subtotal: number = productCfdi?.dec_ImporteConcepto!;
     try {
-      let result = await callEndpoint(createCfdiCartaPorte(cfdi));
-      console.log(result.data);
-      createProdServiceCfdi(result.data.data.id_CFDI);
-      console.log(result);
+      let cfdi_result = await callEndpoint(createCfdiCartaPorte(subtotal, total, cfdi));
+      console.log(cfdi_result.data);
+      createProdServiceCfdi(cfdi_result.data.data.id_CFDI);
+      console.log(cfdi_result);
     } catch (error) {
       console.log("Cfdi: " + error)
     }
   }
 
+  //todo: Funcion para crear y guardar el producto/servicio de la carta porte
   const createProdServiceCfdi =  async(idCfi: number) => {
     try {
-      let result = await callEndpoint(createProductServiceCfdiCartaPorte(idCfi, productCfdi));
-      console.log(result.data.data);
+      let productoCfdi_result = await callEndpoint(createProductServiceCfdiCartaPorte(idCfi, productCfdi));
+      console.log(productoCfdi_result.data.data);
       createCartaporte(idCfi);
     } catch (error) {
       console.log("Cfdi producto/Servicio: " + error)
     }
   }
 
+  //todo: Funcion para crear y guardar la carta porte
   const createCartaporte = async(idCfi: number) => {
     try {
-      let result = await callEndpoint(createCartaPorteService(idCfi,cartaPorte));
-      console.log(result);
+      let cartaPorte_response = await callEndpoint(createCartaPorteService(idCfi,cartaPorte));
+      console.log(cartaPorte_response.data.data);
+      createProductCartaPorte(cartaPorte_response.data.data.id_CartaPorte);
     } catch (error) {
       console.log("Carta Porte: " + error)
     }
   }
 
-  const createProductCartaPorte = () => {
-    //todo: Foreach
-    console.log("createProductCartaPorte");
+  //todo: Funcion para crear y guardar el product de la carta porte
+  const createProductCartaPorte = (idCP: number) => {
+    let result_productos: any;
+    //todo: Guardamos producto / servicio del cfdi
+    productosServicios.forEach( async (producto) => {
+      try {
+        result_productos = await callEndpoint(createProductosCartaPorteService(idCP, producto));
+        console.log(result_productos);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    createAddressOrigin(idCP);
   }
 
-  const  createAddressOrigin = () => {
-    //todo: Foreach
-    console.log("createAddressOrigin"); 
+  //todo: Funcion para crear y guardar los origenes de la carta porte
+  const createAddressOrigin = (idCP: number) => {
+    let result_origen : any;
+    arrOrigenes.forEach( async (origen) => {
+      try {
+        result_origen = await callEndpoint(createOrigenCartaPorteService(idCP, origen));
+        console.log(result_origen);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    createAddressDestiny(idCP);
   }
 
-  const  createAddressDestiny = () => {
-    //todo: Foreach
-    console.log("createAddressDestiny"); 
+  //todo: Funcion para crear y guardar los destinos de la carta porte
+  const createAddressDestiny = (idCP: number) => {
+    let result_destino : any;
+    arrDestinos.forEach( async (destino) => {
+      try {
+        result_destino = await callEndpoint(createDestinoCartaPorteService(idCP, destino));
+        console.log(result_destino);
+      } catch (error) {
+        console.log(error);
+      }
+    }); 
   }
   
   return (
@@ -750,7 +779,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
             </div>
             { 
               /* VALIDAMOS EL TIPO DE COMPROBANTE SEA INGRESO  Y QUE SEA CON DESGLOSE DE OBJETO*/
-             ( tipoComprobante === "Ingreso" && showImpuestos) ? (
+              ( tipoComprobante === "Ingreso" && showImpuestos) ? (
                 <div className="row">
                   <h4 className="card-title mt-5">Impuestos</h4>
                   <div className="row">
