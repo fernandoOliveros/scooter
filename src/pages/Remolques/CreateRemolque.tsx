@@ -1,12 +1,12 @@
 import { Fragment } from 'react'
 import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate } from 'react-router-dom';
-import RemolqueForm from './Form/RemolqueForm';
 import Swal from 'sweetalert2';
+import FormRemolque from './Form/FormRemolque';
 
 const CreateRemolque = () => {
     const navigate = useNavigate();
-
+    
     const catchResponseForm = (success: boolean) => {
         if(success){
             navigate("/remolques");
@@ -36,7 +36,7 @@ const CreateRemolque = () => {
                         <div className="card-body">
                             <div className='row'>
                                 <div className='col-12'>
-                                    <RemolqueForm returnFormRemolque={catchResponseForm} />
+                                    <FormRemolque returnFormRemolque={catchResponseForm}/>
                                 </div>
                             </div>
                         </div>

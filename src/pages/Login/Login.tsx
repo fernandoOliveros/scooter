@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import loginService from '../../services/login/login.service';
 import { loginModel } from '../../models/login/login.model';
 import { createUser } from '../../redux/auth/authSlicer';
-import { useNavigate, redirect } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 
@@ -39,7 +39,7 @@ const Login = () => {
         const result = await callEndpoint(loginService(FormLogin));
         Swal.fire({ icon: 'success', title: 'Bienvenido' , text: 'entrando al sistema ...', timer: 1500, showConfirmButton:false});
         let reduxResult = dispatch(createUser(result.data.data));
-        redirect("/home");
+        navigate("/home");
         console.log(reduxResult);
     } catch (error) {
         console.log(error);

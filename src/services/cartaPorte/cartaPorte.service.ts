@@ -8,15 +8,14 @@ import { ICartaPorteDirOrigenForm } from "../../models/cartaportes/cartaPorte-di
 import { ICartaPorteDirDestinoForm } from "../../models/cartaportes/cartaPorte-dirDestino-form.model";
 
 
-export const getViajesActivos = (idEmpresa: string) => {
-    const controller = loadAbort(); //Opcion para cancelar solicitud
-    let uri = baseUrl + "viajes/readActivosByEmpresa/" + idEmpresa;
+export const timbrarCartaPorte = (id_CartaPorte: number) => {
+    const controller = loadAbort();
+    let uri = baseUrl + "cartaporte/create/" + id_CartaPorte;
     return {
         call: axios.get(uri, {signal: controller.signal}),
         controller
     }
 }
-
 
 // =================================== Servicios para Carta Porte ==============================================
 

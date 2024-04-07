@@ -4,7 +4,7 @@ import { ICartaPorteMaterialPeligroso } from '../../../models/cartaportes/cartaP
 import { getEmbalajesCP, getMaterialesPeligrosos, getProductoCPLike, getUnidadPesoCP } from '../../../services/public.service';
 import { Autocomplete, Button, FormControlLabel, Switch, TextField } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPeso } from '../../../models/cartaportes/cartaPorte.model';
+import { IEmbalaje, IMaterialPeligroso, IProductosServicios, IUnidadPesoCartaPorte } from '../../../models/cartaportes/cartaPorte.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 import Swal from 'sweetalert2';
 
@@ -50,13 +50,13 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
   //todo: Catálogo
   const [catProducServicio, setCatProducServicio] = useState<IProductosServicios[]>([]);
   const [catMatPeligroso, setCatMatPeligroso] = useState<IMaterialPeligroso[]>([]);
-  const [catUnidadPeso, setCatUnidadPeso] = useState<IUnidadPeso[]>([]);
+  const [catUnidadPeso, setCatUnidadPeso] = useState<IUnidadPesoCartaPorte[]>([]);
   const [catEmbalajes, setCatEmbalajes] = useState<IEmbalaje[]>([]);
 
   //todo: Variables para funcionalidad de materialPeligrsos HTML
   const [selectProducto, setSelectProducto] = useState<IProductosServicios | null>(null);
   const [isPeligroso, setIsPeligroso] = useState<boolean>(false);
-  const [selectUnidadPeso, setSelectUnidadPeso] = useState<IUnidadPeso | null>(null);
+  const [selectUnidadPeso, setSelectUnidadPeso] = useState<IUnidadPesoCartaPorte | null>(null);
   const onChangeFormProducto = ({ target: { name, value } }: handleChangeForm) => {
     setProductoServicio({...productoServicio, [name]: value});
   }
@@ -146,8 +146,8 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
   const onChangeUnidadPeso = (item: any) => {
     if(item !== null){
       catUnidadPeso.forEach((element) => {
-        if(element.id_ClaveUnidadPeso === item.id_ClaveUnidadPeso){
-          setProductoServicio({...productoServicio, id_ClaveUnidadPeso: element.id_ClaveUnidadPeso});
+        if(element.id_ClaveUnidadPesoCFDI === item.id_ClaveUnidadPesoCFDI){
+          setProductoServicio({...productoServicio, id_ClaveUnidadPeso: element.id_ClaveUnidadPesoCFDI});
           setSelectUnidadPeso(element);
         }
       });
@@ -241,8 +241,8 @@ function ProductoServicioForm({retornaProducto, retornaVerProductos}: Props) {
               options={catUnidadPeso}
               value={selectUnidadPeso}
               onChange={(_option, value) => onChangeUnidadPeso(value)}
-              getOptionLabel={(option) => option.st_ClaveUnidad + " - " + option.st_NombreClave}
-              isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPeso === value.id_ClaveUnidadPeso}
+              getOptionLabel={(option) => option.c_ClaveUnidad + " - " + option.st_Nombre}
+              isOptionEqualToValue={(option, value) => option.id_ClaveUnidadPesoCFDI === value.id_ClaveUnidadPesoCFDI}
               renderInput={(params) => <TextField {...params} label="Selecciona unidad peso" variant="outlined" />} />
           </div>
         </div>

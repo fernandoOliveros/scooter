@@ -21,12 +21,13 @@ const DocumentosOeprador = ["url_CURP", "url_RFC", "url_ComprobanteDom"];
 
 //todo: interfaz de Props
 export interface Props {
-  id_Operador?: string,
+  id_Operador?: number,
   returnFormOperador: (success: boolean) => void
 }
 
-const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
-  console.log("render operador form");
+const OperadorForm = ({id_Operador = 0, returnFormOperador}: Props) =>{
+  //todo: variable para saber el comportamiento del formulario alta/editar
+  const isEditMode = id_Operador != 0 ? true : false;
   //todo: Store
   const userState = useSelector((store: RootStore) => store.user);
   const id_Empresa = userState.user.id_Empresa;
@@ -54,9 +55,8 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
   useEffect( () => {
     console.log("useffect with operador");
 
-    const loadEspecificOperador = getIdOperador(id_Operador);
     const getOperadorWithId = async () => {
-      console.log("Obtener Info de un Operador Especifico");
+      const loadEspecificOperador = getIdOperador(id_Operador.toString());
       try {
         const result = await loadEspecificOperador.call;
         let response = result.data;
@@ -90,9 +90,8 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     }
 
     //todo: SERVICE LOAD DIRECCION OPERADOR WIDTH ID
-    const loadDireccion = getDireccionOperador(id_Operador);
     const getDireccionOperadorId = async() => {
-      console.log("OBTENER LA DIRECCIÓN DEL OPERADOR");
+      const loadDireccion = getDireccionOperador(id_Operador.toString());
       try {
         let result = await loadDireccion.call;
         let response = result.data;
@@ -135,8 +134,8 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     }
 
     //todo: SERVICE TO LOAD TELEFONOS WITH ID OPERADOR
-    const loadSpecificTelefono = getTelefonoOperador(id_Operador);
     const getOperadorTelefono = async () => {
+      const loadSpecificTelefono = getTelefonoOperador(id_Operador.toString());
       console.log("Obtener el telefono del operador");
       try {
         const result = await loadSpecificTelefono.call;
@@ -155,8 +154,8 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     }
 
     //todo: SERVICE TO LOAD CONTACTO DE EMERGENCIA WITH ID OPERADOR
-    const loadContactEmergency = getContactoOperador(id_Operador);
     const getContactoOperadorId = async() => {
+      const loadContactEmergency = getContactoOperador(id_Operador.toString());
       console.log("Obtener contacto del operador");
       try {
         let result = await loadContactEmergency.call;
@@ -176,21 +175,13 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
 
     }
 
-    if(id_Operador !== ''){
+    if(id_Operador !== 0){
       getOperadorWithId();
       getDireccionOperadorId();
       getOperadorTelefono();
       getContactoOperadorId();
     }
-    return() => {
-      if(id_Operador !== ''){ 
-        loadEspecificOperador.controller.abort(); 
-        loadDireccion.controller.abort();
-        loadSpecificTelefono.controller.abort();
-        loadContactEmergency.controller.abort();
-      } 
-    }
-  },[id_Operador]);
+  },[]);
 
   const validateSameEmpresa = (idEmpresa : number) => {
     if(id_Empresa === idEmpresa)
@@ -313,10 +304,6 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     e.preventDefault();
     let createrOperador = null;
     let createrDocuments = null;
-    let updaterDocuments = null;
-    let createrTelefono = null;
-    let createrDireccion = null;
-    let createrContacto = null;
     try {
       //todo: Creamos el registro del operador
       createrOperador = await callEndpoint(createOperador(operadorForm));
@@ -330,7 +317,7 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
 
         //todo: ACTUALIZAMOS EL REGISTRO DE LOS DOCUMENTOS
         let DocumentoId = createrDocuments.data.data.id_Documento;
-        updaterDocuments = await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
+        await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
 
         //todo: LLENAMOS TODOS LOS ARREGLO CON EL ID_OPERADOR DEL API
         setDireccion({...direccion, id_Operador: id_OperadorTemp});
@@ -348,6 +335,7 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     } catch (error) { returnFormOperador(false); }
   }
 
+  /*
   //todo: Generamos los POST de Dirección, Telefono, Contacto del Operador nuevo
   useEffect( () => {
     const postDireccion = async() => {
@@ -373,32 +361,27 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
     }
     postContacto();
   },[contacto.id_Operador]);
+  */
 
 
   const HandleEditSubmit = async (e: any) => {
     e.preventDefault();
-    let updaterOperador = null;
-    let updaterDocuments = null;
-    let updaterTelefono = null;
-    let updaterDireccion = null;
-    let updaterContacto = null;
-
     try {
       //todo: ACTUALIZAMOS DATOS GENERALES DEL OPERADOR
-      updaterOperador = await callEndpoint(updateOperador(operadorForm, id_Operador));
+      await callEndpoint(updateOperador(operadorForm, id_Operador.toString()));
 
       //todo: ACTUALIZAMOS TELEFONO
-      updaterTelefono = await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono.toString()));
+      await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono.toString()));
 
       //todo: ACTUALIZAMOS CONTACTOS
-      updaterContacto = await callEndpoint(updateContactoOperador(contacto, id_ContactoEm.toString()));
+      await callEndpoint(updateContactoOperador(contacto, id_ContactoEm.toString()));
 
       //todo: ACTULIZAMOS DIRECIÓN
-      updaterDireccion = await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador.toString()));
+      await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador.toString()));
 
       //todo: ACTUALIZAMOS DOCUMENTOACIÓN
       if(documentos.url_CURP !== '' || documentos.url_ComprobanteDom !== '' || documentos.url_RFC !== ''){
-        updaterDocuments = await callEndpoint(updateFilesOperador(documentos, idDocumento.toString(), id_Operador));
+        await callEndpoint(updateFilesOperador(documentos, idDocumento.toString(), id_Operador.toString()));
       }
       returnFormOperador(true);
     } catch (error) {
@@ -408,9 +391,9 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
 
   return (
     <Fragment>
-      <form className='form-horizontal'>
+    <form className='form-horizontal'>
         <div className="form-body">
-            <h4 className="card-title">Información del Operador</h4>
+            <h4 className="card-title">{isEditMode ? 'Actualizar Operador' : 'Nuevo Operador'}</h4>
             <hr></hr>
             <div className='row'>
                 <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -457,7 +440,7 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
                     <div className="form-group">
                     <FormControl fullWidth>
                         <InputLabel id="seleccionPuesto">Tipo de Puesto</InputLabel>
-                        <Select labelId="seleccionPuesto" id="id_TipoPuesto" value={operadorForm.id_TipoPuesto || ''} label="Tipo de Puesto" onChange={onChangePuesto}>
+                        <Select labelId="seleccionPuesto" id="id_TipoPuesto" value={operadorForm.id_TipoPuesto || 0} label="Tipo de Puesto" onChange={onChangePuesto}>
                             <MenuItem value={1}>Auxiliar</MenuItem>
                             <MenuItem value={2}>Operador de Camión</MenuItem>
                         </Select>
@@ -598,8 +581,8 @@ const OperadorForm = ({id_Operador = '', returnFormOperador}: Props) =>{
             <div className="row mt-4">
                 <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                     <div className="form-group">
-                      <Button onClick={(idDocumento === 0 && id_Operador === '' ) ? HandleSubmit : HandleEditSubmit} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> 
-                          { (idDocumento === 0 && id_Operador === '' ) ? "   Guardar" : " Editar"}
+                      <Button onClick={(idDocumento === 0 && id_Operador === 0 ) ? HandleSubmit : HandleEditSubmit} variant='contained' color='success' size='medium' type="button"> <i className="fa fa-save">  </i> 
+                          { (idDocumento === 0 && id_Operador === 0 ) ? "   Guardar" : " Editar"}
                       </Button>
                     </div>
                 </div>

@@ -44,7 +44,7 @@ export const createRemolque = (data: IRemolqueForm) => {
 export const editRemolque = (idRemolque: string, data: IRemolqueForm) =>{
     const controller = loadAbort();
     return {
-        call: axios.put(baseUrl + "unidades/update/" + idRemolque, data, { signal: controller.signal, }),
+        call: axios.put(baseUrl + "remolques/update/" + idRemolque, data, { signal: controller.signal, }),
         controller 
     }
 }

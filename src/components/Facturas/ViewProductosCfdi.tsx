@@ -8,7 +8,7 @@ export interface Props {
     returnCloseDialog: (close: boolean) => void,
 }
 
-const ViewProductosCfdi = ({open, params, returnCloseDialog}: Props) => {
+const ViewProductosCfdi = ({open, returnCloseDialog}: Props) => {
   return (
     <Fragment>
         <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"  maxWidth={"lg"}>

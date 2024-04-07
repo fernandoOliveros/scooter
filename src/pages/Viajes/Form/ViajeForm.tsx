@@ -298,10 +298,10 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
                     <div className='row'>
                         <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                             <h4 className="card-title">Configura tu viaje</h4>
-                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogUnidad(true) }>Nueva unidad</Button>
-                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogRemolque(true) }>Nuevo remolque</Button>
-                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogOperador(true) }>Nuevo operador</Button>
-                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ (e) => setDialogCliente(true) }>Nuevo Cliente</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ () => setDialogUnidad(true) }>Nueva unidad</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ () => setDialogRemolque(true) }>Nuevo remolque</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ () => setDialogOperador(true) }>Nuevo operador</Button>
+                            <Button startIcon={<AddIcon/>} size='small' variant="contained" color='primary' onClick={ () => setDialogCliente(true) }>Nuevo Cliente</Button>
                         </div>
                         <hr></hr>
                         <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">

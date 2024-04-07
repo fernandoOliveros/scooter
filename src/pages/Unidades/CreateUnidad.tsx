@@ -1,8 +1,8 @@
 import { Fragment } from 'react'
 import MenuBar from "../../components/shared/Menu"
-import UnidadForms from './Form/UnidadForm';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import FormUnidad from './Form/FormUnidad';
 
 const CreateUnidad = () => {
     //todo: variables
@@ -37,7 +37,7 @@ const CreateUnidad = () => {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <UnidadForms returnFormUnidad={returnFormUnidad}/>
+                                <FormUnidad returnFormUnidad={returnFormUnidad} />
                             </div>
                         </div>
                     </div>

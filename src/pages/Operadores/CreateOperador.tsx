@@ -1,8 +1,9 @@
 import { Fragment } from 'react'
 import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate } from 'react-router-dom'
-import OperadorForm from './Form/OperadorForm'
 import Swal from 'sweetalert2'
+import FormOperador from './Form/FormOperador'
+import OperadorForm from './Form/OperadorForm'
 
 const CreateOperador = ()  => {
     //variables
@@ -37,6 +38,7 @@ const CreateOperador = ()  => {
                             <div className='row'>
                                 <div className='col-12'>
                                     <OperadorForm returnFormOperador={catchResponseForm} />
+                                    {/* <FormOperador returnFormOperador={catchResponseForm} /> */}
                                 </div>
                             </div>
                         </div>

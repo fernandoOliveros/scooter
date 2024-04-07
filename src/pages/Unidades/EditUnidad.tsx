@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import MenuBar from "../../components/shared/Menu"
 import UnidadForms from './Form/UnidadForm';
 import Swal from 'sweetalert2';
+import FormUnidad from './Form/FormUnidad';
 
 const EditUnidad = () => {
     const { idUnidad } = useParams();
@@ -37,7 +38,8 @@ const EditUnidad = () => {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <UnidadForms id_Unidad={idUnidad} returnFormUnidad={catchResponseForm} />
+                                <FormUnidad  id_Unidad={Number(idUnidad)} returnFormUnidad={catchResponseForm} />
+                                {/* <UnidadForms id_Unidad={idUnidad} returnFormUnidad={catchResponseForm} /> */}
                             </div>
                         </div>
                     </div>

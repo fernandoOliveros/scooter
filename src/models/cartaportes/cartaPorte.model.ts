@@ -24,6 +24,13 @@ export interface IUnidadPeso {
     st_DescripcionClave: string;
 }
 
+export interface IUnidadPesoCartaPorte {
+    id_ClaveUnidadPesoCFDI: number;
+    c_ClaveUnidad: string;
+    st_Nombre: string;
+    st_Descripcion: string;
+}
+
 export interface IMaterialPeligroso {
     c_MaterialesPeligrosos: string;
     st_descripcion: string;
@@ -34,25 +41,4 @@ export interface IEmbalaje {
     c_tipoEmbalaje: string;
     st_descripcion: string;
     id_TipoEmbalaje: number;
-}
-
-
-export interface IViajesActivos {
-    id_Viaje: number;
-    folio_int_viaje: number;
-    id_Cliente: number;
-    id_TipoViaje: number;
-    id_Unidad: number;
-    id_Operador: number;
-    id_Remolque: number;
-    i_km_totales: number;
-    id_Empresa: number;
-    id_StatusViaje: number;
-    createdAt: string;
-    id_Candado: string;
-    st_EconomicoUnidad: string;
-    st_Nombre: string;
-    st_ApellidoP: string;
-    st_EconomicoRemolque: string;
-    HasCFDI: boolean;
 }

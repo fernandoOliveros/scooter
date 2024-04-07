@@ -9,6 +9,8 @@ import { Autocomplete, Button, TextField } from '@mui/material';
 import Swal from 'sweetalert2';
 import DialogShared from '../../../components/shared/DialogShared';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
+import { getViajesActivos } from '../../../services/public.service';
+import { IViajesActivos } from '../../../models/viajes/viaje.model';
 
 let ITipoComprobanteArray = [
   {
@@ -62,7 +64,7 @@ let catTasaCuotaJson: ITasaCuota[] = [
 ];
 
 const ProductoServicioCfdiEmpty: IProducServicioCfdiForm = {
-  id_CFDI: null, id_ClaveProdServCFDI: null, i_Cantidad: null, id_ClaveUnidadPesoCFDI: null, st_DescripcionConcepto: null, dec_ValorUnitarioConcepto: null, dec_ImporteConcepto: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, id_TipoFactorTraslado: null, id_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
+  id_CFDI: null, id_ClaveProdServCFDI: null, i_Cantidad: 1, id_ClaveUnidadPesoCFDI: null, st_DescripcionConcepto: null, dec_ValorUnitarioConcepto: null, dec_ImporteConcepto: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, id_TipoFactorTraslado: null, id_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
 };
 
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -77,7 +79,7 @@ function FacturaForm() {
   const [ arrServicioCfdi, setArrServicioCfdi] = useState<IProducServicioCfdiForm[]>([]);
 
   //todo _variables globales
-  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : 1, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
+  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
 
   //string global para tipo de comprobante
   const [tipoComprobante, setTipoComprobante] = useState<string>("");
@@ -85,6 +87,7 @@ function FacturaForm() {
   const [showImpuestos, setShowImpuestos] = useState<boolean>(false);
 
   //todo: catalogos para Formulario
+  const [catViajesActivos, setCatViajesActivos] = useState<IViajesActivos[]>([]);
   const [catClientes, setCatClientes] = useState<ICliente[]>([]);
   const [catMonedas, setCatMonedas] = useState<ICatMoneda[]>([]);
   const [catFormasPago, setCatFormasPago] = useState<IFormasPago[]>([]);
@@ -99,6 +102,7 @@ function FacturaForm() {
   const [catTasaCuota, setCatTasaCuota] = useState<ITasaCuota[]>([]);
 
   //todo: variables para formulario <Autocomplete />
+  const [selectViaje, setSelectViaje] = useState<IViajesActivos | null>(null);
   const [selectClientes, setSelectClientes] = useState< ICliente | null>(null);
   const [selectMonedas, setSelectMonedas] = useState< ICatMoneda | null>(null);
   const [selectFormasPago, setSelectFormasPago] = useState< IFormasPago | null>(null);
@@ -124,7 +128,6 @@ function FacturaForm() {
   
   // todo: FUNCION INICIAL PARA CARGAR SERVICIOS PARA LOS AUTOCOMPLETE'S
   useEffect(() => {
-    // ? Services
     const loadClientes = getClientesEmpresa(id_Empresa);
     const loadMonedas = getCatTipoMonedas();
     const loadFormasPago = getCatFormaPago();
@@ -135,89 +138,121 @@ function FacturaForm() {
     const loadTipoImpuestos = getCatTipoImpuestos();
     const loadObjetoImpuesto = getCatObjetoImpuesto();
     const loadTipoFactor = getCatTipoFactor();
+    const loadViajesActivos = getViajesActivos(id_Empresa);
 
-    const _getClientes =  async() => {
-      let result = await loadClientes.call;
-      if(result.data.success){
-        let response = result.data;
+    //obtenemos los viajes activos por empresa
+    const _getViajesActivos = () => {
+      loadViajesActivos.call
+      .then((resp) => {
+        let response = resp.data;
+        setCatViajesActivos(response.data);
+      }).catch((error: any) => {
+        console.log(error);
+      });
+    }
+
+    const _getClientes = () => {
+      loadClientes.call
+      .then((resp) => {
+        let response = resp.data;
         setCatClientes( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getMonedas = async() => {
-      let result = await loadMonedas.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getMonedas = () => {
+      loadMonedas.call
+      .then((resp) => {
+        let response = resp.data;
         setCatMonedas( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getFormasPago = async() => {
-      let result = await loadFormasPago.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getFormasPago = () => {
+      loadFormasPago.call
+      .then((resp) => {
+        let response = resp.data;
         setCatFormasPago( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getMetodosPago = async() => {
-      let result = await loadMetodosPago.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getMetodosPago = () => {
+      loadMetodosPago.call
+      .then((resp) => {
+        let response = resp.data;
         setCatMetodosPago( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getProdServiciosCfdi = async() => {
-      let result = await loadProdServicioCfdi.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getProdServiciosCfdi = () => {
+      loadProdServicioCfdi.call
+      .then((resp) => {
+        let response = resp.data;
         setCatProdServicioCFDI( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getUnidadPesoCfdi = async() => {
-      let result = await loadUnidadPesoCfdi.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getUnidadPesoCfdi = () => {
+      loadUnidadPesoCfdi.call
+      .then((resp) => {
+        let response = resp.data;
         setCatUnidadPesoCFDI( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getUsoCfdi = async() => {
-      let result = await loadUsoCfdi.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getUsoCfdi = () => {
+      loadUsoCfdi.call
+      .then((resp) => {
+        let response = resp.data;
         setCatUsoCFDI( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
     const _getTipoComprobante = () => {
       setCatTipoComprobante(ITipoComprobanteArray);
     }
 
-    const _getTipoImpuestos = async() => {
-      let result = await loadTipoImpuestos.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getTipoImpuestos = () => {
+      loadTipoImpuestos.call
+      .then((resp) => {
+        let response = resp.data;
         setCatTipoImpuestos( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getObjetoImpuesto = async() => {
-      let result = await loadObjetoImpuesto.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getObjetoImpuesto = () => {
+      loadObjetoImpuesto.call
+      .then((resp) => {
+        let response = resp.data;
         setCatObjetoImpuesto( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
-    const _getTipoFactor = async() => {
-      let result = await loadTipoFactor.call;
-      if(result.data.success){
-        let response = result.data;
+    const _getTipoFactor = () => {
+      loadTipoFactor.call
+      .then((resp) => {
+        let response = resp.data;
         setCatTipoFactor( response.data );
-      }
+      }).catch((error: any) => {
+        console.log(error);
+      });
     }
 
     const _getTasaCuota = () => {
@@ -225,6 +260,7 @@ function FacturaForm() {
     }
 
     //todo: llamamos a los servicios de catálogos
+    _getViajesActivos();
     _getClientes();
     _getMonedas();
     _getFormasPago();
@@ -239,7 +275,13 @@ function FacturaForm() {
     _getTasaCuota();
   },[]);
 
-  /* ============ FUNCIONES EFFECT PARA CATALOGOS DE LOS SELECT ============ */
+  /* =================== FUNCIONES EFFECT PARA CATALOGOS DE LOS SELECT =====================*/
+
+  //todo: funcion para select cat - viajes activos
+  useEffect(() => {
+    setCfdiForm({ ...cfdiForm, id_Viaje: (selectViaje !== null) ? selectViaje.id_Viaje : null });
+  },[selectViaje]);
+
   //todo: Effect para select cat - clientes
   useEffect(() => {
     setCfdiForm({...cfdiForm, id_Cliente: (selectClientes !== null) ? selectClientes.id_Cliente : null});
@@ -279,11 +321,11 @@ function FacturaForm() {
     // //todo: Validación si es comprobante es "Traslado" o "Pago" el subtotal y total lo ponemos en 0
     if(selectTipoComprobante !== null && ( 
       selectTipoComprobante.st_TipoComprobante === "Traslado" || selectTipoComprobante.st_TipoComprobante === "Pago") ){
-       setCfdiForm({...cfdiForm, dec_SubTotal: 0, dec_Total: 0});
+        setCfdiForm({...cfdiForm, dec_SubTotal: 0, dec_Total: 0});
     } else setCfdiForm({...cfdiForm, dec_SubTotal: null, dec_Total: null});
   },[cfdiForm.id_TipoComprobante]);
 
-  /* ================== SECCIÓN DE PRODUCTO SERVICIO CFDI ================================ */
+  /* ========================= SECCIÓN DE PRODUCTO SERVICIO CFDI ================================ */
 
   //todo: Funcion para editar formulario seccion de producto / servicio cfdi
   const onChangeFormPoductoServicio = ({ target: { name, value } }: handleChangeForm) => setProductoServicioCfdi({...productoServicioCfdi, [name]: value});
@@ -300,22 +342,18 @@ function FacturaForm() {
 
   //todo: Effect para select cat- Objeto de impuesto
   useEffect(()=> {
+    if(selectObjetoImpuesto?.c_ObjetoImp === "02") {setShowImpuestos(true);}
     setProductoServicioCfdi({...productoServicioCfdi, id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null});
   },[selectObjetoImpuesto]);
-
-  //todo: Effect para campo de objeto de impuesto y depende del resultado mostrar o no la seccion de impuestos
-  useEffect(() => {
-    if(selectObjetoImpuesto?.c_ObjetoImp === "02"){
-      setShowImpuestos(true);
-    }else{
-      setShowImpuestos(false);
-    }
-  },[productoServicioCfdi.id_ObjetoImp]);
 
   //todo:Effect para calcular el importe si cambian los campos: valor Unitario, descuento, cantidad
   useEffect(()=> {
     let importe: number = ImporteCalculate();
-    setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteConcepto: importe});
+    setProductoServicioCfdi({...productoServicioCfdi, 
+      dec_ImporteConcepto: importe,
+      dec_BaseTraslado: importe, 
+      dec_BaseRetencion: importe
+    });
   }, [productoServicioCfdi.dec_ValorUnitarioConcepto, productoServicioCfdi.dec_Descuento, productoServicioCfdi.i_Cantidad]);
 
   //todo: Funcion para calcular el importe del producto / servicio cfdi
@@ -325,25 +363,15 @@ function FacturaForm() {
     //todo: importe si se aplica descuento sino toma el valor del importe normal
     let importeWithDescuento: number = 0;
     if(productoServicioCfdi.dec_ValorUnitarioConcepto !== null && productoServicioCfdi.i_Cantidad !== null ){
-      importe =  + (productoServicioCfdi.dec_ValorUnitarioConcepto * productoServicioCfdi.i_Cantidad).toFixed(3);
+      importe = + (productoServicioCfdi.dec_ValorUnitarioConcepto * productoServicioCfdi.i_Cantidad).toFixed(3);
       importeWithDescuento = (productoServicioCfdi.dec_Descuento !== null ) 
       ? (importe - productoServicioCfdi.dec_Descuento)
       : importe;
     }
     return importeWithDescuento;
   }
-  //todo: seteamos la base traslado y retención cuando cambia el importe del producto / servicio del cfdi
-  useEffect(()=>{
-    // ? validamos si el objeto de impuesto es con detalle que guarde el base Trasldo y Retención
-    if(selectObjetoImpuesto?.id_ObjetoImp === 2){
-      setProductoServicioCfdi({...productoServicioCfdi, 
-        dec_BaseTraslado: productoServicioCfdi.dec_ImporteConcepto, 
-        dec_BaseRetencion: productoServicioCfdi.dec_ImporteConcepto
-      });
-    }
-  },[productoServicioCfdi.dec_ImporteConcepto]);
 
-  /* ================== AREA DE SELECT DE IMPUESTOS TRASLADOS =========================== */
+  /* ======================================== IMPUESTOS TRASLADOS ================================================ */
   //todo:Effect para select cat - Tipo Impuesto traslado
   useEffect(() => {
     setProductoServicioCfdi({...productoServicioCfdi, id_ImpuestoTraslado: (selectTipoImpuestosTraslado !== null) ? selectTipoImpuestosTraslado.id_Impuesto : null});
@@ -361,59 +389,78 @@ function FacturaForm() {
 
   //todo: Calculado el impuesto de Traslado respecto: Base, tasa Cuota
   useEffect( () => {
-    calculateTrasladoImporte();
+    let impuestoTraslado : number = calculateTrasladoImporte();
+    setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteTraslado: impuestoTraslado});
   },[productoServicioCfdi.dec_BaseTraslado, productoServicioCfdi.dec_TasaOCuotaTraslado]);
 
-  const calculateTrasladoImporte = () =>{
-    if(productoServicioCfdi.dec_BaseTraslado !== null && selectTasaCuotaTraslado !== null){
-      let impuesto: number =  + (productoServicioCfdi.dec_BaseTraslado * selectTasaCuotaTraslado.dec_ValorAplica).toFixed(3);
-      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteTraslado: impuesto});
-    }  
+  const calculateTrasladoImporte = (): number => {
+    let impuesto: number = 0;
+    if(productoServicioCfdi.dec_BaseTraslado !== null && productoServicioCfdi.dec_TasaOCuotaTraslado !== null){
+      impuesto = +(productoServicioCfdi.dec_BaseTraslado * productoServicioCfdi.dec_TasaOCuotaTraslado).toFixed(3);
+    }
+    return impuesto;
   }
-
-  /* ================== AREA DE SELECT DE IMPUESTOS RETENCIÓN =========================== */
-
-  //todo:Effect para select cat - Tipo Impuesto retención
+  /* ======================================== IMPUESTOS RETENCIÓN ================================================ */
+  //todo:Effect para select cat - Tipo Impuesto retencion
   useEffect(() => {
     setProductoServicioCfdi({...productoServicioCfdi, id_ImpuestoRetencion: (selectTipoImpuestosRetencion !== null) ? selectTipoImpuestosRetencion.id_Impuesto : null});
   },[selectTipoImpuestosRetencion]);
 
-  //todo:Effect para select cat - Tipo Factor Traslado
+  //todo:Effect para select cat - Tipo Factor retencion
   useEffect(() => {
     setProductoServicioCfdi({...productoServicioCfdi, id_TipoFactorRetencion: (selectTipoFactorRetencion !== null) ? selectTipoFactorRetencion.id_TipoFactor : null});
   },[selectTipoFactorRetencion]);
 
-  //todo: Effect para select Tasa Cuota Traslado
+  //todo: Effect para select Tasa Cuota retencion
   useEffect(() => {
     setProductoServicioCfdi({...productoServicioCfdi, dec_TasaOCuotaRetencion: (selectTasaCuotaRetencion !== null) ? selectTasaCuotaRetencion.dec_ValorAplica : null });
   },[selectTasaCuotaRetencion]);
 
   //todo: Calculado el impuesto de Retención respecto: base, Tasa Cuota
   useEffect( () => {
-    calculateRetencionImporte();
+    let impuestoRetencion: number = calculateRetencionImporte();
+    setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteRetencion: impuestoRetencion});
   },[productoServicioCfdi.dec_BaseRetencion, productoServicioCfdi.dec_TasaOCuotaRetencion]);
 
-  const calculateRetencionImporte = () => {
-    if(productoServicioCfdi.dec_BaseRetencion !== null && selectTasaCuotaRetencion !== null){
-      let impuesto: number =  + (productoServicioCfdi.dec_BaseRetencion * selectTasaCuotaRetencion.dec_ValorAplica).toFixed(3);
-      setProductoServicioCfdi({...productoServicioCfdi, dec_ImporteRetencion: impuesto});
+  const calculateRetencionImporte = (): number => {
+    let impuesto: number = 0;
+    if(productoServicioCfdi.dec_BaseRetencion !== null && productoServicioCfdi.dec_TasaOCuotaRetencion !== null){
+      impuesto = +(productoServicioCfdi.dec_BaseRetencion * productoServicioCfdi.dec_TasaOCuotaRetencion).toFixed(3);
     }
+    return impuesto;
   }
 
-  /* ================ VALIDACIONES PARA EL FORMULARIO ===============================*/
+  //todo: Funcion para validar que el importe no sea 0 y negativo
   useEffect(()=> {
     if( productoServicioCfdi?.dec_ImporteConcepto!== null && productoServicioCfdi?.dec_ImporteConcepto <= 0){
-      cleanFieldNumber(); // * Limpiamos campos numéricos
+      cleanFieldNumber();
       Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'El importe no puede ser un número negativo, verifica la cantidad, y el valor unitario del servicio de la factura', showConfirmButton: true });
     }
   },[productoServicioCfdi.dec_ImporteConcepto]);
 
   //todo: Función para limpiar campos de traslados, retención y descuento por error de numeros negativos
   const cleanFieldNumber = () => {
-    setProductoServicioCfdi({...productoServicioCfdi, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null, dec_Descuento: null});
+    // * limpamos el select de tasaCuota Traslado
+    setSelectTasaCuotaTraslado(null);
+    // * limpamos el select de tasaCuota Retencion
+    setSelectTasaCuotaRetencion(null);
+    // * limpamos los campos, valor unitario, descuento, importe conepto
+    setProductoServicioCfdi({...productoServicioCfdi, 
+      dec_BaseTraslado: null, 
+      dec_BaseRetencion: null, 
+      id_ImpuestoTraslado: null, 
+      id_ImpuestoRetencion: null, 
+      dec_ImporteTraslado: null, 
+      dec_ImporteRetencion: null, 
+      dec_TasaOCuotaTraslado: null, 
+      dec_TasaOCuotaRetencion: null, 
+      dec_Descuento: null,
+      dec_ImporteConcepto: null,
+      dec_ValorUnitarioConcepto: null
+    });
   }
 
-  //todo: 
+  //todo: Funcion que limpia todos los <AutoComplete />
   const cleanSelectCat = () => {
     setSelectProdServicioCfdi(null);
     setSelectUnidadPesoCfdi(null);
@@ -426,13 +473,14 @@ function FacturaForm() {
     setSelectTasaCuotaRetencion(null);
   }
 
-  /* =========================== SUBMIT ======================================= */
+  /* =================================================== SUBMIT ==================================================== */
 
   const addServiceCfdi = () => {
     setArrServicioCfdi([...arrServicioCfdi, productoServicioCfdi]);
     setProductoServicioCfdi(ProductoServicioCfdiEmpty);
     cleanSelectCat();
   }
+
   const calculateSubAndTotal = () => {
     let retenciones: number = 0;
     let traslados: number = 0;
@@ -440,9 +488,9 @@ function FacturaForm() {
 
     // iteramos los productos/servicios de la factura
     arrServicioCfdi.forEach(element => {
-      retenciones += (element.dec_ImporteRetencion !== null) ? Number(element.dec_ImporteRetencion) :  0;
-      traslados += (element.dec_ImporteTraslado !== null) ? Number(element.dec_ImporteTraslado) :  0;
-      importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? Number(element.dec_ImporteConcepto) :  0;
+      retenciones += (element.dec_ImporteRetencion !== null) ? +(element.dec_ImporteRetencion.toFixed(2)) :  0;
+      traslados += (element.dec_ImporteTraslado !== null) ? +(element.dec_ImporteTraslado.toFixed(2)) :  0;
+      importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? +(element.dec_ImporteConcepto.toFixed(2)) :  0;
     });
 
     //todo: Variables para 
@@ -457,7 +505,7 @@ function FacturaForm() {
       subTotal = importesBeforeTaxes;
       total = (subTotal + traslados) - retenciones;
     }
-
+  
     // Actualizamos subtotal y total
     setCfdiForm({...cfdiForm, dec_SubTotal: subTotal, dec_Total: total});
   }
@@ -472,10 +520,9 @@ function FacturaForm() {
       let idCfdi = result.data.data.id_CFDI.toString();
       console.log(idCfdi);
 
-      let result_productos: any;  
       //todo: Guardamos producto / servicio del cfdi
       arrServicioCfdi.forEach( async (element) => {
-        result_productos = await callEndpoint(createServicesCfdi(idCfdi, element));
+        await callEndpoint(createServicesCfdi(idCfdi, element));
       });
 
       //todo: Generamos el XML
@@ -500,6 +547,18 @@ function FacturaForm() {
         <div className='form-body'>
           <h4 className="card-title">Información General de la Factura</h4>
           <div className='row'>
+            <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+              <div className="form-group">
+                <Autocomplete
+                  value={selectViaje}
+                  options={catViajesActivos}
+                  onChange={(_option, value) => setSelectViaje(value)}
+                  getOptionLabel={(option) => option.folio_int_viaje.toString()}
+                  isOptionEqualToValue={(option, value) => option.id_Viaje === value.id_Viaje}
+                  renderInput={(params) => <TextField {...params} label="Selecciona tu viaje" variant="outlined" required />}
+                />
+              </div>
+            </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
               <div className="form-group">
                 <Autocomplete
@@ -576,8 +635,8 @@ function FacturaForm() {
         </div>
         <div className='borderForm'>
           <div className="form-body">
-            <Button onClick={() => setOpen(true)} variant='contained' color='primary' size='medium' type="button">Ver lista de servicios</Button> 
-            <h4 className="card-title mt-5">Producto servicio de la Factura</h4>
+            <h4 className="card-title">Producto servicio de la Factura</h4>
+            <Button className='mb-4' onClick={() => setOpen(true)} variant='contained' color='primary' size='medium' type="button">Ver lista de servicios</Button> 
             <div className="row">
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
@@ -593,7 +652,7 @@ function FacturaForm() {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField onChange={onChangeFormPoductoServicio} id='i_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1}} name="i_Cantidad" value={productoServicioCfdi.i_Cantidad || ''} required/>
+                  <TextField onChange={onChangeFormPoductoServicio} id='i_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ inputMode: 'numeric', autoComplete: "off", min: 1}} name="i_Cantidad" value={productoServicioCfdi.i_Cantidad || ''} required/>
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">

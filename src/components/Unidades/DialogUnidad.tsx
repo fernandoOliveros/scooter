@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 import { Fragment } from 'react';
-import UnidadForm from '../../pages/Unidades/Form/UnidadForm';
+import FormUnidad from '../../pages/Unidades/Form/FormUnidad';
 
 
 export interface Props {
@@ -22,7 +22,7 @@ const DialogUnidad = ({open, returnCloseDialog, returnUnidad}: Props) => {
         <Fragment>
             <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"  maxWidth={"lg"}>
                 <DialogContent>
-                    <UnidadForm  returnFormUnidad={(e) => returnFunction(e)} />
+                    <FormUnidad  returnFormUnidad={(e) => returnFunction(e)} />
                 </DialogContent>
                 <DialogActions>
                     <Button variant='contained' color='warning' onClick={() => returnCloseDialog(false)}>Salir sin guardar</Button>                

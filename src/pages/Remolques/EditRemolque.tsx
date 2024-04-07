@@ -1,8 +1,8 @@
 import { Fragment } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import MenuBar from "../../components/shared/Menu"
-import RemolqueForm from './Form/RemolqueForm';
 import Swal from 'sweetalert2';
+import FormRemolque from './Form/FormRemolque';
 
 function EditRemolque() {
   const { idRemolque } = useParams();
@@ -37,7 +37,7 @@ function EditRemolque() {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <RemolqueForm id_Remolque={idRemolque} returnFormRemolque={catchResponseForm}/>
+                                <FormRemolque id_Remolque={Number(idRemolque)} returnFormRemolque={catchResponseForm}/>
                             </div>
                         </div>
                     </div>

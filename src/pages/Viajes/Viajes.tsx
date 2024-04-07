@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate } from 'react-router-dom';
 import { DataGrid, esES,GridActionsCellItem,GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
@@ -16,7 +16,6 @@ const Viajes = () => {
     const [ viajes, setViajes ] = useState<IViajeModel[]>([])
     const navigate = useNavigate();
 
-    
     //todo: Inital function
     useEffect(() => {
         const loadViajes = getViajesEmpresa(userState.user.id_Empresa);
@@ -74,52 +73,52 @@ const Viajes = () => {
 
     return (
         <Fragment>
-        <div className="container-fluid">
-            <div className="row page-titles">
-                <div className="col-md-5 col-sm-12 col-xs-12">
-                    <h2 className="card-title">Unidades</h2>
-                </div>
-                <div className="col-md-7 col-sm-12 col-xs-12">
-                    <div className="d-flex justify-content-end align-items-center">
-                        <ol className="breadcrumb justify-content-end">
-                            <li className="breadcrumb-item"><Link to="/home">Home</Link></li>
-                            <li className="breadcrumb-item active">Unidades</li>
-                        </ol>
+            <div className="container-fluid">
+                <div className="row page-titles">
+                    <div className="col-md-5 col-sm-12 col-xs-12">
+                        <h2 className="card-title">Viajes</h2>
                     </div>
-                </div>
-            </div>
-            <div className='card'>
-                <div className="card-body">
-                    <div className="row" >
-                        <div className='col-md-5 col-sm-12 col-xs-12'>
-                            <h4 className="card-title">Viajes Registrados</h4>
-                        </div>
-                        <div className='col-md-7 col-sm-12 col-xs-12 text-end'>
-                            <button onClick={crearViaje} className="btn btn-primary btn-rounded" type="button"><i className="fa fa-plus-circle"></i> Viaje</button>
-                        </div>
-                        <div className="col-12 mt-3">
-                            <DataGrid
-                                autoHeight
-                                columns={columns}
-                                rows={viajes}
-                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                                getRowId={(row: IViajeModel) =>  row.id_Viaje}
-                                initialState={{
-                                    pagination: {
-                                      paginationModel: {
-                                        pageSize: 25,
-                                      },
-                                    },
-                                }}
-                                pageSizeOptions={[25]}
-                                disableRowSelectionOnClick
-                            />
+                    <div className="col-md-7 col-sm-12 col-xs-12">
+                        <div className="d-flex justify-content-end align-items-center">
+                            <ol className="breadcrumb justify-content-end">
+                                <li className="breadcrumb-item"><Link to="/home">Home</Link></li>
+                                <li className="breadcrumb-item active">Viaje</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
+                <div className='card'>
+                    <div className="card-body">
+                        <div className="row" >
+                            <div className='col-md-5 col-sm-12 col-xs-12'>
+                                <h4 className="card-title">Viajes registrados</h4>
+                            </div>
+                            <div className='col-md-7 col-sm-12 col-xs-12 text-end'>
+                                <button onClick={crearViaje} className="btn btn-primary btn-rounded" type="button"><i className="fa fa-plus-circle"></i> Viaje</button>
+                            </div>
+                            <div className="col-12 mt-3">
+                                <DataGrid
+                                    autoHeight
+                                    columns={columns}
+                                    rows={viajes}
+                                    localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                                    getRowId={(row: IViajeModel) =>  row.id_Viaje}
+                                    initialState={{
+                                        pagination: {
+                                        paginationModel: {
+                                            pageSize: 25,
+                                        },
+                                        },
+                                    }}
+                                    pageSizeOptions={[25]}
+                                    disableRowSelectionOnClick
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <MenuBar />
+            <MenuBar />
         </Fragment>
     )
 }

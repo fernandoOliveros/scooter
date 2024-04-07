@@ -23,25 +23,6 @@ const MAX_FILE_SIZE = 5002400;
 const nameDocuments = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
 const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
-  //todo: variables globales
-  const userState = useSelector((store: RootStore) => store.user);
-  const id_Empresa = userState.user.id_Empresa;
-  const [idDocumento, setIdDocumento] = useState<number>(0);
-
-  //todo: FORMULARIO
-  const [remolqueForm, setRemolqueForm] = useState<IRemolqueForm>({ id_Empresa : id_Empresa, st_Anio : '', st_Economico : '', st_Marca : '', st_Placa : '', st_NumSerie : '', date_VigenciaFM : null, id_TipoRemolque : null,
-  });
-  const [documentos, setDocumentos] = useState<IRemolqueDocumentos>({url_TarjetaCirculacion: '', url_Factura: '', url_PermisoSCT: ''});
-
-  //todo: select - catálogos
-  const [selectTipoRemolque, setSelectTipoRemolque] = useState(null);
-
-  //todo: variable - contiene los tipos remolques
-  const [ tipoRemolques, setTipoRemolques] = useState<IAutoComplete[]>([]);
-
-  //todo: Custom Hooks
-  const { callEndpoint } = useFetchAndLoad();
-
   //todo: INITIAL FUNCTION
   useEffect(() => {
     const loadTipoRemolques = getTipoRemolque();
@@ -62,6 +43,25 @@ const RemolqueForm = ({id_Remolque = '', returnFormRemolque}: Props) => {
     catTipoRemolques();
     return () => loadTipoRemolques.controller.abort();
   },[]);
+
+  //todo: variables generales
+  const userState = useSelector((store: RootStore) => store.user);
+  const id_Empresa = userState.user.id_Empresa;
+  const [idDocumento, setIdDocumento] = useState<number>(0);
+
+  //todo: FORMULARIO
+  const [remolqueForm, setRemolqueForm] = useState<IRemolqueForm>({ id_Empresa : id_Empresa, st_Anio : '', st_Economico : '', st_Marca : '', st_Placa : '', st_NumSerie : '', date_VigenciaFM : null, id_TipoRemolque : null,
+  });
+  const [documentos, setDocumentos] = useState<IRemolqueDocumentos>({url_TarjetaCirculacion: '', url_Factura: '', url_PermisoSCT: ''});
+
+  //todo: select - catálogos
+  const [selectTipoRemolque, setSelectTipoRemolque] = useState(null);
+
+  //todo: variable - contiene los tipos remolques
+  const [ tipoRemolques, setTipoRemolques] = useState<IAutoComplete[]>([]);
+
+  //todo: Custom Hooks
+  const { callEndpoint } = useFetchAndLoad();
 
   //todo: Función para seleccionar
 

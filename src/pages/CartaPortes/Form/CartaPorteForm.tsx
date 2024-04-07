@@ -11,14 +11,15 @@ import { ICartaPorteForm } from '../../../models/cartaportes/cartaPorte-form.mod
 import { Autocomplete, Button, TextField } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
-import { createCartaPorteService, createCfdiCartaPorte, createDestinoCartaPorteService, createOrigenCartaPorteService, createProductServiceCfdiCartaPorte, createProductosCartaPorteService, getViajesActivos } from '../../../services/cartaPorte/cartaPorte.service';
-import { IViajesActivos } from '../../../models/cartaportes/cartaPorte.model';
+import { createCartaPorteService, createCfdiCartaPorte, createDestinoCartaPorteService, createOrigenCartaPorteService, createProductServiceCfdiCartaPorte, createProductosCartaPorteService, timbrarCartaPorte } from '../../../services/cartaPorte/cartaPorte.service';
 import { ICatMoneda, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
 import { ICartaPorteCfdiForm, IProducServicioCartaPorteCfdiForm } from '../../../models/cartaportes/cartaPorte-cfdi.model';
 import { getClientesEmpresa } from '../../../services/clientes/clientes.service';
 import { getCatTipoMonedas, getCatFormaPago, getCatMetodosPago, getCatProdServicioCFDI, getCatUsoCFDI, getCatTipoImpuestos, getCatObjetoImpuesto, getCatTipoFactor } from '../../../services/cfdi/cfdi.service';
 import { ICliente } from '../../../models/clientes/cliente.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
+import { getViajesActivos } from '../../../services/public.service';
+import { IViajesActivos } from '../../../models/viajes/viaje.model';
 
 //Lazy load Dialogs
 const DialogOrigenes = lazy( () => import('../../../components/CartaPorte/DialogOrigenes'));
@@ -354,14 +355,14 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   //todo: Funcion para calcular total de mercancia, distancia recorrida conforme se guarda en el arreglo de productoServicios
   useEffect(() => {
     let pesoBruto : number = 0;
-    productosServicios.forEach( item => pesoBruto += + (item?.i_Cantidad));
+    productosServicios.forEach( item => pesoBruto += +(item?.i_Cantidad));
     setCartaPorte({...cartaPorte, i_NumberTotalMercancias: productosServicios.length, dec_PesoBrutoTotalMercancias: pesoBruto});
   },[productosServicios]);
 
   useEffect(() => {
     let distanciaRecorrida: number = 0;
     // sumando las distancias
-    arrDestinos.forEach(item => distanciaRecorrida += item?.dec_DistRe);
+    arrDestinos.forEach(item => distanciaRecorrida += +(item?.dec_DistRe));
     setCartaPorte({...cartaPorte, dec_TotalDistRec: distanciaRecorrida});
   },[arrDestinos]);
 
@@ -536,10 +537,17 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
 
   //todo: Funcion para calcular el total del cfdi de la carta porte
   const addSubAndTotal = () : number => {
-    //total = (importe + traslados(16%)) - retención (04%)
+    //* total = (importe + traslados(16%)) - retención (04%)
     let total : number = 0;
-    if(productCfdi.dec_ImporteConcepto != null && productCfdi.dec_ImporteTraslado != null && productCfdi.dec_ImporteRetencion != null){
-      total = (productCfdi.dec_ImporteConcepto + productCfdi.dec_ImporteTraslado) - productCfdi?.dec_ImporteRetencion; 
+    // * Si el comprobante es 1 (Ingreso entonces si hay total) de lo contrario se manda 0
+    if(cfdi.id_TipoComprobante === 1){
+      //* Valida si es con desglose de impuesto(2) y que las cantidad no vengan vacias
+      if( productCfdi.id_ObjetoImp === 2 && productCfdi.dec_ImporteConcepto != null && productCfdi.dec_ImporteTraslado != null && productCfdi.dec_ImporteRetencion != null){
+        total = (productCfdi.dec_ImporteConcepto + productCfdi.dec_ImporteTraslado) - productCfdi?.dec_ImporteRetencion; 
+      }else{
+        //* total es igual al subtotal porque no requieres desglose de impuesto
+        total = + productCfdi.dec_ImporteConcepto!;
+      }
     }
     return total;
   }
@@ -617,10 +625,23 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
       try {
         result_destino = await callEndpoint(createDestinoCartaPorteService(idCP, destino));
         console.log(result_destino);
+        returnFormCartaPorte(true);
+        //generateAndTimbrar(idCP);
       } catch (error) {
         console.log(error);
       }
     }); 
+  }
+
+  //todo: funcion para timbrar
+  const generateAndTimbrar = (idCP: number) => {
+    const loadTimbrarCP = timbrarCartaPorte(idCP);
+    loadTimbrarCP.call
+    .then((resp) => {
+      console.log(resp);
+    }).catch((error: any) => {
+      console.log(error);
+    });
   }
   
   return (
@@ -902,30 +923,3 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   )
 }
 export default CartaPorteForm;
-
-{/* <DynamicList open={open} items={ () => arrOrigenes} itemComponent={
-            (data, index) => (
-              <div className="table-responsive">
-                <table className='table color-table dark-table'>
-                  <thead>
-                    <tr>
-                      <th>Nombre Remitente</th>
-                      <th>RFC</th>
-                      <th>Calle</th>
-                      <th>CP</th>
-                      <th>Eliminar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{data?.st_RemitenteNombre}</td>
-                      <td>{data?.st_RemitenteRFC}</td>
-                      <td>{data?.st_Calle}</td>
-                      <td>{data?.c_codigoPostal}</td>
-                      <td><Button variant='contained' onClick={() => deleteOrigen(data.)} startIcon={<VisibilityIcon />} size='small'>Ver Origenes</Button></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>  
-            )
-          }  returnCloseDialog={(close) => setOpen(close)}/> */}

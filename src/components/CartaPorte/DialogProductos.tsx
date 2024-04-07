@@ -34,8 +34,8 @@ function DialogProductos({open, productos, deleteProducto, returnCloseDialog}:Pr
                     <tr key={index}>
                       <td>{++index}</td>
                       <td>{data?.id_ClaveProducto}</td>
-                      <td>{data?.Cantidad}</td>
-                      <td>{data?.PesoEnKg}</td>
+                      <td>{data?.i_Cantidad}</td>
+                      <td>{data?.dec_PesoEnKg}</td>
                       <td><Button variant='contained' color='error' onClick={() => deleteProducto(index)} endIcon={<GridDeleteForeverIcon />}>Eliminar </Button></td>
                     </tr>
                   ))

@@ -23,10 +23,15 @@ function Operadores() {
     const loadOperadores = getOperadoresByEmpresa(userState.user.id_Empresa);
     //todo: INITIAL
     useEffect( () => {
-        const getInitial = async () => {
+        const getInitial = () => {
             try {
-                const result = await loadOperadores.call;
-                setOperadores(result.data.data);
+                loadOperadores.call
+                .then(result => {
+                    let operadores_call = result.data;
+                    if(operadores_call.data.length > 0){
+                        setOperadores(operadores_call.data);
+                    }
+                }).catch((error) => console.log(error)) 
             } catch (error) {
                 alert("Error, al obtener los operadores de la empresa y/o empresa aún no tiene operadores cargados en el sistema");
                 console.log(error);

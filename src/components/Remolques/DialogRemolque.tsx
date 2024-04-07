@@ -1,6 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 import { Fragment } from 'react';
-import RemolqueForm from '../../pages/Remolques/Form/RemolqueForm';
+import FormRemolque from '../../pages/Remolques/Form/FormRemolque';
 
 
 export interface Props {
@@ -22,7 +22,7 @@ const DialogRemolque = ({open, returnCloseDialog, returnRemolque}: Props) => {
         <Fragment>
             <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"  maxWidth={"lg"}>
                 <DialogContent>
-                    <RemolqueForm  returnFormRemolque={(e) => returnFunction(e)} />
+                    <FormRemolque  returnFormRemolque={(e) => returnFunction(e)} />
                 </DialogContent>
                 <DialogActions>
                     <Button variant='contained' color='warning'  onClick={() => returnCloseDialog(false)}>Salir sin guardar</Button>

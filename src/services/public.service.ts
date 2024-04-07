@@ -3,6 +3,14 @@ import loadAbort from "../utils/load-abort.util"
 import baseUrl from "../utils/base-url.utils";
 
 
+export const getViajesActivos = (idEmpresa: string) => {
+    const controller = loadAbort(); //Opcion para cancelar solicitud
+    let uri = baseUrl + "viajes/readActivosByEmpresa/" + idEmpresa;
+    return {
+        call: axios.get(uri, {signal: controller.signal}),
+        controller
+    }
+}
 
 export const getUltimoFolioViaje = (id_Empresa: string) => {
     const controller = loadAbort();
@@ -102,7 +110,7 @@ export const getOrigenesCPEmpresa = (id_Empresa: string) => {
 
 export const getUnidadPesoCP = () => {
     const controller = loadAbort();
-    const url = baseUrl + "productos/readClaveUnidadPeso";
+    const url = baseUrl + "catalogos/readUnidadPesoCFDI";
     return {
         call: axios.get(url, { signal: controller.signal }),
         controller
