@@ -79,7 +79,7 @@ function FacturaForm() {
   const [ arrServicioCfdi, setArrServicioCfdi] = useState<IProducServicioCfdiForm[]>([]);
 
   //todo _variables globales
-  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null });
+  const [cfdiForm, setCfdiForm] = useState<ICfdiForm>({ id_Empresa : id_Empresa, id_Moneda : null, id_FormaPago : null, id_MetodoPago: null, id_UsoCFDI : null, id_TipoComprobante : null, id_Viaje : null, id_Cliente : null, dec_SubTotal: null, dec_Total: null, st_CondicionesPago: null, dec_TotalImpuestosRetenidos: null, dec_TotalImpuestosTrasladados: null});
 
   //string global para tipo de comprobante
   const [tipoComprobante, setTipoComprobante] = useState<string>("");
@@ -316,13 +316,13 @@ function FacturaForm() {
     setCfdiForm({...cfdiForm, id_MetodoPago: (selectMetodosPago !== null) ? selectMetodosPago.id_MetodoPago : null});
   },[selectMetodosPago]);
 
-  //todo: Effect para que se ejecuta cada vez que cambiemos de tipo de comprobante
+  //todo: Effect para que se ejecuta cada vez que cambiemos de id tipo de comprobante en cfdiForm
   useEffect(() => {
     // //todo: Validación si es comprobante es "Traslado" o "Pago" el subtotal y total lo ponemos en 0
     if(selectTipoComprobante !== null && ( 
       selectTipoComprobante.st_TipoComprobante === "Traslado" || selectTipoComprobante.st_TipoComprobante === "Pago") ){
-        setCfdiForm({...cfdiForm, dec_SubTotal: 0, dec_Total: 0});
-    } else setCfdiForm({...cfdiForm, dec_SubTotal: null, dec_Total: null});
+        setCfdiForm({...cfdiForm, dec_SubTotal: 0, dec_Total: 0, dec_TotalImpuestosRetenidos: 0, dec_TotalImpuestosTrasladados: 0});
+    } else setCfdiForm({...cfdiForm, dec_SubTotal: null, dec_Total: null, dec_TotalImpuestosRetenidos: null, dec_TotalImpuestosTrasladados: null});
   },[cfdiForm.id_TipoComprobante]);
 
   /* ========================= SECCIÓN DE PRODUCTO SERVICIO CFDI ================================ */
@@ -396,10 +396,11 @@ function FacturaForm() {
   const calculateTrasladoImporte = (): number => {
     let impuesto: number = 0;
     if(productoServicioCfdi.dec_BaseTraslado !== null && productoServicioCfdi.dec_TasaOCuotaTraslado !== null){
-      impuesto = +(productoServicioCfdi.dec_BaseTraslado * productoServicioCfdi.dec_TasaOCuotaTraslado).toFixed(3);
+      impuesto = +(productoServicioCfdi.dec_BaseTraslado * productoServicioCfdi.dec_TasaOCuotaTraslado).toFixed(2);
     }
     return impuesto;
   }
+
   /* ======================================== IMPUESTOS RETENCIÓN ================================================ */
   //todo:Effect para select cat - Tipo Impuesto retencion
   useEffect(() => {
@@ -425,7 +426,7 @@ function FacturaForm() {
   const calculateRetencionImporte = (): number => {
     let impuesto: number = 0;
     if(productoServicioCfdi.dec_BaseRetencion !== null && productoServicioCfdi.dec_TasaOCuotaRetencion !== null){
-      impuesto = +(productoServicioCfdi.dec_BaseRetencion * productoServicioCfdi.dec_TasaOCuotaRetencion).toFixed(3);
+      impuesto = +(productoServicioCfdi.dec_BaseRetencion * productoServicioCfdi.dec_TasaOCuotaRetencion).toFixed(2);
     }
     return impuesto;
   }
@@ -485,38 +486,36 @@ function FacturaForm() {
     let retenciones: number = 0;
     let traslados: number = 0;
     let importesBeforeTaxes: number = 0;
+    let subTotal: number = 0;
+    let total: number = 0;
 
-    // iteramos los productos/servicios de la factura
-    arrServicioCfdi.forEach(element => {
-      retenciones += (element.dec_ImporteRetencion !== null) ? +(element.dec_ImporteRetencion.toFixed(2)) :  0;
-      traslados += (element.dec_ImporteTraslado !== null) ? +(element.dec_ImporteTraslado.toFixed(2)) :  0;
-      importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? +(element.dec_ImporteConcepto.toFixed(2)) :  0;
-    });
+    //todo: Validamos Tipo de comprobante "Ingreso" para obtener el total de impuestos (reten, traslado), subtotal y total
+    if(cfdiForm.id_TipoComprobante === 1){
 
-    //todo: Variables para 
-    let subTotal: number;
-    let total: number;
+      //todo: iteramos los productos/servicios de la factura
+      arrServicioCfdi.forEach(element => {
+        retenciones += (element.dec_ImporteRetencion !== null) ? +(element.dec_ImporteRetencion.toFixed(2)) :  0;
+        traslados += (element.dec_ImporteTraslado !== null) ? +(element.dec_ImporteTraslado.toFixed(2)) :  0;
+        importesBeforeTaxes += (element.dec_ImporteConcepto !== null) ? +(element.dec_ImporteConcepto.toFixed(2)) :  0;
+      });
 
-    //Actualizamos total subtotal
-    if(cfdiForm.dec_SubTotal !== null && cfdiForm.dec_Total !== null){
-      subTotal = cfdiForm.dec_SubTotal + importesBeforeTaxes;
-      total = cfdiForm.dec_Total + ((subTotal + traslados) - retenciones);
-    }else{
+      //todo: calculamos el subtotal y el total
       subTotal = importesBeforeTaxes;
       total = (subTotal + traslados) - retenciones;
     }
-  
-    // Actualizamos subtotal y total
-    setCfdiForm({...cfdiForm, dec_SubTotal: subTotal, dec_Total: total});
+    // * Llamamos a la función para crear el CFDI
+    generateCFDI(subTotal, total, retenciones, traslados);
   }
 
-  const generateCFDI = async() => {
+  const generateCFDI = async(subtotal: number, total: number, retenciones: number, traslados: number) => {
     try {
       //todo: creamos el cfdi general
-      let result = await callEndpoint(createCfdiGeneral(cfdiForm));
-      console.log(result.data);
+      let result = await callEndpoint(createCfdiGeneral(cfdiForm, subtotal, total, retenciones, traslados));
 
-      //guardamos temporalmente el id_Cfdi
+      //todo: prueba
+      //let result = await createCfdiGeneral(cfdiForm, subtotal, total, retenciones, traslados)
+
+      //todo: guardamos temporalmente el id_Cfdi
       let idCfdi = result.data.data.id_CFDI.toString();
       console.log(idCfdi);
 
@@ -524,21 +523,14 @@ function FacturaForm() {
       arrServicioCfdi.forEach( async (element) => {
         await callEndpoint(createServicesCfdi(idCfdi, element));
       });
-
+      
       //todo: Generamos el XML
-      let xml = await callEndpoint(createXmlCfdi(idCfdi));
-      console.log(xml);
+      //let xml = await callEndpoint(createXmlCfdi(idCfdi));
+      //console.log(xml);
     } catch (error) {
       console.log(error);
     }
   }
-
-  //todo: generamod el CFDI general
-  useEffect(() => {
-    if(cfdiForm.dec_Total !== null && cfdiForm.dec_SubTotal !== null){
-      generateCFDI();
-    }
-  },[cfdiForm.dec_Total, cfdiForm.dec_SubTotal]);
   
   return (
     <Fragment>

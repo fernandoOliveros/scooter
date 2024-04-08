@@ -8,6 +8,17 @@ import { ICartaPorteDirOrigenForm } from "../../models/cartaportes/cartaPorte-di
 import { ICartaPorteDirDestinoForm } from "../../models/cartaportes/cartaPorte-dirDestino-form.model";
 
 
+export const getCartaPorteByEmpresa = (idEmpresa: string) => {
+    const controller = loadAbort();
+    let uri = baseUrl + "cartaporte/readAllByEmpresa/" + idEmpresa;
+    return {
+        call: axios.get(uri, { signal: controller.signal }),
+        controller
+    }
+}
+
+
+
 export const timbrarCartaPorte = (id_CartaPorte: number) => {
     const controller = loadAbort();
     let uri = baseUrl + "cartaporte/create/" + id_CartaPorte;

@@ -1,13 +1,57 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import MenuBar from "../../components/shared/Menu";
-
+import { ICartaPorte } from '../../models/cartaportes/cartaPorte.model';
+import { RootStore } from '../../redux/store';
+import { useSelector } from 'react-redux';
+import { getCartaPorteByEmpresa } from '../../services/cartaPorte/cartaPorte.service';
+import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import CodeIcon from '@mui/icons-material/Code';
 function CartaPortes() {
-    
+    //todo: variables
+    const userState = useSelector((store: RootStore) => store.user);
+    const [ cartasPorte, setCartasPorte ] = useState<ICartaPorte[]>([])
+
+    useEffect(() => {
+        const _getCartasPorte =  () => {
+            const loadCartasPorte = getCartaPorteByEmpresa(userState.user.id_Empresa);
+                loadCartasPorte.call
+            .then((result) => {
+                let tempCartaPorte = result.data;
+                setCartasPorte(tempCartaPorte.data);
+            }).catch((error) => console.log(error));
+        }
+        _getCartasPorte();
+    },[]);
     let navigate = useNavigate();
 
     //todo: FUNCIONES GLOBALES
     const createCartaPorte = () => navigate("crear");
+
+    const columns: GridColDef[] = [
+        {
+            field: 'actions',
+            headerName: 'Acc',
+            type: 'actions',
+            width: 40,
+            getActions: (params) => [
+              <GridActionsCellItem
+                icon={<CodeIcon />}
+                label="Timbrar"
+                onClick={() => console.log(params.row)}
+                showInMenu
+              />,
+              <GridActionsCellItem
+                icon={<CodeIcon />}
+                label="Editar"
+                onClick={() => console.log(params.id)}
+                showInMenu
+              />,
+            ],
+        },
+        { field: 'folio_int_cp', headerName: 'Folio interno', width: 200}
+    ];
+
     return (
         <Fragment>
             <div className="container-fluid">
@@ -28,10 +72,28 @@ function CartaPortes() {
                     <div className='card-body'>
                         <div className='row'>
                             <div className='col-md-5 col-sm-12 col-xs-12'>
-                                <h4 className="card-title">Cartas Porte generadas ()</h4>
+                                <h4 className="card-title">Cartas Porte generadas</h4>
                             </div>
                             <div className='col-md-7 col-sm-12 col-xs-12 text-end'>
                                 <button onClick={createCartaPorte} className="btn btn-primary btn-rounded" type="button"><i className="fa fa-plus-circle"></i> Carta Porte</button>
+                            </div>
+                            <div className="col-12 mt-3">
+                                <DataGrid
+                                    autoHeight
+                                    columns={columns}
+                                    rows={cartasPorte}
+                                    localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                                    getRowId={(row: ICartaPorte) =>  row.id_CartaPorte}
+                                    initialState={{
+                                        pagination: {
+                                        paginationModel: {
+                                            pageSize: 25,
+                                        },
+                                        },
+                                    }}
+                                    pageSizeOptions={[25]}
+                                    disableRowSelectionOnClick
+                                />
                             </div>
                         </div>
                     </div>

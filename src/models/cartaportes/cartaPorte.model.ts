@@ -1,11 +1,20 @@
 export interface ICartaPorte {
-    id_CartaPorte: number | null;
+    id_CartaPorte: number;
     id_Viaje: number | null;
     id_CFDI: number | null;
     folio_int_cp: number | null;
     i_NumberTotalMercancias: number | null;
     st_LugarExpedicion: string;
     dec_TotalDistRec: number | null; //debe la suma de las distancias recorridas
+    createdAt: string | null;
+    updatedAt: string | null;
+    st_Version: string;
+    dec_PesoBrutoTotalMercancias: string;
+    id_UnidadPeso: number | null;
+    id_AseguraMedAmbiente: number | null;
+    id_AseguraCarga: number | null;
+    st_PolizaMedAmbiente: string | null;
+    st_PolizaAseguraCarga: string | null;
 };
 
 

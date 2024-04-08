@@ -10,6 +10,8 @@ export interface ICfdiForm {
     dec_SubTotal: number | null;
     dec_Total: number | null;
     st_CondicionesPago: string | null;
+    dec_TotalImpuestosRetenidos: number | null;
+    dec_TotalImpuestosTrasladados: number | null;
 }
 
 export interface IProducServicioCfdiForm {
