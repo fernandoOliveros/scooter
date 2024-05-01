@@ -4,7 +4,7 @@ import MenuBar from "../../components/shared/Menu";
 import { ICartaPorte } from '../../models/cartaportes/cartaPorte.model';
 import { RootStore } from '../../redux/store';
 import { useSelector } from 'react-redux';
-import { getCartaPorteByEmpresa } from '../../services/cartaPorte/cartaPorte.service';
+import { createXml, getCartaPorteByEmpresa, timbrarXmlCartaPorte } from '../../services/cartaPorte/cartaPorte.service';
 import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
 import CodeIcon from '@mui/icons-material/Code';
 function CartaPortes() {
@@ -38,7 +38,7 @@ function CartaPortes() {
               <GridActionsCellItem
                 icon={<CodeIcon />}
                 label="Timbrar"
-                onClick={() => console.log(params.row)}
+                onClick={() => generateXml(params.row)}
                 showInMenu
               />,
               <GridActionsCellItem
@@ -51,6 +51,32 @@ function CartaPortes() {
         },
         { field: 'folio_int_cp', headerName: 'Folio interno', width: 200}
     ];
+
+    //todo: funcion para timbrar
+    const generateXml = (row: any) => {
+        console.log(row);
+        const loadXmlCP = createXml(row.id_CartaPorte);
+        loadXmlCP.call
+        .then((resp: any) => {
+            console.log(resp);
+            timbrarXml(row.id_CFDI);
+        }).catch((error: any) => {
+            console.log(error);
+        });
+    }
+
+    const timbrarXml = (id_cfdi: number) => {
+        const loadTimbrarXml = timbrarXmlCartaPorte(id_cfdi);
+        loadTimbrarXml.call
+        .then((resp: any) => {
+            console.log(resp);
+        }).catch((error: any) => {
+            console.log(error);
+        });
+
+    }
+
+
 
     return (
         <Fragment>

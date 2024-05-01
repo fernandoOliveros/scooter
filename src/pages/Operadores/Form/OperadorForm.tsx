@@ -304,12 +304,15 @@ const OperadorForm = ({id_Operador = 0, returnFormOperador}: Props) =>{
     e.preventDefault();
     let createrOperador = null;
     let createrDocuments = null;
+    let createrDireccion = null;
+    let createrTelefono = null;
+    let createrContacto = null;
     try {
       //todo: Creamos el registro del operador
       createrOperador = await callEndpoint(createOperador(operadorForm));
       let id_OperadorTemp = createrOperador.data.data.id_Operador;
 
-      //todo: ID DLE OPERADOR CORRECTO?
+      //todo: ID DEL OPERADOR CORRECTO?
       if(id_OperadorTemp !== '' || id_OperadorTemp !== null || id_OperadorTemp !== undefined){
 
         //todo: CREAMOS EL REGISTRO DE LOS DOCUMENTOS
@@ -319,15 +322,10 @@ const OperadorForm = ({id_Operador = 0, returnFormOperador}: Props) =>{
         let DocumentoId = createrDocuments.data.data.id_Documento;
         await callEndpoint(updateFilesOperador(documentos, DocumentoId, id_OperadorTemp));
 
-        //todo: LLENAMOS TODOS LOS ARREGLO CON EL ID_OPERADOR DEL API
-        setDireccion({...direccion, id_Operador: id_OperadorTemp});
-        setTelefono({...telefono, id_Operador: id_OperadorTemp});
-        setContacto({...contacto, id_Operador: id_OperadorTemp});
-
         //todo: INSERT DE DIRECCION, TELEFONO, CONTACTO DE EMERGENCIA
-        //createrDireccion = await callEndpoint(insertDireccion(direccion));
-        //createrTelefono = await callEndpoint(insertTelefono(telefono));
-        //createrContacto = await callEndpoint(insertContacto(contacto));
+        createrDireccion = await callEndpoint(insertDireccion(direccion, id_OperadorTemp));
+        createrTelefono = await callEndpoint(insertTelefono(telefono, id_OperadorTemp));
+        createrContacto = await callEndpoint(insertContacto(contacto, id_OperadorTemp));
 
         // * Retornamos boolean de respuesta
         returnFormOperador(true);
@@ -335,53 +333,24 @@ const OperadorForm = ({id_Operador = 0, returnFormOperador}: Props) =>{
     } catch (error) { returnFormOperador(false); }
   }
 
-  /*
-  //todo: Generamos los POST de Dirección, Telefono, Contacto del Operador nuevo
-  useEffect( () => {
-    const postDireccion = async() => {
-      let createrDireccion = await callEndpoint(insertDireccion(direccion));
-      console.log(createrDireccion);
-    }
-    postDireccion();
-  },[direccion.id_Operador]);
-
-
-  useEffect(() => {
-    const postTelefono = async() => {
-      let createrTelefono = await callEndpoint(insertTelefono(telefono));
-      console.log(createrTelefono);
-    }
-    postTelefono();
-  },[telefono.id_Operador]);
-
-  useEffect(() => {
-    const postContacto = async() => {
-      let createrContacto = await callEndpoint(insertContacto(contacto));
-      console.log(createrContacto);
-    }
-    postContacto();
-  },[contacto.id_Operador]);
-  */
-
-
   const HandleEditSubmit = async (e: any) => {
     e.preventDefault();
     try {
       //todo: ACTUALIZAMOS DATOS GENERALES DEL OPERADOR
-      await callEndpoint(updateOperador(operadorForm, id_Operador.toString()));
+      await callEndpoint(updateOperador(operadorForm, id_Operador));
 
       //todo: ACTUALIZAMOS TELEFONO
-      await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono.toString()));
+      await callEndpoint(updateTelefonoOperador(telefono, id_NumTelefono));
 
       //todo: ACTUALIZAMOS CONTACTOS
-      await callEndpoint(updateContactoOperador(contacto, id_ContactoEm.toString()));
+      await callEndpoint(updateContactoOperador(contacto, id_ContactoEm));
 
       //todo: ACTULIZAMOS DIRECIÓN
-      await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador.toString()));
+      await callEndpoint(updateDireccionOperador(direccion, id_Dir_Operador));
 
       //todo: ACTUALIZAMOS DOCUMENTOACIÓN
       if(documentos.url_CURP !== '' || documentos.url_ComprobanteDom !== '' || documentos.url_RFC !== ''){
-        await callEndpoint(updateFilesOperador(documentos, idDocumento.toString(), id_Operador.toString()));
+        await callEndpoint(updateFilesOperador(documentos, idDocumento, id_Operador));
       }
       returnFormOperador(true);
     } catch (error) {

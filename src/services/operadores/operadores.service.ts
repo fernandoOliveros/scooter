@@ -72,24 +72,30 @@ export const createOperador = (operador: IOperadorForm) => {
     }
 }
 
-export const insertDireccion = (direccion: IOperadorDireccion) => {
+export const insertDireccion = (direccion: IOperadorDireccion, idOperador: number) => {
     const controller = loadAbort();
+    //guardamos el id Operador en el objeto
+    direccion.id_Operador = idOperador;
     return {
         call: axios.post(baseUrl + "direccionOperadores/create", direccion, { signal: controller.signal }),
         controller
     }
 }
 
-export const insertTelefono = (telefono: IOperadorTelefono) => {
+export const insertTelefono = (telefono: IOperadorTelefono, idOperador: number) => {
     const controller = loadAbort();
+    //guardamos el id Operador en el objeto
+    telefono.id_Operador = idOperador;
     return {
         call: axios.post(baseUrl + "telefonosOperadores/create", telefono, { signal: controller.signal }),
         controller
     }
 }
 
-export const insertContacto = (contacto: IOperadorContactos) => {
+export const insertContacto = (contacto: IOperadorContactos, idOperador: number) => {
     const controller = loadAbort();
+    //guardamos el id Operador en el objeto
+    contacto.id_Operador = idOperador;
     return {
         call: axios.post(baseUrl + "contactosEmOperadores/create", contacto, { signal: controller.signal }),
         controller
@@ -111,7 +117,7 @@ export const uploadFilesOperador = (documentos: IOperadorDocumentos, idOperador:
 
 //todo: UPDATE'S DATABASE
 
-export const updateOperador = (data: IOperadorForm, id: string) => {
+export const updateOperador = (data: IOperadorForm, id: number) => {
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "operadores/update/" + id, data, { signal: controller.signal }),
@@ -119,7 +125,7 @@ export const updateOperador = (data: IOperadorForm, id: string) => {
     }
 }
 
-export const updateTelefonoOperador = (data: IOperadorTelefono, id: string) => {
+export const updateTelefonoOperador = (data: IOperadorTelefono, id: number) => {
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "telefonosOperadores/update/" + id, data, { signal: controller.signal }),
@@ -127,7 +133,7 @@ export const updateTelefonoOperador = (data: IOperadorTelefono, id: string) => {
     }
 }
 
-export const updateDireccionOperador = (data: IOperadorDireccion, id: string) => {
+export const updateDireccionOperador = (data: IOperadorDireccion, id: number) => {
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "direccionOperadores/update/" + id, data, { signal: controller.signal }),
@@ -135,7 +141,7 @@ export const updateDireccionOperador = (data: IOperadorDireccion, id: string) =>
     }
 }
 
-export const updateContactoOperador = (data: IOperadorContactos, id: string) => {
+export const updateContactoOperador = (data: IOperadorContactos, id: number) => {
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "contactosEmOperadores/update/" + id, data, { signal: controller.signal }),
@@ -143,12 +149,12 @@ export const updateContactoOperador = (data: IOperadorContactos, id: string) => 
     }
 }
 
-export const updateFilesOperador = (documentos: IOperadorDocumentos, idDocumento: string, idOperador: string) => {
+export const updateFilesOperador = (documentos: IOperadorDocumentos, idDocumento: number, idOperador: number) => {
     let format = new FormData();
     format.append( "url_CURP", documentos.url_CURP);
     format.append( "url_RFC", documentos.url_RFC);
     format.append( "url_ComprobanteDom", documentos.url_ComprobanteDom);
-    format.append("id_Operador", idOperador);
+    format.append("id_Operador", idOperador.toString());
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "documentosOperadores/update/" + idDocumento, format, { signal: controller.signal, }),

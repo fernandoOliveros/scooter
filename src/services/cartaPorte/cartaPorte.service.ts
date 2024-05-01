@@ -17,9 +17,18 @@ export const getCartaPorteByEmpresa = (idEmpresa: string) => {
     }
 }
 
+export const timbrarXmlCartaPorte = (id: number) =>{
+    const controller = loadAbort();
+    let uri = baseUrl + "timbox/timboxTimbrar/" + id;
+    return {
+        call: axios.post(uri, {signal: controller.signal}),
+        controller
+    }
+}
 
 
-export const timbrarCartaPorte = (id_CartaPorte: number) => {
+
+export const createXml = (id_CartaPorte: number) => {
     const controller = loadAbort();
     let uri = baseUrl + "cartaporte/create/" + id_CartaPorte;
     return {

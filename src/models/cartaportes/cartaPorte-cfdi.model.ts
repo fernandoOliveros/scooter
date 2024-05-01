@@ -9,6 +9,8 @@ export interface ICartaPorteCfdiForm {
     id_Cliente : number | null;
     dec_SubTotal: number | null;
     dec_Total: number | null;
+    dec_TotalImpuestosRetenidos?: number | null;
+    dec_TotalImpuestosTrasladados?: number | null;
 }
 
 export interface IProducServicioCartaPorteCfdiForm {

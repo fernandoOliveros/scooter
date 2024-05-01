@@ -27,7 +27,7 @@ let ArrDestinoEmpty = {
   st_IdUbicacion: '', 
   date_FechaLlegada: null, 
   st_DestinatarioRFC: '', 
-  dec_DistRe: 1,
+  dec_DistRec: 1,
 }
 let FormHtmlDireccion = {st_Colonia: '', st_Municipio: '', st_Localidad:'', st_Estado: ''};
 type handleChangeForm = ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
@@ -152,7 +152,7 @@ function DirDestinoForm({retornaDestino, retornaVerDestinos}: Props) {
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
               <div className="form-group">
-                <TextField fullWidth id='dec_DistRe' className="form-control" variant="outlined" label="Distancia Recorrida" type="number" name="dec_DistRe" onChange={onChangeDestino} value={destino.dec_DistRe || ''} inputProps={{ autoComplete: "off", min: 1}} required/>
+                <TextField fullWidth id='dec_DistRec' className="form-control" variant="outlined" label="Distancia Recorrida" type="number" name="dec_DistRec" onChange={onChangeDestino} value={destino.dec_DistRec || ''} inputProps={{ autoComplete: "off", min: 1}} required/>
               </div>
           </div>
           <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">

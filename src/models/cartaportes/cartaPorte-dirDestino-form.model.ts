@@ -13,5 +13,5 @@ export interface ICartaPorteDirDestinoForm {
     st_IdUbicacion: string | null;
     date_FechaLlegada: Date | null;
     st_DestinatarioRFC: string;
-    dec_DistRe: number;
+    dec_DistRec: number;
 }

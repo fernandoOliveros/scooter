@@ -2,7 +2,7 @@ export interface ICartaPorteForm {
     id_Viaje: number | null;
     id_CFDI: number | null;
     folio_int_cp: number | null;
-    i_NumberTotalMercancias: number | null;
+    i_NumTotalMercancias: number | null;
     st_LugarExpedicion: string | null;
     dec_TotalDistRec: number | null; //debe la suma de las distancias recorridas
     dec_PesoBrutoTotalMercancias: number | null;

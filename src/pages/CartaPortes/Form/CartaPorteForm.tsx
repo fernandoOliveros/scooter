@@ -11,7 +11,7 @@ import { ICartaPorteForm } from '../../../models/cartaportes/cartaPorte-form.mod
 import { Autocomplete, Button, TextField } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootStore } from '../../../redux/store';
-import { createCartaPorteService, createCfdiCartaPorte, createDestinoCartaPorteService, createOrigenCartaPorteService, createProductServiceCfdiCartaPorte, createProductosCartaPorteService, timbrarCartaPorte } from '../../../services/cartaPorte/cartaPorte.service';
+import { createCartaPorteService, createCfdiCartaPorte, createDestinoCartaPorteService, createOrigenCartaPorteService, createProductServiceCfdiCartaPorte, createProductosCartaPorteService } from '../../../services/cartaPorte/cartaPorte.service';
 import { ICatMoneda, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../models/cfdis/cfdi-form.model';
 import { ICartaPorteCfdiForm, IProducServicioCartaPorteCfdiForm } from '../../../models/cartaportes/cartaPorte-cfdi.model';
 import { getClientesEmpresa } from '../../../services/clientes/clientes.service';
@@ -129,7 +129,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     id_Viaje: null,
     id_CFDI: null,
     folio_int_cp: null,
-    i_NumberTotalMercancias: null,
+    i_NumTotalMercancias: null,
     st_LugarExpedicion: null,
     dec_TotalDistRec:  null,
     dec_PesoBrutoTotalMercancias: null,
@@ -150,7 +150,9 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     id_Viaje : null,
     id_Cliente : null,
     dec_SubTotal: null,
-    dec_Total: null
+    dec_Total: null,
+    dec_TotalImpuestosRetenidos: null,
+    dec_TotalImpuestosTrasladados: null
   });
 
   //todo: Variable general del producto/servicio del cfdi
@@ -355,14 +357,14 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   //todo: Funcion para calcular total de mercancia, distancia recorrida conforme se guarda en el arreglo de productoServicios
   useEffect(() => {
     let pesoBruto : number = 0;
-    productosServicios.forEach( item => pesoBruto += +(item?.i_Cantidad));
-    setCartaPorte({...cartaPorte, i_NumberTotalMercancias: productosServicios.length, dec_PesoBrutoTotalMercancias: pesoBruto});
+    productosServicios.forEach( item => pesoBruto += +(item?.dec_PesoEnKg));
+    setCartaPorte({...cartaPorte, i_NumTotalMercancias: productosServicios.length, dec_PesoBrutoTotalMercancias: pesoBruto});
   },[productosServicios]);
 
   useEffect(() => {
     let distanciaRecorrida: number = 0;
     // sumando las distancias
-    arrDestinos.forEach(item => distanciaRecorrida += +(item?.dec_DistRe));
+    arrDestinos.forEach(item => distanciaRecorrida += +(item?.dec_DistRec));
     setCartaPorte({...cartaPorte, dec_TotalDistRec: distanciaRecorrida});
   },[arrDestinos]);
 
@@ -490,6 +492,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     }else{
       setProductCfdi({...productCfdi, dec_ImporteTraslado: null});
     }
+    setCfdi({... cfdi, dec_TotalImpuestosTrasladados: importe});
   }
 
   //todo: Effect para mandar llamar a la funcion para importe 
@@ -507,6 +510,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     }else{
       setProductCfdi({...productCfdi, dec_ImporteRetencion: null});
     }
+    setCfdi({... cfdi, dec_TotalImpuestosRetenidos: importe});
   }
 
   //todo: Effect para select de tipo de comprobante
@@ -631,17 +635,6 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
         console.log(error);
       }
     }); 
-  }
-
-  //todo: funcion para timbrar
-  const generateAndTimbrar = (idCP: number) => {
-    const loadTimbrarCP = timbrarCartaPorte(idCP);
-    loadTimbrarCP.call
-    .then((resp) => {
-      console.log(resp);
-    }).catch((error: any) => {
-      console.log(error);
-    });
   }
   
   return (
