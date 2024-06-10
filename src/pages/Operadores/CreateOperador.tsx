@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import FormOperador from './Form/FormOperador'
 import OperadorForm from './Form/OperadorForm'
+import SecondFormOperador from './Form/SecondFormOperador'
 
 const CreateOperador = ()  => {
     //variables
@@ -37,6 +38,7 @@ const CreateOperador = ()  => {
                         <div className="card-body">
                             <div className='row'>
                                 <div className='col-12'>
+                                    {/* <SecondFormOperador returnFormOperador={catchResponseForm} /> */}
                                     <OperadorForm returnFormOperador={catchResponseForm} />
                                     {/* <FormOperador returnFormOperador={catchResponseForm} /> */}
                                 </div>

@@ -1,3 +1,31 @@
+export interface ICfdi{
+    id_CFDI: number | null;
+    id_Moneda: number | null;
+    id_FormaPago: number | null;
+    id_MetodoPago: number | null;
+    id_Empresa: number | null;
+    id_TipoComprobante: number | null;
+    id_Viaje: number | null;
+    id_Cliente: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+    st_nombreCrudoXML: string;
+    dec_Total: string | number | null;
+    dec_SubTotal: string | number | null;
+    st_RFC_emisor: string | null;
+    st_RFC_receptor: string | null;
+    st_nombre_receptor: string | null;
+    st_nombre_emisor: string | null;
+    st_LugarExpedicion: string | null;
+    st_CondicionesPago: string | null;
+    id_UsoCFDI: number | null;
+    st_Descuento: string | null;
+    dec_Descuento: string | number | null;
+    i_Timbrado: number | null;
+    dec_TotalImpuestosRetenidos: string | number | null;
+    dec_TotalImpuestosTrasladados: string | number | null;
+}
+
 export interface ICfdiForm {
     id_Empresa : number;
     id_Moneda : number | null;

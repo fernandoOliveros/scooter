@@ -63,6 +63,25 @@ let catTasaCuotaJson: ITasaCuota[] = [
   }
 ];
 
+let catValidateImpuestoFactor = [
+  {
+    valorImpuesto: "002",
+    impuesto: "IVA",
+    factor: "Tasa",
+    valor: 0.16,
+    traslado: true,
+    retencion: false
+  },
+  {
+    valorImpuesto: "002",
+    impuesto: "IVA",
+    factor: "Tasa",
+    valor: 0.04,
+    traslado: false,
+    retencion: true
+  }
+];
+
 const ProductoServicioCfdiEmpty: IProducServicioCfdiForm = {
   id_CFDI: null, id_ClaveProdServCFDI: null, i_Cantidad: 1, id_ClaveUnidadPesoCFDI: null, st_DescripcionConcepto: null, dec_ValorUnitarioConcepto: null, dec_ImporteConcepto: null, dec_Descuento: null, id_ObjetoImp: null, dec_BaseTraslado: null, dec_BaseRetencion: null, id_ImpuestoTraslado: null, id_ImpuestoRetencion: null, dec_ImporteTraslado: null, dec_ImporteRetencion: null, id_TipoFactorTraslado: null, id_TipoFactorRetencion: null, dec_TasaOCuotaTraslado: null, dec_TasaOCuotaRetencion: null
 };
@@ -342,8 +361,42 @@ function FacturaForm() {
 
   //todo: Effect para select cat- Objeto de impuesto
   useEffect(()=> {
-    if(selectObjetoImpuesto?.c_ObjetoImp === "02") {setShowImpuestos(true);}
-    setProductoServicioCfdi({...productoServicioCfdi, id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null});
+    if(selectObjetoImpuesto?.c_ObjetoImp === "02"){
+      setShowImpuestos(true);
+      setProductoServicioCfdi({...productoServicioCfdi, 
+        id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null,
+        dec_BaseRetencion: (productoServicioCfdi.dec_ImporteConcepto !== null) ? productoServicioCfdi.dec_ImporteConcepto : null,
+        dec_BaseTraslado: (productoServicioCfdi.dec_ImporteConcepto !== null) ? productoServicioCfdi.dec_ImporteConcepto : null,
+      });
+    }else{
+      setShowImpuestos(false);
+      //todo: limpiamos los campos para impuestos traslado y retencion
+      setProductoServicioCfdi({...productoServicioCfdi, 
+        id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null,
+        dec_BaseTraslado: null, 
+        dec_BaseRetencion: null, 
+        id_ImpuestoTraslado: null, 
+        id_ImpuestoRetencion: null, 
+        dec_ImporteTraslado: null, 
+        dec_ImporteRetencion: null, 
+        dec_TasaOCuotaTraslado: null, 
+        dec_TasaOCuotaRetencion: null, 
+        id_TipoFactorTraslado: null,
+        id_TipoFactorRetencion: null
+      });
+      // * limpamos el select de tasaCuota Traslado
+      setSelectTasaCuotaTraslado(null);
+      // * limpamos el select de tasaCuota Retencion
+      setSelectTasaCuotaRetencion(null);
+      // * limpamos el select de Factor Traslado
+      setSelectTipoFactorTraslado(null);
+      // * limpamos el select de Factor Retencion
+      setSelectTipoFactorRetencion(null);
+      // * limpamos el select de impuesto Traslado
+      setSelectTipoImpuestosTraslado(null);
+      // * limpamos el select de Factor Retencion
+      setSelectTipoImpuestosRetencion(null);
+    }
   },[selectObjetoImpuesto]);
 
   //todo:Effect para calcular el importe si cambian los campos: valor Unitario, descuento, cantidad
@@ -369,6 +422,26 @@ function FacturaForm() {
       : importe;
     }
     return importeWithDescuento;
+  }
+
+  //Todo: Funcion para  verificar el Impuesto - Tipo factor para traslado como para retención
+  const validateImpuestoFactorConfig = ( impuesto: string | null = null,  factor: string | null = null,  isTraslado: boolean = false ): boolean => {
+    if(impuesto !== null && factor !== null){
+      let findValidate  = [];
+      //Preguntamos que tipo de verificación es trasldo o retencion
+      if(isTraslado){
+        findValidate = catValidateImpuestoFactor.filter(x => x.valorImpuesto.includes(impuesto) && x.factor.includes(factor) && x.traslado);
+      }else{
+        findValidate = catValidateImpuestoFactor.filter(x => x.valorImpuesto.includes(impuesto) && x.factor.includes(factor) && x.retencion);
+      }
+      // preguntamos si el arreglo existe
+      if(findValidate.length > 0)
+        return true;
+      else
+        return false;
+    }else{
+      return true;
+    }
   }
 
   /* ======================================== IMPUESTOS TRASLADOS ================================================ */
@@ -434,19 +507,14 @@ function FacturaForm() {
   //todo: Funcion para validar que el importe no sea 0 y negativo
   useEffect(()=> {
     if( productoServicioCfdi?.dec_ImporteConcepto!== null && productoServicioCfdi?.dec_ImporteConcepto <= 0){
-      cleanFieldNumber();
+      cleanFieldImpuestosFactor();
       Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'El importe no puede ser un número negativo, verifica la cantidad, y el valor unitario del servicio de la factura', showConfirmButton: true });
     }
   },[productoServicioCfdi.dec_ImporteConcepto]);
 
   //todo: Función para limpiar campos de traslados, retención y descuento por error de numeros negativos
-  const cleanFieldNumber = () => {
-    // * limpamos el select de tasaCuota Traslado
-    setSelectTasaCuotaTraslado(null);
-    // * limpamos el select de tasaCuota Retencion
-    setSelectTasaCuotaRetencion(null);
-    // * limpamos los campos, valor unitario, descuento, importe conepto
-    setProductoServicioCfdi({...productoServicioCfdi, 
+  const cleanFieldImpuestosFactor = () => {
+    setProductoServicioCfdi({...productoServicioCfdi,   
       dec_BaseTraslado: null, 
       dec_BaseRetencion: null, 
       id_ImpuestoTraslado: null, 
@@ -457,12 +525,27 @@ function FacturaForm() {
       dec_TasaOCuotaRetencion: null, 
       dec_Descuento: null,
       dec_ImporteConcepto: null,
-      dec_ValorUnitarioConcepto: null
+      dec_ValorUnitarioConcepto: null,
+      id_TipoFactorTraslado: null,
+      id_TipoFactorRetencion: null
     });
+    // * limpamos el select de tasaCuota Traslado
+    setSelectTasaCuotaTraslado(null);
+    // * limpamos el select de tasaCuota Retencion
+    setSelectTasaCuotaRetencion(null);
+    // * limpamos el select de Factor Traslado
+    setSelectTipoFactorTraslado(null);
+    // * limpamos el select de Factor Retencion
+    setSelectTipoFactorRetencion(null);
+    // * limpamos el select de impuesto Traslado
+    setSelectTipoImpuestosTraslado(null);
+    // * limpamos el select de Factor Retencion
+    setSelectTipoImpuestosRetencion(null);
   }
 
   //todo: Funcion que limpia todos los <AutoComplete />
   const cleanSelectCat = () => {
+    console.log("Limpiando campos de impuestos traslados y retención");
     setSelectProdServicioCfdi(null);
     setSelectUnidadPesoCfdi(null);
     setSelectObjetoImpuesto(null);
@@ -676,22 +759,29 @@ function FacturaForm() {
                   />
                 </div>
               </div>
-              <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                <div className="form-group">
-                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Valor Unitario"  type="number" 
-                  inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitarioConcepto" value={productoServicioCfdi.dec_ValorUnitarioConcepto || ''} required/>
-                </div>
-              </div>
-              <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                <div className="form-group">
-                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_Descuento' className="form-control" variant="outlined" label="Descuento"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1}} name="dec_Descuento" value={productoServicioCfdi.dec_Descuento || ''}/>
-                </div>
-              </div>
-              <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                <div className="form-group">
-                  <TextField fullWidth  id='dec_ImporteConcepto'  name="dec_ImporteConcepto" className="form-control" variant="outlined" label="Importe"  type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1, readOnly: true}} value={productoServicioCfdi.dec_ImporteConcepto || ''} required/>
-                </div>
-              </div>
+              {
+                (tipoComprobante === "Ingreso") ? (
+                  <Fragment>
+                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                      <div className="form-group">
+                        <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Valor Unitario" type="number"
+                          inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*', min: 1 }} name="dec_ValorUnitarioConcepto" value={productoServicioCfdi.dec_ValorUnitarioConcepto || ''} required />
+                      </div>
+                    </div>
+                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                      <div className="form-group">
+                        <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_Descuento' className="form-control" variant="outlined" label="Descuento" type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*', min: 1 }} name="dec_Descuento" value={productoServicioCfdi.dec_Descuento || ''} />
+                      </div>
+                    </div>
+                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                      <div className="form-group">
+                        <TextField fullWidth id='dec_ImporteConcepto' name="dec_ImporteConcepto" className="form-control" variant="outlined" label="Importe" type="number" inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*', min: 1, readOnly: true }} value={productoServicioCfdi.dec_ImporteConcepto || ''} />
+                      </div>
+                    </div>
+                  </Fragment>
+                )
+                : void(0)
+              }
             </div>
           </div>
           {

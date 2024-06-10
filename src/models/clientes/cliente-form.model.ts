@@ -4,6 +4,7 @@ export interface IClienteForm {
     id_RegimenFiscal : number | null;
     st_RFC: string;
     i_Status: number;
+    c_DomicilioFiscal: string;
     st_PersonaRepresenta?: string;
     st_Celular?: string;
     st_Correo?: string;

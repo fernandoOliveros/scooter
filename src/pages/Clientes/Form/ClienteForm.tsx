@@ -24,7 +24,7 @@ const ClienteForm = ({returnFormCliente}: Props) => {
     const { callEndpoint } = useFetchAndLoad();
 
     //todo: variables del formulario
-    const [clienteForm, setClienteForm] = useState<IClienteForm>({ st_RazonSocial: '', st_AliasCliente : '', id_RegimenFiscal : null, st_RFC: '', i_Status: 1, st_PersonaRepresenta: '', st_Celular: '', st_Correo: '', id_Empresa: id_Empresa});
+    const [clienteForm, setClienteForm] = useState<IClienteForm>({ st_RazonSocial: '', st_AliasCliente : '', id_RegimenFiscal : null, st_RFC: '', i_Status: 1, st_PersonaRepresenta: '', st_Celular: '', st_Correo: '', id_Empresa: id_Empresa, c_DomicilioFiscal: ''});
 
     //todo: catálogos
     const [catRegFiscal, setCatRegFiscal] = useState<IRegFiscal[]>([]);
@@ -89,17 +89,22 @@ const ClienteForm = ({returnFormCliente}: Props) => {
                 <div className='row'>
                     <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                         <div className="form-group">
-                            <TextField id='st_RazonSocial' className="form-control" variant="outlined" label="Razon Social"  type="text" name="st_RazonSocial" onChange={onChangeForm} value={clienteForm.st_RazonSocial || ''} inputProps={{ autoComplete: "off" }} required />
-                        </div>
-                    </div>
-                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
-                        <div className="form-group">
                             <TextField id='st_AliasCliente' className="form-control" variant="outlined" label="Alias del cliente"  type="text" name="st_AliasCliente" onChange={onChangeForm} value={clienteForm.st_AliasCliente || ''} inputProps={{ autoComplete: "off" }} required />
                         </div>
                     </div>
                     <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                         <div className="form-group">
+                            <TextField id='st_RazonSocial' className="form-control" variant="outlined" label="Razon Social"  type="text" name="st_RazonSocial" onChange={onChangeForm} value={clienteForm.st_RazonSocial || ''} inputProps={{ autoComplete: "off" }} required />
+                        </div>
+                    </div>
+                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                        <div className="form-group">
                             <TextField id='st_RFC' className="form-control" variant="outlined" label="RFC del cliente"  type="text" name="st_RFC" onChange={onChangeForm} value={clienteForm.st_RFC || ''} inputProps={{ autoComplete: "off" }} required />
+                        </div>
+                    </div>
+                    <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                        <div className="form-group">
+                            <TextField id='c_DomicilioFiscal' className="form-control" variant="outlined" label="Codigo postal del cliente"  type="text" name="c_DomicilioFiscal" onChange={onChangeForm} value={clienteForm.c_DomicilioFiscal || ''} inputProps={{ autoComplete: "off" }} required />
                         </div>
                     </div>
                     <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">

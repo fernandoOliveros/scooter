@@ -7,14 +7,14 @@ import { getUnidades } from '../../../services/unidades/unidades.service';
 import { getOperadoresByEmpresa } from '../../../services/operadores/operadores.service';
 import { getRemolques } from '../../../services/remolques/remolques.service';
 import { Autocomplete, Button, TextField } from '@mui/material';
-import { IViajeForm } from '../../../models/viajes/viaje-form.model';
+import { IRelViajeRemolqueForm, IViajeForm } from '../../../models/viajes/viaje-form.model';
 import { IOperadorModel } from '../../../models/operadores/operador.model';
 import AddIcon from '@mui/icons-material/Add';
 import { getUltimoFolioViaje } from '../../../services/public.service';
 import { getClientesEmpresa } from '../../../services/clientes/clientes.service';
 import { ICliente } from '../../../models/clientes/cliente.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
-import { createViaje } from '../../../services/viajes/viajes.service';
+import { createRelViajeRemolques, createViaje } from '../../../services/viajes/viajes.service';
 
 //Lazy
 const ModalUnidad = lazy( () => import('../../../components/Unidades/DialogUnidad'));
@@ -42,7 +42,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
     const[dialogOperador, setDialogOperador] = useState<boolean>(false);
     const[dialogCliente, setDialogCliente] = useState<boolean>(false);
 
-    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 1, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, id_Remolque: null, i_km_totales: 1, id_Empresa:  id_Empresa, id_StatusViaje: 1, id_Candado: 1});
+    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 1, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, i_km_totales: 1, id_Empresa:  id_Empresa, id_StatusViaje: 1, id_Candado: 1});
     
     // CATÁLOGOS PARA LOS SELECT DE UNIDADES, OPERADORES, REMOLQUES
     //const [clientes, setClientes] = useState<IAutoComplete[]>([]);
@@ -53,7 +53,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     const [selectUnidad, setSelectUnidad] = useState<UnidadModel | null>(null);
     const [selectOperador, setSelectOperador] = useState<IOperadorModel | null>(null);
-    const [selectRemolque, setSelectRemolque] = useState<IRemolqueModel | null>(null);
+    const [selectRemolque, setSelectRemolque] = useState<IRemolqueModel[]>([]);
     const [selectCliente, setSelectCliente] = useState<ICliente | null>(null);
 
     const [newUnidad, setNewUnidad] = useState(false);
@@ -132,12 +132,6 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
     useEffect(()=>{
         setViajeForm({...viajeForm, id_Unidad: (selectUnidad !== null) ? selectUnidad.id_Unidad : null});
     },[selectUnidad]);
-
-    //todo: Select Remolque
-    useEffect(()=>{
-        setViajeForm({...viajeForm, id_Remolque: (selectRemolque !== null) ? selectRemolque.id_Remolque : null});
-    },[selectRemolque]);
-
 
     //todo: Select Operador
     useEffect(()=>{
@@ -236,11 +230,23 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
     const onSubmit = async(e: any) => {
         e.preventDefault();
         try {
-            await callEndpoint(createViaje(viajeForm));
+            let viaje = await callEndpoint(createViaje(viajeForm));
+            if(selectRemolque.length > 0 && selectRemolque.length <= 2){
+                //todo: recorremos el arreglo que contiene el 
+                selectRemolque.forEach( async (remolque) => {
+                    let relViajeRemolque: IRelViajeRemolqueForm = {
+                        id_Viaje: viaje.data.data.id_Viaje,
+                        id_Remolque: remolque.id_Remolque
+                    }
+                    console.log(relViajeRemolque);
+                    //todo: guardamos los remolque con relacion al viaje
+                    await callEndpoint(createRelViajeRemolques(relViajeRemolque));
+                });
+            }
             returnFormCreateViaje(true);
         } catch (error) {
             returnFormCreateViaje(false)
-            console.log(error);
+            console.log("Crear Viaje: " + error);
         }
     }
 
@@ -318,7 +324,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
                         </div>
                         <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                             <Autocomplete
-                                value={selectRemolque}
+                                multiple
                                 options={remolques}
                                 onChange={(_option, value) => setSelectRemolque(value)}
                                 getOptionLabel={(option) => "ECO: " + option.st_Economico}

@@ -20,6 +20,7 @@ import { ICliente } from '../../../models/clientes/cliente.model';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';
 import { getViajesActivos } from '../../../services/public.service';
 import { IViajesActivos } from '../../../models/viajes/viaje.model';
+import Swal from 'sweetalert2';
 
 //Lazy load Dialogs
 const DialogOrigenes = lazy( () => import('../../../components/CartaPorte/DialogOrigenes'));
@@ -91,7 +92,7 @@ const productoServicioCfdiEmpty : IProducServicioCartaPorteCfdiForm = {
   id_ClaveUnidadPesoCFDI: null,
   id_ObjetoImp: null,
   dec_ImporteConcepto: null,
-  dec_ValorUnitarioConcepto: 1,
+  dec_ValorUnitarioConcepto: null,
   st_DescripcionConcepto: null,
   id_ImpuestoTraslado: null,
   id_ImpuestoRetencion: null,
@@ -108,10 +109,29 @@ const productoServicioCfdiEmpty : IProducServicioCartaPorteCfdiForm = {
 
 let catUnidadServicio : IUnidadPesoCFDI[] = [
   {
-    id_ClaveUnidadPesoCFDI: 1,
+    id_ClaveUnidadPesoCFDI: 678,
     c_ClaveUnidad: "E48",
     st_Nombre: "Unidad de servicio",
     st_Descripción: "Unidad de conteo que define el número de unidades de servicio (unidad de servicio: definido período / propiedad / centro / utilidad de alimentación)."
+  }
+];
+
+let catValidateImpuestoFactor = [
+  {
+    valorImpuesto: "002",
+    impuesto: "IVA",
+    factor: "Tasa",
+    valor: 0.16,
+    traslado: true,
+    retencion: false
+  },
+  {
+    valorImpuesto: "002",
+    impuesto: "IVA",
+    factor: "Tasa",
+    valor: 0.04,
+    traslado: false,
+    retencion: true
   }
 ];
 
@@ -130,6 +150,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     id_CFDI: null,
     folio_int_cp: null,
     i_NumTotalMercancias: null,
+    dec_PesoBrutoVehicular: null,
     st_LugarExpedicion: null,
     dec_TotalDistRec:  null,
     dec_PesoBrutoTotalMercancias: null,
@@ -358,7 +379,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   useEffect(() => {
     let pesoBruto : number = 0;
     productosServicios.forEach( item => pesoBruto += +(item?.dec_PesoEnKg));
-    setCartaPorte({...cartaPorte, i_NumTotalMercancias: productosServicios.length, dec_PesoBrutoTotalMercancias: pesoBruto});
+    setCartaPorte({...cartaPorte, i_NumTotalMercancias: productosServicios.length, dec_PesoBrutoTotalMercancias: pesoBruto, dec_PesoBrutoVehicular: pesoBruto});
   },[productosServicios]);
 
   useEffect(() => {
@@ -428,18 +449,111 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
 
   //todo: Effect para select cat- Objeto de impuesto
   useEffect(()=> {
-    if(selectObjetoImpuesto?.c_ObjetoImp === "02") {setShowImpuestos(true);}
-    setProductCfdi({...productCfdi, id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null});
+    if(selectObjetoImpuesto?.c_ObjetoImp === "02") {
+      setProductCfdi({...productCfdi, 
+        id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null,
+        dec_BaseRetencion: (productCfdi.dec_ImporteConcepto !== null) ? productCfdi.dec_ImporteConcepto : null,
+        dec_BaseTraslado: (productCfdi.dec_ImporteConcepto !== null) ? productCfdi.dec_ImporteConcepto : null,
+      });
+      setShowImpuestos(true);
+    }else{
+      setShowImpuestos(false);
+      //todo: limpiamos los campos para impuestos traslado y retencion
+      setProductCfdi({...productCfdi, 
+        id_ObjetoImp: (selectObjetoImpuesto !== null) ? selectObjetoImpuesto.id_ObjetoImp : null,
+        dec_BaseTraslado: null, 
+        dec_BaseRetencion: null, 
+        id_ImpuestoTraslado: null, 
+        id_ImpuestoRetencion: null, 
+        dec_ImporteTraslado: null, 
+        dec_ImporteRetencion: null, 
+        dec_TasaOCuotaTraslado: null, 
+        dec_TasaOCuotaRetencion: null, 
+        id_TipoFactorTraslado: null,
+        id_TipoFactorRetencion: null
+      });
+      // * limpamos el select de tasaCuota Traslado
+      setSelectTasaCuotaTraslado(null);
+      // * limpamos el select de tasaCuota Retencion
+      setSelectTasaCuotaRetencion(null);
+      // * limpamos el select de Factor Traslado
+      setSelectTipoFactorTraslado(null);
+      // * limpamos el select de Factor Retencion
+      setSelectTipoFactorRetencion(null);
+      // * limpamos el select de impuesto Traslado
+      setSelectTipoImpuestosTraslado(null);
+      // * limpamos el select de Factor Retencion
+      setSelectTipoImpuestosRetencion(null);
+    }
   },[selectObjetoImpuesto]);
 
+  //Todo: Funcion para  verificar el Impuesto - Tipo factor para traslado como para retención
+  const validateImpuestoFactorConfig = ( impuesto: string | null = null,  factor: string | null = null,  isTraslado: boolean = false ): boolean => {
+    if(impuesto !== null && factor !== null){
+      let findValidate  = [];
+      //Preguntamos que tipo de verificación es trasldo o retencion
+      if(isTraslado){
+        findValidate = catValidateImpuestoFactor.filter(x => x.valorImpuesto.includes(impuesto) && x.factor.includes(factor) && x.traslado);
+      }else{
+        findValidate = catValidateImpuestoFactor.filter(x => x.valorImpuesto.includes(impuesto) && x.factor.includes(factor) && x.retencion);
+      }
+      // preguntamos si el arreglo existe
+      if(findValidate.length > 0)
+        return true;
+      else
+        return false;
+    }else{
+      return true;
+    }
+  }
+
+  //todo: Funcion para calcular el importe del servicio además de la base de impuesto traslado y retención
+  useEffect(() => {
+    let importe: number = CalculateImporteBeforeImpuestos();
+    setProductCfdi({...productCfdi, 
+      dec_ImporteConcepto: importe, 
+      dec_BaseTraslado: importe, 
+      dec_BaseRetencion: importe
+    });
+  },[productCfdi.dec_ValorUnitarioConcepto, productCfdi.i_Cantidad]);
+
+  //todo: Funcion para calcular el importe del producto / servicio cfdi
+  const CalculateImporteBeforeImpuestos = (): number => {
+    let importe: number = 0;
+    if(productCfdi.dec_ValorUnitarioConcepto !== null && productCfdi.i_Cantidad !== null ){
+      importe = + (productCfdi.dec_ValorUnitarioConcepto * productCfdi.i_Cantidad).toFixed(3);
+    }
+    return importe;
+  }
+
+  //todo: Funcion para validar que el importe no sea 0 y negativo
+  useEffect(()=> {
+    if( productCfdi?.dec_ImporteConcepto!== null && productCfdi?.dec_ImporteConcepto <= 0){
+      cleanFieldImpuestosFactor();
+      Swal.fire({ icon: 'error', title: 'Ocurrio un error', text: 'El importe no puede ser 0 ó un número negativo, verifica la cantidad, y el valor unitario del servicio de la factura', showConfirmButton: true });
+    }
+  },[productCfdi.dec_ImporteConcepto]);
+
+  /* ======================================== IMPUESTOS TRASLADOS ================================================ */
   //todo:Effect para catalogo - Tipo Impuesto traslado
   useEffect(() => {
-    setProductCfdi({...productCfdi, id_ImpuestoTraslado: (selectTipoImpuestosTraslado !== null) ? selectTipoImpuestosTraslado.id_Impuesto : null});
+    let valdateConfiguration = validateImpuestoFactorConfig( selectTipoImpuestosTraslado?.c_Impuesto,  selectTipoFactorTraslado?.c_TipoFactor, true);
+
+    if(valdateConfiguration){
+      setProductCfdi({...productCfdi, id_ImpuestoTraslado: (selectTipoImpuestosTraslado !== null) ? selectTipoImpuestosTraslado.id_Impuesto : null});
+    }else{
+      Swal.fire({ icon: 'error', title: 'Impuesto - factor', text: 'Verifica que la configuración del impuesto y tipo de factor en la sección de traslado sean los correctos', showConfirmButton: true });
+    }
   },[selectTipoImpuestosTraslado]);
 
   //todo:Effect para catalogo - Tipo Factor Traslado
   useEffect(() => {
-    setProductCfdi({...productCfdi, id_TipoFactorTraslado: (selectTipoFactorTraslado !== null) ? selectTipoFactorTraslado.id_TipoFactor : null});
+    let valdateConfiguration = validateImpuestoFactorConfig( selectTipoImpuestosTraslado?.c_Impuesto, selectTipoFactorTraslado?.c_TipoFactor, true);
+    if(valdateConfiguration){
+      setProductCfdi({...productCfdi, id_TipoFactorTraslado: (selectTipoFactorTraslado !== null) ? selectTipoFactorTraslado.id_TipoFactor : null});
+    }else{
+      Swal.fire({ icon: 'error', title: 'Impuesto - factor', text: 'Verifica que la configuración del impuesto y tipo de factor en la sección traslado sean los correctos', showConfirmButton: true });
+    }
   },[selectTipoFactorTraslado]);
 
   //todo: Effect para catalogo - Tasa Cuota Traslado
@@ -447,53 +561,61 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     setProductCfdi({...productCfdi, dec_TasaOCuotaTraslado: (selectTasaCuotaTraslado !== null) ? selectTasaCuotaTraslado.dec_ValorAplica : null });
   },[selectTasaCuotaTraslado]);
 
+  //todo: Effect para mandar llamar a la funcion para importe 
+  //todo: (cuando cambie de valor dec_TasaOCuotaTraslado, base Traslado)
+  useEffect(() => {
+    console.log("entro dec_BaseTraslado");
+    CalcularImporteTrasladoAfterImpuestos();
+  },[productCfdi.dec_BaseTraslado]);
+  useEffect(() => {
+    console.log("entro dec_TasaOCuotaTraslado");
+    CalcularImporteTrasladoAfterImpuestos();
+  },[productCfdi.dec_TasaOCuotaTraslado]);
+
+  const CalcularImporteTrasladoAfterImpuestos = () => {
+    let importe: number = 0;
+    if(productCfdi.dec_BaseTraslado !== null && productCfdi.dec_TasaOCuotaTraslado !== null ){
+      console.log("if");
+      //.ToFixed(3) solo tomas 3 decimal y el  +() convierte string a number
+      importe =  + (productCfdi.dec_BaseTraslado * productCfdi.dec_TasaOCuotaTraslado).toFixed(3);
+      setProductCfdi({...productCfdi, dec_ImporteTraslado: importe});
+    }else{
+      console.log("else");
+      setProductCfdi({...productCfdi, dec_ImporteTraslado: null});
+    }
+    setCfdi({... cfdi, dec_TotalImpuestosTrasladados: importe});
+  }
+
+  /* ======================================== IMPUESTOS RETENCION ================================================ */
+
   //todo:Effect para catalogo - Tipo Impuesto retención
   useEffect(() => {
-    setProductCfdi({...productCfdi, id_ImpuestoRetencion: (selectTipoImpuestosRetencion !== null) ? selectTipoImpuestosRetencion.id_Impuesto : null});
+    let valdateConfiguration = validateImpuestoFactorConfig( selectTipoImpuestosRetencion?.c_Impuesto,  selectTipoFactorRetencion?.c_TipoFactor);
+    if(valdateConfiguration){
+      setProductCfdi({...productCfdi, id_ImpuestoRetencion: (selectTipoImpuestosRetencion !== null) ? selectTipoImpuestosRetencion.id_Impuesto : null});
+    }else{
+      Swal.fire({ icon: 'error', title: 'Impuesto - factor', text: 'Verifica que la configuración del impuesto y tipo de factor en la sección de retención sean los correctos', showConfirmButton: true });
+    }
+    
+    
   },[selectTipoImpuestosRetencion]);
 
   //todo:Effect para catalogo - Tipo Factor rertención
   useEffect(() => {
-    setProductCfdi({...productCfdi, id_TipoFactorRetencion: (selectTipoFactorRetencion !== null) ? selectTipoFactorRetencion.id_TipoFactor : null});
+    let valdateConfiguratio = validateImpuestoFactorConfig( selectTipoImpuestosRetencion?.c_Impuesto,  selectTipoFactorRetencion?.c_TipoFactor);
+
+    if(valdateConfiguratio){
+      setProductCfdi({...productCfdi, id_TipoFactorRetencion: (selectTipoFactorRetencion !== null) ? selectTipoFactorRetencion.id_TipoFactor : null});
+    }else{
+      Swal.fire({ icon: 'error', title: 'Impuesto - trasldo', text: 'Verifica que la configuración del impuesto y tipo de factor en la sección de retención sean los correctos', showConfirmButton: true });
+    }
+    
   },[selectTipoFactorRetencion]);
 
   //todo: Effect para catalogo - Tasa Cuota retención
   useEffect(() => {
     setProductCfdi({...productCfdi, dec_TasaOCuotaRetencion: (selectTasaCuotaRetencion !== null) ? selectTasaCuotaRetencion.dec_ValorAplica : null });
   },[selectTasaCuotaRetencion]);
-
-  //todo: Funcion para calcular el importe del servicio además de la base de impuesto traslado y retención
-  const CalcularBaseImpuestos = () => {
-    let importe: number = CalculateImporteBeforeImpuestos();
-    setProductCfdi({...productCfdi, dec_ImporteConcepto: importe, dec_BaseTraslado: importe, dec_BaseRetencion: importe});
-  }
-
-  //todo: Funcion para calcular el importe del producto / servicio cfdi
-  const CalculateImporteBeforeImpuestos = (): number => {
-    let importe: number = 0;
-    if(productCfdi.dec_ValorUnitarioConcepto !== null && productCfdi.i_Cantidad !== null ){
-      importe = productCfdi.dec_ValorUnitarioConcepto * productCfdi.i_Cantidad;
-    }
-    return importe;
-  }
-
-  //todo: Effect para mandar llamar a la funcion para importe 
-  //todo: (cuando cambie de valor dec_TasaOCuotaTraslado, base Traslado)
-  useEffect(() => {
-    CalcularImporteTrasladoAfterImpuestos();
-  },[productCfdi.dec_TasaOCuotaTraslado, productCfdi.dec_BaseTraslado]);
-
-  const CalcularImporteTrasladoAfterImpuestos = () => {
-    let importe: number = 0;
-    if(productCfdi.dec_BaseTraslado !== null && productCfdi.dec_TasaOCuotaTraslado !== null ){
-      //.ToFixed(3) solo tomas 3 decimal y el  +() convierte string a number
-      importe =  + (productCfdi.dec_BaseTraslado * productCfdi.dec_TasaOCuotaTraslado).toFixed(3);
-      setProductCfdi({...productCfdi, dec_ImporteTraslado: importe});
-    }else{
-      setProductCfdi({...productCfdi, dec_ImporteTraslado: null});
-    }
-    setCfdi({... cfdi, dec_TotalImpuestosTrasladados: importe});
-  }
 
   //todo: Effect para mandar llamar a la funcion para importe 
   //todo: (cuando cambie de valor dec_TasaOCuotaRetencion, dec_BaseRetencion)
@@ -512,6 +634,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     }
     setCfdi({... cfdi, dec_TotalImpuestosRetenidos: importe});
   }
+  /*============================================================================================================== */
 
   //todo: Effect para select de tipo de comprobante
   useEffect(() => {
@@ -539,6 +662,36 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     console.log("Producto: " + position);
   }
 
+  //todo: Función para limpiar campos de traslados, retención y descuento por error de numeros negativos
+  const cleanFieldImpuestosFactor = () => {
+    setProductCfdi({...productCfdi,
+      dec_ValorUnitarioConcepto: null,
+      dec_ImporteConcepto: null,
+      dec_BaseTraslado: null, 
+      dec_BaseRetencion: null, 
+      id_ImpuestoTraslado: null, 
+      id_ImpuestoRetencion: null,
+      id_TipoFactorTraslado: null,
+      id_TipoFactorRetencion: null,
+      dec_TasaOCuotaTraslado: null, 
+      dec_TasaOCuotaRetencion: null,
+      dec_ImporteTraslado: null, 
+      dec_ImporteRetencion: null
+    });
+    // * limpamos el select de tasaCuota Traslado
+    setSelectTasaCuotaTraslado(null);
+    // * limpamos el select de tasaCuota Retencion
+    setSelectTasaCuotaRetencion(null);
+    // * limpamos el select de Factor Traslado
+    setSelectTipoFactorTraslado(null);
+    // * limpamos el select de Factor Retencion
+    setSelectTipoFactorRetencion(null);
+    // * limpamos el select de impuesto Traslado
+    setSelectTipoImpuestosTraslado(null);
+    // * limpamos el select de Factor Retencion
+    setSelectTipoImpuestosRetencion(null);
+  }
+
   //todo: Funcion para calcular el total del cfdi de la carta porte
   const addSubAndTotal = () : number => {
     //* total = (importe + traslados(16%)) - retención (04%)
@@ -560,7 +713,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   const createCfdi = async(e: any) => {
     e.preventDefault();
     let total = addSubAndTotal();
-    let subtotal: number = productCfdi?.dec_ImporteConcepto!;
+    let subtotal: number = (total > 0) ? productCfdi?.dec_ImporteConcepto! : 0;
     try {
       let cfdi_result = await callEndpoint(createCfdiCartaPorte(subtotal, total, cfdi));
       console.log(cfdi_result.data);
@@ -630,7 +783,6 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
         result_destino = await callEndpoint(createDestinoCartaPorteService(idCP, destino));
         console.log(result_destino);
         returnFormCartaPorte(true);
-        //generateAndTimbrar(idCP);
       } catch (error) {
         console.log(error);
       }
@@ -747,7 +899,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField onBlur={CalcularBaseImpuestos} onChange={onChangeFormPoductoServicio} id='i_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ autoComplete: "off", min: 1}} name="i_Cantidad" value={productCfdi.i_Cantidad || ''} required/>
+                  <TextField onChange={onChangeFormPoductoServicio} id='i_Cantidad' className="form-control" variant="outlined" label="Cantidad"  type="number" inputProps={{ autoComplete: "off", min: 1}} name="i_Cantidad" value={productCfdi.i_Cantidad || ''} required/>
                 </div>
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -781,7 +933,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
               </div>
               <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                  <TextField onBlur={CalcularBaseImpuestos} fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Valor Unitario"  type="number" 
+                  <TextField fullWidth onChange={onChangeFormPoductoServicio} id='dec_ValorUnitarioConcepto' className="form-control" variant="outlined" label="Valor Unitario"  type="number" 
                   inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 1 }} name="dec_ValorUnitarioConcepto" value={productCfdi.dec_ValorUnitarioConcepto || ''} required/>
                 </div>
               </div>
@@ -802,14 +954,14 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
                     </div>
                     <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
                       <div className="form-group">
-                        <TextField id='dec_BaseTraslado' onChange={CalcularImporteTrasladoAfterImpuestos} className="form-control" variant="outlined" label="Base Traslado"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1, readOnly: true }} name="dec_BaseTraslado" value={productCfdi.dec_BaseTraslado || ''} required />
+                        <TextField id='dec_BaseTraslado' className="form-control" variant="outlined" label="Base Traslado"  type="number" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' , autoComplete: "off", min: 1, readOnly: true }} name="dec_BaseTraslado" value={productCfdi.dec_BaseTraslado || ''} required />
                       </div>
                     </div>
                     <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
                       <div className="form-group">
                         <Autocomplete
                           value={selectTipoImpuestosTraslado}
-                          options={catTipoImpuestos}   
+                          options={catTipoImpuestos}
                           onChange={(_option, value) => setSelectTipoImpuestosTraslado(value)}
                           getOptionLabel={(option) => option.c_Impuesto + " - " + option.st_Descripcion}
                           isOptionEqualToValue={(option, value) => option.id_Impuesto === value.id_Impuesto}
@@ -843,7 +995,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
                     </div>
                     <div className="col-md-4 col-lg-3 col-sm-12 col-xs-12">
                       <div className="form-group">
-                        <TextField className="form-control" onChange={CalcularImporteRetencionAfterImpuestos} label="Importe" id="dec_ImporteTraslado" name="dec_ImporteTraslado" type="text" value={productCfdi.dec_ImporteTraslado || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }} required/>
+                        <TextField className="form-control" label="Importe" id="dec_ImporteTraslado" name="dec_ImporteTraslado" type="text" value={productCfdi.dec_ImporteTraslado || ''} variant="outlined" InputLabelProps={{ shrink: true }} InputProps={{ readOnly: true }} required/>
                       </div>
                     </div>
                   </div>

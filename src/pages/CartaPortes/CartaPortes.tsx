@@ -4,9 +4,10 @@ import MenuBar from "../../components/shared/Menu";
 import { ICartaPorte } from '../../models/cartaportes/cartaPorte.model';
 import { RootStore } from '../../redux/store';
 import { useSelector } from 'react-redux';
-import { createXml, getCartaPorteByEmpresa, timbrarXmlCartaPorte } from '../../services/cartaPorte/cartaPorte.service';
+import { createXml, getCartaPorteByEmpresa } from '../../services/cartaPorte/cartaPorte.service';
 import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
 import CodeIcon from '@mui/icons-material/Code';
+import { timbrarXmlAndCreate } from '../../services/public.service';
 function CartaPortes() {
     //todo: variables
     const userState = useSelector((store: RootStore) => store.user);
@@ -66,7 +67,8 @@ function CartaPortes() {
     }
 
     const timbrarXml = (id_cfdi: number) => {
-        const loadTimbrarXml = timbrarXmlCartaPorte(id_cfdi);
+        console.log("si se llamo");
+        const loadTimbrarXml = timbrarXmlAndCreate(id_cfdi, userState?.token);
         loadTimbrarXml.call
         .then((resp: any) => {
             console.log(resp);

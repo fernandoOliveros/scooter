@@ -2,6 +2,15 @@ import axios from "axios";
 import loadAbort from "../utils/load-abort.util"
 import baseUrl from "../utils/base-url.utils";
 
+export const timbrarXmlAndCreate = (id: number, token: string) =>{
+    const controller = loadAbort();
+    let uri = baseUrl + "timbox/timboxTimbrar/" + id;
+    return {
+        call: axios.post(uri, {signal: controller.signal},{ headers: {'Authorization': `Bearer ${token}` }}),
+        controller
+    }
+}
+
 
 export const getViajesActivos = (idEmpresa: string) => {
     const controller = loadAbort(); //Opcion para cancelar solicitud

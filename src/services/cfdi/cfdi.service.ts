@@ -4,6 +4,16 @@ import loadAbort from "../../utils/load-abort.util";
 import { ICfdiForm, IProducServicioCfdiForm } from "../../models/cfdis/cfdi-form.model";
 
 
+export const getCfdiByEmpresa = (idEmpresa: string) => {
+    const controller = loadAbort();
+    let uri = baseUrl +  'cfdi/readAllByEmpresa/' + idEmpresa;
+    return {
+        call: axios.get(uri, { signal: controller.signal }),
+        controller
+    }
+
+}
+
 export const createCfdiGeneral = (data: ICfdiForm, subtotal: number, total: number, retenciones: number, traslados: number) => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
     let uri = baseUrl + "cfdi/create";
