@@ -1,5 +1,4 @@
 export interface IRemolqueForm {
-    id_Empresa : number | null;
     st_Anio : string;
     st_Economico : string;
     st_Marca : string;

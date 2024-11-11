@@ -1,54 +1,80 @@
 import { Fragment, useEffect, useState } from 'react';
 import { UnidadModel } from '../../models/unidades/unidad.model';
 import { Link, useNavigate } from 'react-router-dom';
-import { getUnidades } from '../../services/unidades/unidades.service';
+import { deleteUnidad, getUnidades } from '../../services/unidades/unidades.service';
 import MenuBar from "../../components/shared/Menu"
 import DeleteIcon from '@mui/icons-material/Delete';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import DateFormatFix from '../../utils/DateFormatFix';
-import { useSelector } from "react-redux";
-import { RootStore } from "../../redux/store";
-import ModalDocumentos from '../../components/Unidades/ModalDocumentos';
+import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import useFetchAndLoad from '../../hooks/useFetchAndLoad';
+import { AxiosError } from 'axios';
 
 function Unidades () {
-    //Store
-    const userState = useSelector((store: RootStore) => store.user);
     const [ unidades, setUnidades ] = useState<UnidadModel[]>([])
-    const loadUnidad = getUnidades(userState.user.id_Empresa);
-    const [openModal, setOpenModal] = useState<boolean>(false);
+    const columns: GridColDef[] = 
+    [
+        {
+            field: 'actions',
+            headerName: 'ACC',
+            type: 'actions',
+            width: 40,
+            getActions: (params) => [
+              <GridActionsCellItem
+                icon={<MiscellaneousServicesIcon />}
+                label="Editar Unidad"
+                onClick={() => editarUnidad(+params.id)}
+                showInMenu
+              />,
+              <GridActionsCellItem
+                icon={<DeleteIcon />}
+                label="Eliminar Unidad"
+                onClick={() => eliminarUnidad(+params.id)}
+                showInMenu
+              />,
+            ],
+        },
+        { field: 'st_Economico', headerName: 'ECO', width: 200, sortable: true},
+        { field: 'st_Placa', headerName: 'Placas', width: 200, sortable: false},
+        { field: 'st_Marca', headerName: 'Marca', width: 200, sortable: false},
+        { field: 'st_SubMarca', headerName: 'Sub - marca', width: 200, sortable: false},
+        { field: 'st_PermisoSCT', headerName: 'Permiso SCT', width: 200, sortable: false},
+        { field: 'st_NumPoliza', headerName: 'No. Poliza', width: 200, sortable: false},
 
+    ];
     let navigate = useNavigate();
 
+    //todo: Custom Hooks
+    const { callEndpoint } = useFetchAndLoad();
+
+    //todo: Service
+    const loadUnidad = getUnidades();
+
     useEffect(() => {
-        const useGet = async() => {
-            try{
-                const response = await loadUnidad.call;
-                console.log(response.data);
-                if(response.data.success)
-                    setUnidades(response.data.data);
-            }catch(error){
-                alert("error");
-            }
-        };
         useGet();
         // Desmontamos componente
         return() => { loadUnidad.controller.abort() };
     },[]);
+
+    const useGet = async() => {
+        try{
+            await loadUnidad.call
+            .then( result => {
+                setUnidades(result.data.data);
+            }).catch((e: AxiosError) => console.log(e.message));
+        }catch(e){ console.log(e); }
+    };
     
     const crearUnidad = () => navigate("crear");
 
-    const EditarUnidad = (id: number) => navigate("editar/" + id);
+    const editarUnidad = (id: number) => navigate("editar/" + id);
 
-    const EliminarUnidad = (id: number) => console.log(id);
-
-    const viewDocuments = () => {
-        setOpenModal(true);
+    const eliminarUnidad = async (id: number) => {
+        await callEndpoint(deleteUnidad(id));
+        useGet();
     }
 
     return (
     <Fragment>
-        <ModalDocumentos open={openModal}/>
         <div className="container-fluid">
             <div className="row page-titles">
                 <div className="col-md-5 col-sm-12 col-xs-12">
@@ -73,56 +99,27 @@ function Unidades () {
                             <button className="btn btn-primary btn-rounded" type="button" onClick={crearUnidad}><i className="fa fa-plus-circle"></i> Unidad</button>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div className='row'>
-                { unidades.map( 
-                ( unidad, i ) => {
-                return (
-                    <div className='col-md-6 col-xs-12 col-sm-12' key={i}>
-                        <div className="card">
-                            <div className="card-body">
-                                <div className='row'>
-                                    <div className='col-md-12 col-sm-12 col-xs-12'>
-                                        <h3 className="card-title">Eco: {unidad.st_Economico}</h3>
-                                    </div>
-                                    <div className='mr-5 col-md-12 col-sm-12 col-xs-12'>
-                                        <ul className="list-inline">
-                                            <li>
-                                                <button className="btn btn-sm btn-outline-success btn-rounded" type="button" onClick={() => viewDocuments()}><VisibilityIcon /> Ver</button>
-                                            </li>
-                                            <li>
-                                                <button className="btn btn-sm btn-outline-info btn-rounded" type="button" onClick={() => EditarUnidad(unidad.id_Unidad)}><MiscellaneousServicesIcon /> Editar</button>
-                                            </li>
-                                            <li>
-                                                <button className="btn btn-sm btn-outline-danger btn-rounded" type="button" onClick={() => EliminarUnidad(unidad.id_Unidad)}><DeleteIcon /> Borrar</button>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div className='row'>
-                                    <div className='col-xs-12 col-sm-12 col-md-12 col-lg-12 mt-4'>
-                                        <h5 className="card-title">Información General</h5>
-                                        <hr></hr>
-                                    </div>
-                                    <div className='col-md-6 col-sm-12 col-xs-12 col-lg-6'>
-                                        <p className='text-desc'>{unidad.st_Marca} - {unidad.st_SubMarca}</p>
-                                        <p className='text-desc'>(Año): {unidad.st_Anio}</p>
-                                        <p className='text-desc'>(Fecha Físico Mecánico): {new DateFormatFix(new Date(unidad.date_Mecanico+"T00:00:00")).getFormatName()}</p>
-                                        <p className='text-desc'>(Fecha Ecológica): {new DateFormatFix(new Date(unidad.date_Ecologico+"T00:00:00")).getFormatName()}</p>
-                                    </div>
-                                    <div className='col-md-6 col-sm-12 col-xs-12 col-lg-6'>
-                                        <p className='text-desc'>(# de Motor): {unidad.st_NumMotor}</p>
-                                        <p className='text-desc'>(# de Serie): {unidad.st_NumSerie}</p>
-                                        <p className='text-desc'>(Placas): {unidad.st_Placa}</p>
-                                        <p className='text-desc'>(Estatus): <span style={{ fontWeight:'bold', color: (unidad.id_Candado === '1' ? "green" : "red")}}>{unidad.st_DescripcionCandado}</span></p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className='row'>
+                        <div className="col-12 mt-3">
+                            <DataGrid
+                                autoHeight
+                                columns={columns}
+                                rows={unidades}
+                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                                getRowId={(row: UnidadModel) =>  row.id_Unidad}
+                                pageSizeOptions={[1,3,5,10]}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: {
+                                            pageSize: 5,
+                                        }
+                                    }
+                                }}
+                                disableRowSelectionOnClick                                
+                            />
                         </div>
                     </div>
-                )}
-            )}
+                </div>
             </div>
         </div>
         <MenuBar />

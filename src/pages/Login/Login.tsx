@@ -38,9 +38,8 @@ const Login = () => {
     try {
         const result = await callEndpoint(loginService(FormLogin));
         Swal.fire({ icon: 'success', title: 'Bienvenido' , text: 'entrando al sistema ...', timer: 1500, showConfirmButton:false});
-        let reduxResult = dispatch(createUser(result.data.data));
-        navigate("/home");
-        console.log(reduxResult);
+        dispatch(createUser(result.data.data));
+        navigate("/home", {replace : true})
     } catch (error) {
         console.log(error);
         Swal.fire({ icon: 'error', title: 'Error' , text: 'Ocurrio un error, revise las credenciales', showConfirmButton: true});

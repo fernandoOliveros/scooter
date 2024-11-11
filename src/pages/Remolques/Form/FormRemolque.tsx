@@ -26,10 +26,6 @@ export interface Props {
 function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
     //todo: variable para saber el comportamiento del formulario alta/editar
     const isEditMode = id_Remolque != 0 ? true : false;
-    //todo: variables generales
-    const userState = useSelector((store: RootStore) => store.user);
-    //todo: Constante del ID Empresa
-    const id_Empresa = userState.user.id_Empresa;
     //todo: Id Documento
     const [idDocumento, setIdDocumento] = useState<number>(0);
     //todo: Formulario
@@ -56,7 +52,6 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
                 setTipoRemolques(dataOkey);
             } catch (error) { console.log(error)}
         }
-        setValue('id_Empresa', id_Empresa);
         catTipoRemolques();
     },[]);
 
@@ -66,19 +61,18 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
             const loadSpecificRemolque = getIdRemolque(id_Remolque.toString());
             try {
                 const result = await loadSpecificRemolque.call;
-                const response =  result.data;
+                const response =  result.data.data[0];
                 //Solución temporal asignar uno a uno el arreglo del remolque
-                setValue("id_Empresa", response.data[0]["id_Empresa"]);
-                setValue("st_Anio", response.data[0]["st_Anio"]);
-                setValue("st_Economico", response.data[0]["st_Economico"]);
-                setValue("st_Marca", response.data[0]["st_Marca"]);
-                setValue("st_Placa", response.data[0]["st_Placa"]);
-                setValue("st_NumSerie", response.data[0]["st_NumSerie"]);
-                setValue("date_VigenciaFM", response.data[0]["date_VigenciaFM"]);
-                setValue("id_TipoRemolque", response.data[0]["id_TipoRemolque"]);
+                setValue("st_Anio", response.st_Anio);
+                setValue("st_Economico", response.st_Economico);
+                setValue("st_Marca", response.st_Marca);
+                setValue("st_Placa", response.st_Placa);
+                setValue("st_NumSerie", response.st_NumSerie);
+                setValue("date_VigenciaFM", response.date_VigenciaFM);
+                setValue("id_TipoRemolque", response.id_TipoRemolque);
 
                 //todo: Seteamos el el idDocumento
-                setIdDocumento(response.data[0]["id_Documento"]);
+                setIdDocumento(response.id_Documento ?? 0);
 
                 //!: Revisar porque da error setValue(error, value);
                 //const fieldsForm = ['id_Empresa', 'st_Anio', 'st_Economico', 'st_Marca', 'st_Placa', 'st_NumSerie', 'date_VigenciaFM', 'id_TipoRemolque'];
@@ -105,21 +99,26 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
         e?.preventDefault();
         try {
             if(!isEditMode){
-                //todo: Damos de alta el proveedor
+                //todo: Creamos el remolque
                 let result = await callEndpoint(createRemolque(data));
-                //todo: creamos el registro de los documentos del remolque
-                let createrDocuments = await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
-                //todo: Actualizamos el registro de los documentos del remolque
-                await callEndpoint(updateFilesRemolque(documentos, createrDocuments.data.data.id_Documento, result.data.data.id_Remolque));
+                //todo: Guardamos archivos remolque
+                await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
             }else{
-                console.log("Edit Mode");
-                //* Editamos la unidad
-                await callEndpoint(editRemolque(id_Remolque.toString(), data));
-                //* Actualizamos los archivos
-                await callEndpoint(updateFilesRemolque(documentos, idDocumento.toString(), id_Remolque.toString()));
+                console.log(data);
+                //* Actualizamos remolque
+                const result = await callEndpoint(editRemolque(id_Remolque, data));
+
+                console.log(result);
+                if(idDocumento !== 0){
+                    //* Actualizamos larchivos remolque
+                    await callEndpoint(updateFilesRemolque(documentos, idDocumento, id_Remolque));
+                }else{
+                    //*: guardamos archivos remolques
+                    await callEndpoint(uploadFilesRemolque(documentos, id_Remolque));
+                }
             }
             returnFormRemolque(true);
-        } catch (error) { returnFormRemolque(false);}
+        } catch (error) { console.log(error); returnFormRemolque(false);}
     }
 
     return (

@@ -1,7 +1,6 @@
 export interface UnidadModel {
     id_Unidad: number;
     id_Candado: string;
-    id_Empresa: number;
     id_TipoUnidad: number;
     st_Marca: string;
     st_SubMarca: string;

@@ -4,12 +4,14 @@ import baseUrl from "../../utils/base-url.utils";
 import { IUnidadForm } from "../../models/unidades/unidad-form.model";
 import { IUnidadDocumentos } from "../../models/unidades/unidad-docs.model";
 
-export const getUnidades = (idEmpresa: number) => {
+export const getUnidades = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
     //Peticion
-    const urlGet = baseUrl + "unidadesEmpresa/read/" + idEmpresa;
+    const urlGet = baseUrl + "unidadesEmpresa/read";
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
     return {
-        call: axios.get(urlGet, {signal: controller.signal}),
+        call: axios.get(urlGet, { headers: header, signal: controller.signal}),
         controller
     }
 }
@@ -34,42 +36,60 @@ export const getDocumentsUnidad = (idDocumento: number) => {
 
 export const createUnidad = (dataUnidad: IUnidadForm) => {
     const controller = loadAbort();
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
     return {
-        call: axios.post(baseUrl + "unidades/create", dataUnidad, { signal: controller.signal, }),
+        call: axios.post(baseUrl + "unidades/create", dataUnidad, { signal: controller.signal,  headers: header}),
         controller
     }
 }
 
-export const editUnidad = (idUnidad: string, dataUnidad: IUnidadForm) =>{
+export const editUnidad = (idUnidad: number, dataUnidad: IUnidadForm) =>{
     const controller = loadAbort();
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
     return {
-        call: axios.put(baseUrl + "unidades/update/" + idUnidad, dataUnidad, { signal: controller.signal, }),
+        call: axios.put(baseUrl + `unidades/update/${idUnidad}`, dataUnidad, { signal: controller.signal,  headers: header}),
         controller 
     }
 }
 
-export const uploadFilesUnidad = (documentos: IUnidadDocumentos, idUnidad: string) => {
+export const uploadFilesUnidad = (documentos: IUnidadDocumentos, idUnidad: number) => {
     let format = new FormData();
+    const controller = loadAbort();
     format.append( "url_TarjetaCirculacion", documentos.url_TarjetaCirculacion);
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
-    format.append("id_Unidad", idUnidad);
-    const controller = loadAbort();
+    format.append("id_Unidad", idUnidad.toString());
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
     return {
-        call: axios.post(baseUrl + "documentosUnidades/create", format, { signal: controller.signal, }),
+        call: axios.post(baseUrl + "documentosUnidades/create", format, { signal: controller.signal, headers: header}),
         controller
     }
 }
 
-export const updateFilesUnidad = (documentos: IUnidadDocumentos, idDocumento: string, idUnidad: string) => {
+export const updateFilesUnidad = (documentos: IUnidadDocumentos, idDocumento: number, idUnidad: number) => {
     let format = new FormData();
+    const controller = loadAbort();
     format.append( "url_TarjetaCirculacion", documentos.url_TarjetaCirculacion);
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
-    format.append("id_Unidad", idUnidad);
-    const controller = loadAbort();
+    format.append("id_Unidad", idUnidad.toString());
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
     return {
-        call: axios.put(baseUrl + "documentosUnidades/update/" + idDocumento, format, { signal: controller.signal, }),
+        call: axios.put(baseUrl + "documentosUnidades/update/" + idDocumento, format, { signal: controller.signal, headers: header }),
+        controller
+    }
+}
+
+export const deleteUnidad = (id_Unidad: number) => {
+    const controller = loadAbort();
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
+    return {
+        call: axios.delete(baseUrl + `unidades/delete/${id_Unidad}`, {signal: controller.signal, headers: header}),
         controller
     }
 }

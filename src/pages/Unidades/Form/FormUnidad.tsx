@@ -24,14 +24,9 @@ export interface Props {
 const MAX_FILE_SIZE = 5002400;
 const nameDocumentsUnidad = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
 
-
 function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
     //todo: variable para saber el comportamiento del formulario alta/editar
     const isEditMode = id_Unidad != 0 ? true : false;
-    //todo: variables generales
-    const userState = useSelector((store: RootStore) => store.user);
-    //todo: Constante del ID Empresa
-    const id_Empresa = userState.user.id_Empresa;
     //todo: Id Documento
     const [idDocumento, setIdDocumento] = useState<number>(0);
     //todo: Formulario
@@ -88,9 +83,9 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
 
         //todo: destruccción de componente
         return () => {
-        apiTipoUnidades.controller.abort();
-        apiTipoPermiso.controller.abort();
-        apiAseguradoras.controller.abort();
+            apiTipoUnidades.controller.abort();
+            apiTipoPermiso.controller.abort();
+            apiAseguradoras.controller.abort();
         }
     },[]);
 
@@ -114,11 +109,10 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                     setValue("st_NumPoliza", data.st_NumPoliza);
                     setValue("date_Mecanico", data.date_Mecanico);
                     setValue("date_Ecologico", data.date_Ecologico);
-                    setValue("id_Empresa", data.id_Empresa);
                     setValue("id_Candado", data.id_Candado);
                     setValue("id_TipoPermiso", data.id_TipoPermiso);
                     setValue("id_AseguradoraRespCivil",  data.id_AseguradoraRespCivil);
-                    setIdDocumento(data.id_Documento);
+                    setIdDocumento(data.id_Documento ?? 0);
                 }).catch(error => console.log(error));
                 
             } catch (error) {console.log(error);}
@@ -146,23 +140,26 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
             //* Alta Unidad
             if(!isEditMode){
                 //todo: Completamos el formulario
-                data.id_Empresa = id_Empresa;
                 data.id_Candado = 1;
-                console.log(data);
                 //todo: Creamos la unidad
                 let result = await callEndpoint(createUnidad(data));
                 //Todo: Creamos el registro de los documentos
-                let createDocuments = await callEndpoint(uploadFilesUnidad(documentos,result.data.data.id_Unidad));
-                //Todo: Actualizamos nombre de los archivos con la unidad y los documentos
-                await callEndpoint(updateFilesUnidad(documentos, createDocuments.data.data.id_Documento, result.data.data.id_Unidad));
-            }else{ 
+                await callEndpoint(uploadFilesUnidad(documentos, result.data.data.id_Unidad));
+            }else{
                 //* Editamos la unidad
-                await callEndpoint(editUnidad(id_Unidad.toString(),data));
-                //* Actualizamos los archivos
-                await callEndpoint(updateFilesUnidad(documentos, idDocumento.toString(), id_Unidad.toString()));
+                await callEndpoint(editUnidad(id_Unidad, data));
+                //* Verificamos si tenemos IdDocumento para saber si hay un registro
+                if(idDocumento !== 0){
+                    //* Actualizamos los archivos
+                    await callEndpoint(updateFilesUnidad(documentos, idDocumento, id_Unidad));
+                }else{
+                     //*: Creamos el registro de los documentos
+                    await callEndpoint(uploadFilesUnidad(documentos, id_Unidad));
+                }
+                
             }
             returnFormUnidad(true);
-        } catch (error) { returnFormUnidad(false); }
+        } catch (error) { console.log(error); returnFormUnidad(false); }
     }
 
     return (

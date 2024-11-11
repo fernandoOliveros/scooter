@@ -4,12 +4,16 @@ import { createSlice } from '@reduxjs/toolkit';
 export const UserEmptyState: userModel = {
     token: null,
     user: {
-        id_User: null,
-        id_Empresa: null,
-        st_Nombre: null,
-        st_Email: null,
+        id_User: 0,
+        id_Empresa: 0,
+        st_Nombre: undefined,
+        st_Email: undefined,
+        st_Password: undefined,
+        createdAt: undefined, 
+        updatedAt: undefined
     }
 };
+
 
 //Le ponemos <T,> porque es cualquier tipo de dato que manden desde la llamada de la funcion
 export const persistLocalStorage = <T>(key: string, value: T) => {
@@ -26,7 +30,7 @@ export const userSlice = createSlice({
   reducers: {
     createUser: (_state, action) => {
         persistLocalStorage<userModel>('user', action.payload);
-        action.payload
+        return action.payload;
     },
     modifyUser: (state, action) =>  {
         const result  = { ...state, ...action.payload };

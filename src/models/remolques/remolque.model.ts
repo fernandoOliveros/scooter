@@ -1,7 +1,6 @@
 export interface IRemolqueModel {
     id_Remolque: number;
     id_TipoRemolque: number;
-    id_Empresa: number;
     st_Anio: string;
     st_Economico: string;
     st_Marca: string;
