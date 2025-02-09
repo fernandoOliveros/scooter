@@ -1,22 +1,22 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { useForm, useFormContext } from 'react-hook-form';
-import { IOperadorDireccion } from '../../../models/operadores/operador-direccion.model';
+import { IAutoComplete } from '../../../../models/shared/autocomplete.model';
+import { getColoniasByCodigoPostal } from '../../../../services/public.service';
 import { Button, TextField } from '@mui/material';
-import { IAutoComplete } from '../../../models/shared/autocomplete.model';
-import { getColoniasByCodigoPostal } from '../../../services/public.service';
-import { AutocompleteField } from '../../../components/shared/AutoCompleteField';
-import { IColonia } from '../../../models/shared/colonias.model';
+import { AutocompleteField } from '../../../../components/shared/AutoCompleteField';
+import { IColonia } from '../../../../models/shared/colonias.model';
+import { IOperadorFormData } from '../../../../models/operadores/operador-form.model';
+
 
 function SectionAddress() {
-    console.log("render - address");
-    const { register, formState: { errors }, control, setValue, getValues} = useFormContext<IOperadorDireccion>(); // Accede al contexto del formulario
+    const { register, formState: { errors }, control, setValue, getValues} = useFormContext<IOperadorFormData>(); // Accede al contexto del formulario
     const {register: viewDireccion, setValue: setViewDireccion} = useForm();
     
     //todo: Catalogos
     const [colonias, setColinas] = useState<IAutoComplete[]>([]);
 
     const getColoniaWithCP = () => {
-        let codigo_postal = getValues("c_codigoPostal");
+        let codigo_postal = getValues("direccion.c_codigoPostal");
         if(codigo_postal?.length === 5){
             try {
                 const serviceColonias = getColoniasByCodigoPostal(codigo_postal);
@@ -25,9 +25,9 @@ function SectionAddress() {
                     const response = result.data;
 
                     //todo: set form direction intern
-                    setValue("id_Estado", response.data.id_Estado);
-                    setValue("id_Localidad", response.data.id_Localidad);
-                    setValue("id_Municipio", response.data.id_Municipio);
+                    setValue("direccion.id_Estado", response.data.id_Estado);
+                    setValue("direccion.id_Localidad", response.data.id_Localidad);
+                    setValue("direccion.id_Municipio", response.data.id_Municipio);
 
                     //todo: Set view direction fields
                     setViewDireccion("st_Estado", response.data.st_Estado);
@@ -47,9 +47,9 @@ function SectionAddress() {
         }else{
 
             //todo: set form direction intern
-            setValue("id_Estado", null);
-            setValue("id_Localidad", null);
-            setValue("id_Municipio", null);
+            setValue("direccion.id_Estado", null);
+            setValue("direccion.id_Localidad", null);
+            setValue("direccion.id_Municipio", null);
 
             //todo: Set view direction fields
             setViewDireccion("st_Estado", "");
@@ -76,46 +76,46 @@ function SectionAddress() {
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='st_Calle' className="form-control" variant="outlined" label="Calle"  type="text"
-                    {...register("st_Calle", {
+                    {...register("direccion.st_Calle", {
                         required: "Campo Requerido",
                     })}
-                    error={errors.st_Calle ? true : false}
-                    helperText={errors.st_Calle && errors.st_Calle.message?.toString()}
+                    error={errors.direccion?.st_Calle ? true : false}
+                    helperText={errors.direccion?.st_Calle && errors.direccion?.st_Calle.message?.toString()}
                     inputProps={{ autoComplete: "off" }} required/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='st_NoExterior' className="form-control" variant="outlined" label="Número Exterior"  type="text"
-                    {...register("st_NoExterior", {
+                    {...register("direccion.st_NoExterior", {
                         required: "Campo Requerido",
                     })}
-                    error={errors.st_NoExterior ? true : false}
-                    helperText={errors.st_NoExterior && errors.st_NoExterior.message?.toString()}
+                    error={errors.direccion?.st_NoExterior ? true : false}
+                    helperText={errors.direccion?.st_NoExterior && errors.direccion?.st_NoExterior.message?.toString()}
                     inputProps={{ autoComplete: "off" }} required/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='st_NoInterior' className="form-control" variant="outlined" label="Número Interior"  type="text"
-                    {...register("st_NoInterior", {
+                    {...register("direccion.st_NoInterior", {
                         required: "Campo Requerido",
                     })}
-                    error={errors.st_NoInterior ? true : false}
-                    helperText={errors.st_NoInterior && errors.st_NoInterior.message?.toString()}
+                    error={errors.direccion?.st_NoInterior ? true : false}
+                    helperText={errors.direccion?.st_NoInterior && errors.direccion?.st_NoInterior.message?.toString()}
                     inputProps={{ autoComplete: "off" }} required/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='c_codigoPostal' className="form-control" variant="outlined" label="Código Postal"  type="text"
-                    {...register("c_codigoPostal", {
+                    {...register("direccion.c_codigoPostal", {
                         required: "Campo Requerido",
                         maxLength: 5,
                     })}
                     onKeyDown={handleEnterPress}
-                    error={errors.c_codigoPostal ? true : false}
-                    helperText={errors.c_codigoPostal && errors.c_codigoPostal.message?.toString()}
+                    error={errors.direccion?.c_codigoPostal ? true : false}
+                    helperText={errors.direccion?.c_codigoPostal && errors.direccion?.c_codigoPostal.message?.toString()}
                     inputProps={{ autoComplete: "off", maxLength:"5" }} required InputLabelProps={{ shrink: true }}/>
                 </div>
             </div>
@@ -130,7 +130,7 @@ function SectionAddress() {
                     <AutocompleteField 
                         options={colonias}
                         control={control}
-                        name='id_Colonia'
+                        name='direccion.id_Colonia'
                         placeholder='Selecciona la colonia'
                     />
                 </div>
@@ -165,7 +165,7 @@ function SectionAddress() {
             <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia" 
-                    type="text"{...register("st_RefDomicilio")} inputProps={{ autoComplete: "off"}} required/>
+                    type="text"{...register("direccion.st_RefDomicilio")} inputProps={{ autoComplete: "off"}} required/>
                 </div>
             </div>
         </div>

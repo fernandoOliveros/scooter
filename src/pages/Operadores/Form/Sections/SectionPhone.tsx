@@ -1,10 +1,10 @@
-import React, { Fragment } from 'react'
-import { IOperadorTelefono } from '../../../models/operadores/operador-telefono.model';
+import { Fragment } from 'react'
 import { useFormContext } from 'react-hook-form';
 import { TextField } from '@mui/material';
+import { IOperadorFormData } from '../../../../models/operadores/operador-form.model';
 
 function SectionPhone() {
-        const { register, formState: { errors } } = useFormContext<IOperadorTelefono>(); // Accede al contexto del formulario
+        const { register, formState: { errors } } = useFormContext<IOperadorFormData>(); // Accede al contexto del formulario
     
   return (
     <Fragment>
@@ -12,11 +12,11 @@ function SectionPhone() {
             <div className="form-group">
                 <TextField className="form-control" variant="outlined" id="st_NumTelefono" label="Celular" 
                 InputLabelProps={{ shrink: true }} type="text"
-                {...register("st_NumTelefono", {
+                {...register("telefono.st_NumTelefono", {
                     required: "Campo Requerido",
                 })}
-                error={errors.st_NumTelefono ? true : false}
-                helperText={errors.st_NumTelefono && errors.st_NumTelefono.message?.toString()}
+                error={errors.telefono?.st_NumTelefono ? true : false}
+                helperText={errors.telefono?.st_NumTelefono && errors.telefono?.st_NumTelefono.message?.toString()}
                 inputProps={{ autoComplete: "off" }} required/>
             </div>
         </div>

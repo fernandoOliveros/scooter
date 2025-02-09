@@ -1,5 +1,5 @@
 export interface IOperadorDocumentos {
-    url_CURP: string | Blob,
-    url_RFC: string | Blob,
-    url_ComprobanteDom: string | Blob
+    url_CURP: string | Blob | File | null;
+    url_RFC: string | Blob | File | null;
+    url_ComprobanteDom: string | Blob | File | null;
 }
