@@ -1,26 +1,49 @@
 import { Fragment, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { RootStore } from '../../redux/store';
 import { getOperadoresByEmpresa } from '../../services/operadores/operadores.service';
 import { IOperadorModel } from '../../models/operadores/operador.model';
 import MenuBar from "../../components/shared/Menu"
-import DateFormatFix from '../../utils/DateFormatFix';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
 
 function Operadores() {
     //todo: VARIABLES
     const navigate = useNavigate();
-
     const [operadores, setOperadores] = useState<IOperadorModel[]>([]);
-
-    //todo: STORE
-    const userState = useSelector((store: RootStore) => store.user);
-
     //todo: SERVICES
-    const loadOperadores = getOperadoresByEmpresa(userState.user.id_Empresa);
+    const loadOperadores = getOperadoresByEmpresa();
+    const columns: GridColDef[] = 
+    [
+        {
+            field: 'actions',
+            headerName: 'ACC',
+            type: 'actions',
+            width: 40,
+            getActions: (params) => [
+              <GridActionsCellItem
+                icon={<MiscellaneousServicesIcon />}
+                label="Editar Unidad"
+                onClick={() => editarOperador(+params.id)}
+                showInMenu
+              />,
+              <GridActionsCellItem
+                icon={<DeleteIcon />}
+                label="Eliminar Unidad"
+                onClick={() => eliminarOperador(+params.id)}
+                showInMenu
+              />,
+            ],
+        },
+        { field: 'st_Nombre', headerName: 'Nombre', width: 200, sortable: true},
+        { field: 'st_ApellidoP', headerName: 'Apellido Pa.', width: 200, sortable: true},
+        { field: 'st_ApellidoM', headerName: 'Apellido Ma.', width: 200, sortable: true},
+        { field: 'st_NumLicencia', headerName: 'No. Licencia', width: 200, sortable: false},
+        { field: 'st_NumIMSS', headerName: 'No. IMSS', width: 200, sortable: false},
+        { field: 'st_CURP', headerName: 'CRUP', width: 200, sortable: false},
+
+    ];
+    
     //todo: INITIAL
     useEffect( () => {
         const getInitial = () => {
@@ -45,6 +68,10 @@ function Operadores() {
 
     const editarOperador = (id:number) => {
         navigate("editar/" + id, { replace: true });
+    }
+
+    const eliminarOperador = (id: number) => {
+        console.log(id);
     }
 
     return (
@@ -73,53 +100,27 @@ function Operadores() {
                                 <button className="btn btn-primary btn-rounded" type="button" onClick={crearOeprador}><i className="fa fa-plus-circle"></i> Operador</button>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div className='row'>
-                    { operadores.map( 
-                    ( operador, i ) => {
-                    return (
-                        <div className='col-md-6 col-xs-12 col-sm-12' key={i}>
-                            <div className="card">
-                                <div className="card-body">
-                                    <div className='row'>
-                                        <div className='col-md-12 col-sm-12 col-xs-12'>
-                                            <h3 className="card-title">Eco: {operador.st_Nombre}</h3>
-                                        </div>
-                                        <div className='mr-5 col-md-12 col-sm-12 col-xs-12'>
-                                            <ul className="list-inline">
-                                                <li>
-                                                    <button className="btn btn-sm btn-outline-success btn-rounded" type="button" ><VisibilityIcon /> Ver</button>
-                                                </li>
-                                                <li>
-                                                    <button className="btn btn-sm btn-outline-info btn-rounded" type="button" onClick={() => editarOperador(operador.id_Operador)}><MiscellaneousServicesIcon /> Editar</button>
-                                                </li>
-                                                <li>
-                                                    <button className="btn btn-sm btn-outline-danger btn-rounded" type="button" onClick={() => editarOperador(operador.id_Operador)}><DeleteIcon /> Borrar</button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div className='row'>
-                                        <div className='col-xs-12 col-sm-12 col-md-12 col-lg-12 mt-4'>
-                                            <h5 className="card-title">Información General</h5>
-                                            <hr></hr>
-                                        </div>
-                                        <div className='col-md-6 col-sm-12 col-xs-12 col-lg-6'>
-                                            <p className='text-desc'>(CURP): {operador.st_CURP}</p>
-                                            <p className='text-desc'>(RFC): {operador.st_RFC}</p>
-                                            <p className='text-desc'>(# Licencia): {operador.st_NumLicencia}</p>
-                                        </div>
-                                        <div className='col-md-6 col-sm-12 col-xs-12 col-lg-6'>
-                                            <p className='text-desc'>(Fecha de Nacimiento): {new DateFormatFix(new Date(operador.date_Nacimiento+"T00:00:00")).getFormatName()}</p>
-                                            <p className='text-desc'>(Vigencia de Licencia){new DateFormatFix(new Date(operador.date_LicenciaVigencia+"T00:00:00")).getFormatName()}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div className='row'>
+                            <div className="col-12 mt-3">
+                                <DataGrid
+                                    autoHeight
+                                    columns={columns}
+                                    rows={operadores}
+                                    localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                                    getRowId={(row: IOperadorModel) =>  row.id_Operador}
+                                    pageSizeOptions={[1,3,5,10]}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: {
+                                                pageSize: 5,
+                                            }
+                                        }
+                                    }}
+                                    disableRowSelectionOnClick                                
+                                />
                             </div>
                         </div>
-                    )}
-                )}
+                    </div>
                 </div>
             </div>
             <MenuBar />

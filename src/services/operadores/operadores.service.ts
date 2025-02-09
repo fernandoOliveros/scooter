@@ -8,11 +8,12 @@ import { IOperadorContactos } from "../../models/operadores/operador-contactos.m
 import { IOperadorDocumentos } from "../../models/operadores/operador-docs.model";
 
 //todo: GETS TO DATABASE
-export const getOperadoresByEmpresa = (idEmpresa: number) => {
+export const getOperadoresByEmpresa = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
-    const urlGet = baseUrl + "operadores/readByEmpresa/" + idEmpresa;
+    let header = settingHeader();
+    const urlGet = baseUrl + "operadores/readByEmpresa";
     return {
-        call: axios.get(urlGet, {signal: controller.signal}),
+        call: axios.get(urlGet, { headers: header, signal: controller.signal}),
         controller
     }
 }
@@ -66,8 +67,9 @@ export const getDocumentsOperador = (idOperador: number) => {
 
 export const createOperador = (operador: IOperadorForm) => {
     const controller = loadAbort();
+    let header = settingHeader();
     return {
-        call: axios.post(baseUrl + "operadores/create", operador, { signal: controller.signal }),
+        call: axios.post(baseUrl + "operadores/create", operador, { headers: header, signal: controller.signal }),
         controller
     }
 }
@@ -160,4 +162,11 @@ export const updateFilesOperador = (documentos: IOperadorDocumentos, idDocumento
         call: axios.put(baseUrl + "documentosOperadores/update/" + idDocumento, format, { signal: controller.signal, }),
         controller
     }
+}
+
+
+export const settingHeader = () => {
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
+    return header
 }

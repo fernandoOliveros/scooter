@@ -8,8 +8,7 @@ export const getUnidades = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
     //Peticion
     const urlGet = baseUrl + "unidadesEmpresa/read";
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.get(urlGet, { headers: header, signal: controller.signal}),
         controller
@@ -36,8 +35,7 @@ export const getDocumentsUnidad = (idDocumento: number) => {
 
 export const createUnidad = (dataUnidad: IUnidadForm) => {
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.post(baseUrl + "unidades/create", dataUnidad, { signal: controller.signal,  headers: header}),
         controller
@@ -46,8 +44,7 @@ export const createUnidad = (dataUnidad: IUnidadForm) => {
 
 export const editUnidad = (idUnidad: number, dataUnidad: IUnidadForm) =>{
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.put(baseUrl + `unidades/update/${idUnidad}`, dataUnidad, { signal: controller.signal,  headers: header}),
         controller 
@@ -61,8 +58,7 @@ export const uploadFilesUnidad = (documentos: IUnidadDocumentos, idUnidad: numbe
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
     format.append("id_Unidad", idUnidad.toString());
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.post(baseUrl + "documentosUnidades/create", format, { signal: controller.signal, headers: header}),
         controller
@@ -76,8 +72,7 @@ export const updateFilesUnidad = (documentos: IUnidadDocumentos, idDocumento: nu
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
     format.append("id_Unidad", idUnidad.toString());
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.put(baseUrl + "documentosUnidades/update/" + idDocumento, format, { signal: controller.signal, headers: header }),
         controller
@@ -86,10 +81,15 @@ export const updateFilesUnidad = (documentos: IUnidadDocumentos, idDocumento: nu
 
 export const deleteUnidad = (id_Unidad: number) => {
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.delete(baseUrl + `unidades/delete/${id_Unidad}`, {signal: controller.signal, headers: header}),
         controller
     }
+}
+
+export const settingHeader = () => {
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
+    return header
 }

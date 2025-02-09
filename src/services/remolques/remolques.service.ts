@@ -6,9 +6,7 @@ import { IRemolqueDocumentos } from "../../models/remolques/remolque-docs.model"
 
 export const getRemolques = () => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
-    //Peticion
+    let header = settingHeader();
     const urlGet = baseUrl + "remolques/readByEmpresa";
     return {
         call: axios.get(urlGet, { headers: header, signal: controller.signal}),
@@ -36,8 +34,7 @@ export const getDocumentsRemolque = (idDocumento: number) => {
 
 export const createRemolque = (data: IRemolqueForm) => {
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.post(baseUrl + "remolques/create", data, { signal: controller.signal, headers: header}),
         controller
@@ -46,8 +43,7 @@ export const createRemolque = (data: IRemolqueForm) => {
 
 export const editRemolque = (idRemolque: number, data: IRemolqueForm) =>{
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.put(baseUrl + "remolques/update/" + idRemolque, data, { signal: controller.signal, headers: header}),
         controller 
@@ -60,8 +56,7 @@ export const uploadFilesRemolque = (documentos: IRemolqueDocumentos, idRemolque:
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
     format.append("id_Remolque", idRemolque.toString());
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     const controller = loadAbort();
     return {
         call: axios.post(baseUrl + "documentosRemolques/create", format, { signal: controller.signal, headers: header}),
@@ -76,8 +71,7 @@ export const updateFilesRemolque = (documentos: IRemolqueDocumentos, idDocumento
     format.append( "url_Factura", documentos.url_Factura);
     format.append( "url_PermisoSCT", documentos.url_PermisoSCT);
     format.append("id_Remolque", idRemolque.toString());
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     const controller = loadAbort();
     return {
         call: axios.put(baseUrl + "documentosRemolques/update/" + idDocumento, format, { signal: controller.signal, headers: header}),
@@ -87,10 +81,15 @@ export const updateFilesRemolque = (documentos: IRemolqueDocumentos, idDocumento
 
 export const deleteRemolque = (id_Remolque: number) => {
     const controller = loadAbort();
-    let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = settingHeader();
     return {
         call: axios.delete(baseUrl + `remolques/delete/${id_Remolque}`, {signal: controller.signal, headers: header}),
         controller
     }
+}
+
+export const settingHeader = () => {
+    let user = JSON.parse(localStorage.getItem('user') as string);
+    let header = { 'Authorization': `Bearer ${user?.token}` };
+    return header
 }
