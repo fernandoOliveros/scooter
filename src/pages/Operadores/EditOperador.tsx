@@ -1,8 +1,8 @@
 import { Fragment } from 'react'
-import OperadorForm from './Form/OperadorForm';
 import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Swal from 'sweetalert2';
+import FormOperador from './Form/FormOperador';
 const  EditOperador = () => {
     //todo: params / variables
     const { idOperador } = useParams();
@@ -37,7 +37,7 @@ const  EditOperador = () => {
                         <div className="card-body">
                             <div className='row'>
                                 <div className='col-12'>
-                                    <OperadorForm id_Operador={idOperador} returnFormOperador={catchResponseForm} />
+                                    <FormOperador id_Operador={parseInt(idOperador ?? '0')} returnFormOperador={catchResponseForm} />
                                 </div>
                             </div>
                         </div>

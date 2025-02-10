@@ -1,10 +1,14 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect } from 'react'
 import { useFormContext } from 'react-hook-form';
 import { TextField } from '@mui/material';
 import { IOperadorFormData } from '../../../../models/operadores/operador-form.model';
 
 function SectionPhone() {
-        const { register, formState: { errors } } = useFormContext<IOperadorFormData>(); // Accede al contexto del formulario
+    const { register, formState: { errors }, setValue} = useFormContext<IOperadorFormData>(); // Accede al contexto del formulario
+    useEffect(() => {
+        // Agregamos la categoria
+        setValue("telefono.id_Categoria",1);
+    },[]);
     
   return (
     <Fragment>

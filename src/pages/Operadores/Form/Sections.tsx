@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import { Fragment } from 'react'
 import SectionGeneral from './Sections/SectionGeneral'
 import SectionPhone from './Sections/SectionPhone'
 import SectionAddress from './Sections/SectionAddress'
