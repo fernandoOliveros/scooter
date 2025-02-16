@@ -7,8 +7,6 @@ import { getTipoRemolque } from '../../../services/public.service';
 import { ITipoRemolque } from '../../../models/shared/tipo-remolque.model';
 import { AutocompleteField } from '../../../components/shared/AutoCompleteField';
 import { IRemolqueDocumentos } from '../../../models/remolques/remolque-docs.model';
-import { useSelector } from 'react-redux';
-import { RootStore } from '../../../redux/store';
 import ViewDocumentsRemolque from '../Documents/ViewDocumentsRemolque';
 import { createRemolque, getIdRemolque, updateFilesRemolque, uploadFilesRemolque, editRemolque} from '../../../services/remolques/remolques.service';
 import useFetchAndLoad from '../../../hooks/useFetchAndLoad';

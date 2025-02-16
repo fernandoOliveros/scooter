@@ -6,6 +6,7 @@ import { IOperadorTelefono } from "../../models/operadores/operador-telefono.mod
 import { IOperadorContactos } from "../../models/operadores/operador-contactos.model";
 import { IOperadorDocumentos } from "../../models/operadores/operador-docs.model";
 import api from "../api";
+import axios from "axios";
 
 //todo: GETS TO DATABASE
 export const getOperadoresByEmpresa = () => {
@@ -17,7 +18,7 @@ export const getOperadoresByEmpresa = () => {
     }
 }
 
-export const getIdOperador = (idOperador: string | null = null) => {
+export const getIdOperador = (idOperador: number | null = null) => {
     const controller = loadAbort();
     const urlGet = baseUrl + "operadores/read/" + idOperador;
     return {
@@ -26,7 +27,7 @@ export const getIdOperador = (idOperador: string | null = null) => {
     }
 }
 
-export const getDireccionOperador = (idOperador: string) => {
+export const getDireccionOperador = (idOperador: number) => {
     const controller = loadAbort();
     const urlGet = baseUrl + "direccionOperadores/read/" + idOperador;
     return {
@@ -35,7 +36,7 @@ export const getDireccionOperador = (idOperador: string) => {
     }
 }
 
-export const getTelefonoOperador = (idOperador: string) => {
+export const getTelefonoOperador = (idOperador: number) => {
     const controller = loadAbort();
     const urlGet = baseUrl + "telefonosOperadores/read/" + idOperador;
     return {
@@ -44,7 +45,7 @@ export const getTelefonoOperador = (idOperador: string) => {
     }
 }
 
-export const getContactoOperador = (idOperador: string) => {
+export const getContactoOperador = (idOperador: number) => {
     const controller = loadAbort();
     const urlGet = baseUrl + "contactosEmOperadores/read/" + idOperador;
     return {
@@ -55,7 +56,16 @@ export const getContactoOperador = (idOperador: string) => {
 
 export const getDocumentsOperador = (idOperador: number) => {
     const controller = loadAbort();
-    const uri = baseUrl + "documentosOperadores/read/" + idOperador;
+    const uri = baseUrl + "documentosOperadores/readByOperador/" + idOperador;
+    return {
+        call: api.get(uri, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const getDocumentsById = (id: number) => {
+    const controller = loadAbort();
+    const uri = baseUrl + "documentosOperadores/read/" + id;
     return {
         call: api.get(uri, {signal: controller.signal}),
         controller
@@ -101,13 +111,13 @@ export const insertContacto = (contacto: IOperadorContactos, idOperador: number)
 export const uploadFilesOperador = (documentos: IOperadorDocumentos, idOperador: number) => {
     let format = new FormData();
     const controller = loadAbort();
+    let header = settingHeader();
     if (documentos.url_CURP) format.append("url_CURP", documentos.url_CURP, "CURP.pdf");
     if (documentos.url_RFC) format.append("url_RFC", documentos.url_RFC, "RFC.pdf");
     if (documentos.url_ComprobanteDom) format.append("url_ComprobanteDom", documentos.url_ComprobanteDom, "ComprobanteDomicilio.pdf");
     format.append("id_Operador", idOperador.toString());
     return {
-        call: api.post(baseUrl + "documentosOperadores/create", format, { signal: controller.signal ,
-            headers: { "Content-Type": "multipart/form-data" }
+        call: axios.post(baseUrl + "documentosOperadores/create", format, { headers: header, signal: controller.signal
         }),
         controller
     };
@@ -156,14 +166,24 @@ export const updateFilesOperador = (documentos: IOperadorDocumentos, idDocumento
     if (documentos.url_ComprobanteDom) format.append("url_ComprobanteDom", documentos.url_ComprobanteDom, "ComprobanteDomicilio.pdf");
     format.append("id_Operador", idOperador.toString());
     const controller = loadAbort();
+    let header = settingHeader();
     return {
-        call: api.put(baseUrl + "documentosOperadores/update/" + idDocumento, format, { signal: controller.signal, }),
+        call: axios.put(baseUrl + "documentosOperadores/update/" + idDocumento, format, { headers: header, signal: controller.signal, }),
+        controller
+    }
+}
+
+
+export const deleteOperador = (id: number) => {
+    const controller = loadAbort();
+    return {
+        call: api.delete(baseUrl + `operadores/delete/${id}`, { signal: controller.signal }),
         controller
     }
 }
 
 export const settingHeader = () => {
     let user = JSON.parse(localStorage.getItem('user') as string);
-    let header = { 'Authorization': `Bearer ${user?.token}` };
+    let header = { 'Authorization': `Bearer ${user?.token}`, 'Content-Type': 'multipart/form-data'};
     return header
 }

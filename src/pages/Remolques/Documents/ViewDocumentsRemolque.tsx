@@ -29,7 +29,7 @@ const ViewDocumentsRemolque = ({id_Documento}: Props) => {
 
     const AbrirDocumento = (e: any) =>{
         e.preventDefault();
-        var file = "http://localhost:5000/" + e.target.id; 
+        var file = "http://localhost:5001/" + e.target.id; 
         window.open( file, "_blank"  );
     }
 

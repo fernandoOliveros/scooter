@@ -1,16 +1,20 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { getOperadoresByEmpresa } from '../../services/operadores/operadores.service';
+import { deleteOperador, getOperadoresByEmpresa } from '../../services/operadores/operadores.service';
 import { IOperadorModel } from '../../models/operadores/operador.model';
 import MenuBar from "../../components/shared/Menu"
 import DeleteIcon from '@mui/icons-material/Delete';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
+import useFetchAndLoad from '../../hooks/useFetchAndLoad';
 
 function Operadores() {
     //todo: VARIABLES
     const navigate = useNavigate();
     const [operadores, setOperadores] = useState<IOperadorModel[]>([]);
+    const [isChangeOperador, setIsChangeOperador] = useState<boolean>(false);
+    const { callEndpoint } = useFetchAndLoad();
+
     //todo: SERVICES
     const loadOperadores = getOperadoresByEmpresa();
     const columns: GridColDef[] = 
@@ -46,15 +50,10 @@ function Operadores() {
     
     //todo: INITIAL
     useEffect( () => {
-        const getInitial = () => {
+        const getInitial = async () => {
             try {
-                loadOperadores.call
-                .then(result => {
-                    let operadores_call = result.data;
-                    if(operadores_call.data.length > 0){
-                        setOperadores(operadores_call.data);
-                    }
-                }).catch((error) => console.log(error)) 
+                const result = await loadOperadores.call;
+                setOperadores(result.data.data);
             } catch (error) {
                 alert("Error, al obtener los operadores de la empresa y/o empresa aún no tiene operadores cargados en el sistema");
                 console.log(error);
@@ -62,7 +61,7 @@ function Operadores() {
         }
         getInitial();
         return () => { loadOperadores.controller.abort(); }
-    },[]);
+    },[isChangeOperador]);
 
     const crearOeprador = () => navigate("crear");
 
@@ -70,8 +69,9 @@ function Operadores() {
         navigate("editar/" + id, { replace: true });
     }
 
-    const eliminarOperador = (id: number) => {
-        console.log(id);
+    const eliminarOperador = async(id: number) => {
+        await callEndpoint(deleteOperador(id));
+        setIsChangeOperador(!isChangeOperador);
     }
 
     return (

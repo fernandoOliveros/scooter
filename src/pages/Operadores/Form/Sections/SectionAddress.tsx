@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 import { useForm, useFormContext } from 'react-hook-form';
 import { IAutoComplete } from '../../../../models/shared/autocomplete.model';
 import { getColoniasByCodigoPostal } from '../../../../services/public.service';
@@ -9,8 +9,16 @@ import { IOperadorFormData } from '../../../../models/operadores/operador-form.m
 
 
 function SectionAddress() {
-    const { register, formState: { errors }, control, setValue, getValues} = useFormContext<IOperadorFormData>(); // Accede al contexto del formulario
+    // Formulario 
+    const { register, formState: { errors }, control, setValue, getValues} = useFormContext<IOperadorFormData>();
+    // Solo vista de municipio, localidad, estado
     const {register: viewDireccion, setValue: setViewDireccion} = useForm();
+
+    // Effect para llenar la view Direccion
+    useEffect(() => {
+        console.log("EFFECT");
+        getColoniaWithCP();
+    },[getValues('direccion.c_codigoPostal')]);
     
     //todo: Catalogos
     const [colonias, setColinas] = useState<IAutoComplete[]>([]);
@@ -66,7 +74,6 @@ function SectionAddress() {
             getColoniaWithCP();
         }
     };
-    
   
     return (
     <Fragment>

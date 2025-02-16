@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react'
-import { getDocumentsOperador } from '../../../services/operadores/operadores.service';
+import { getDocumentsById, getDocumentsOperador } from '../../../services/operadores/operadores.service';
 import '../../../styles/dist/verAchivos.css';
 
 export interface Props {
@@ -9,12 +9,13 @@ export interface Props {
 const viewDocumentsOperador = ({id_Documento = 0}: Props) => {
 
     const [docs, setDocs] = useState({url_RFC: '', url_CURP: '', url_ComprobanteDom: ''});
-    const loadDocumentos = getDocumentsOperador(id_Documento);
-
+    const loadDocumentos = getDocumentsById(id_Documento);
+    const uri = "http://localhost:5001/";
 
     const AbrirDocumento = (e: any) =>{
         e.preventDefault();
-        var file = "http://localhost:5000/" + e.target.id; 
+        var file = uri + e.target.id;
+        console.log(file);
         window.open( file, "_blank"  );
     }
 

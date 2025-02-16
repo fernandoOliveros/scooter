@@ -7,10 +7,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import { DataGrid, esES, GridActionsCellItem, GridColDef } from '@mui/x-data-grid';
 import useFetchAndLoad from '../../hooks/useFetchAndLoad';
-import { AxiosError } from 'axios';
 
 function Unidades () {
-    const [ unidades, setUnidades ] = useState<UnidadModel[]>([])
+    const [ unidades, setUnidades ] = useState<UnidadModel[]>([]);
+    const [isChangeUnidad, setIsChangeUnidad] = useState<boolean>(false);
+
     const columns: GridColDef[] = 
     [
         {
@@ -53,14 +54,12 @@ function Unidades () {
         useGet();
         // Desmontamos componente
         return() => { loadUnidad.controller.abort() };
-    },[]);
+    },[isChangeUnidad]);
 
     const useGet = async() => {
         try{
-            await loadUnidad.call
-            .then( result => {
-                setUnidades(result.data.data);
-            }).catch((e: AxiosError) => console.log(e.message));
+            const result = await loadUnidad.call
+            setUnidades(result.data.data);
         }catch(e){ console.log(e); }
     };
     
@@ -70,7 +69,7 @@ function Unidades () {
 
     const eliminarUnidad = async (id: number) => {
         await callEndpoint(deleteUnidad(id));
-        useGet();
+        setIsChangeUnidad(!isChangeUnidad); 
     }
 
     return (

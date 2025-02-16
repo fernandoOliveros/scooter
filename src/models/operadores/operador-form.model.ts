@@ -4,7 +4,7 @@ import { IOperadorDocumentos } from "./operador-docs.model";
 import { IOperadorTelefono } from "./operador-telefono.model";
 
 export interface IOperadorForm{
-    id_Empresa:  number | null;
+    //id_Empresa:  number | null;
     id_TipoPuesto:  number | null;
     st_Nombre:  string;
     st_ApellidoP:  string;

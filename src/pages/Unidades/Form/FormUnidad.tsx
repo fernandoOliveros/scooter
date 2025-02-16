@@ -19,18 +19,17 @@ export interface Props {
     returnFormUnidad: (success: boolean) => void
 }
 
-const MAX_FILE_SIZE = 5002400;
-const nameDocumentsUnidad = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"];
-
 function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
     //todo: variable para saber el comportamiento del formulario alta/editar
     const isEditMode = id_Unidad != 0 ? true : false;
     //todo: Id Documento
     const [idDocumento, setIdDocumento] = useState<number>(0);
-    //todo: Formulario
+    //todo: General Form 
     const {register, setValue, handleSubmit, control, formState: {errors}} = useForm<IUnidadForm>();
-    //todo Arreglo para documentos
-    const [documentos, setDocumentos] = useState<IUnidadDocumentos>({url_TarjetaCirculacion: '', url_Factura: '', url_PermisoSCT: ''});
+    // Documents
+    const documentFields = ["url_TarjetaCirculacion", "url_Factura", "url_PermisoSCT"] as const;
+    const {register: docs, setValue: setDocs, getValues: getValuesDocs,  formState: {errors: errorDocs}} = useForm<IUnidadDocumentos>();
+    const [uploadSuccess, setUploadSuccess] = useState<{ [key in keyof IUnidadDocumentos]?: boolean }>({});
 
     //todo: Catalogos
     const [ tipoUnidades, setTipoUnidades] = useState<IAutoComplete[]>([]);
@@ -118,23 +117,16 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
         if(id_Unidad !== 0) getUnidadId();
     },[]);
 
-    //todo: Funcion para el input tipo file
-    const onchangeDocumentos = (e: ChangeEvent<HTMLInputElement>) => {
-        let selector = nameDocumentsUnidad.filter( x => x === e.target.id);
-        let sizeFile: any = e.target.files?.[0].size;
-        let typeFile = e.target.files?.[0].type;
-    
-        if(sizeFile < MAX_FILE_SIZE && typeFile === "application/pdf"){
-          setDocumentos({...documentos, [selector[0]]  : e.target.files?.[0]});
-        }else{
-          setDocumentos({...documentos, [selector[0]]: ''});
-          alert("Selecciona un archivo en formato pdf y que peso menos de 5MB");
-        }
-    }
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, fieldName: keyof IUnidadDocumentos) => {
+        const file = event.target.files?.[0] || null;
+        setDocs(`${fieldName}`, file);
+        setUploadSuccess((prev) => ({ ...prev, [fieldName]: true })); // Mostramos mensaje de éxito
+    };
 
     const onSubmit: SubmitHandler<IUnidadForm> = async(data, e) => {
         e?.preventDefault();
         try {
+            const documentos = getValuesDocs();
             //* Alta Unidad
             if(!isEditMode){
                 //todo: Completamos el formulario
@@ -327,6 +319,31 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                     <h4 className="card-title mt-4">Documentación de la Unidad</h4>
                     <hr></hr>
                     <div className="row">
+                        {documentFields.map((field) => (
+                            <div key={field} className="col-md-4 col-lg-4 col-sm-6 col-xs-12"> 
+                                <Button variant="contained" component="label">
+                                    {field.replace("url_", "").toUpperCase()}
+                                    <input
+                                        type="file"
+                                        accept="application/pdf"
+                                        hidden
+                                        {...docs(`${field}`)}
+                                        onChange={(e) => handleFileChange(e, field as keyof IUnidadDocumentos)}
+                                    />
+                                </Button>
+                                {/* Mensaje de éxito en color verde */}
+                                {uploadSuccess[field] && (
+                                    <span style={{ color: "green", marginLeft: "10px" }}>Archivo cargado correctamente</span>
+                                )}
+            
+                                {/* Error si el archivo no es válido */}
+                                {errorDocs?.[field] && (
+                                    <span style={{ color: "red", marginLeft: "10px" }}>{errorDocs[field]?.message}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    {/* <div className="row">
                         <div className="col-md-4 col-lg-4 col-sm-6 col-xs-12">
                             <div className="form-group">
                                 <Button variant="contained" component="label" >Tarjeta Circulacion
@@ -366,7 +383,7 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                                 }
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                     {
                         idDocumento !== 0 ? ( <ViewDocuments id_Documento={idDocumento}/>) : void(0)
                     }
