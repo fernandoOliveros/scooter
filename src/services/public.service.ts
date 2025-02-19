@@ -1,6 +1,7 @@
 import axios from "axios";
 import loadAbort from "../utils/load-abort.util"
 import baseUrl from "../utils/base-url.utils";
+import api from "./api";
 
 export const timbrarXmlAndCreate = (id: number, token: string) =>{
     const controller = loadAbort();
@@ -21,12 +22,12 @@ export const getViajesActivos = (idEmpresa: string) => {
     }
 }
 
-export const getUltimoFolioViaje = (id_Empresa: string) => {
+export const getUltimoFolioViaje = () => {
     const controller = loadAbort();
     //Peticion
-    const urlGet = baseUrl + "viajes/getLatestFolio/" + id_Empresa;
+    const urlGet = baseUrl + "viajes/getLatestFolio" ;
     return {
-        call: axios.get(urlGet, {signal: controller.signal}),
+        call: api.get(urlGet, {signal: controller.signal}),
         controller
     }
     

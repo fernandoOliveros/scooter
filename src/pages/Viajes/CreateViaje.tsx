@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Menu from '../../components/shared/Menu'
 import ViajeForm from './Form/ViajeForm'
 import Swal from 'sweetalert2'
+import FormViaje from './Form/FormViaje'
 
 const CreateViaje = () => {
      //todo: variables
@@ -35,6 +36,7 @@ const CreateViaje = () => {
                 </div>
                 <div className="row">
                     <ViajeForm returnFormCreateViaje={returnFormCreateViaje} />
+                    {/* <FormViaje returnFormViaje={returnFormCreateViaje}/> */}
                 </div>
             </div>
             <Menu />

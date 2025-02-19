@@ -2,6 +2,7 @@ import { Controller, Control, Path, FieldValues } from "react-hook-form";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { IAutoComplete } from "../../models/shared/autocomplete.model";
+import { Fragment } from "react";
 
 interface AutocompleteFieldProps<O extends IAutoComplete, TField extends FieldValues> {
   control: Control<TField>;
@@ -24,7 +25,7 @@ export const AutocompleteField = <O extends IAutoComplete, TField extends FieldV
       render={({ field, fieldState: { error } }) => {
         const { onChange, value, ref } = field;
         return (
-          <>
+          <Fragment>
             <Autocomplete
               value={
                 value
@@ -52,7 +53,7 @@ export const AutocompleteField = <O extends IAutoComplete, TField extends FieldV
             {error ? (
               <span style={{ color: "red" }}>{error.message}</span>
             ) : null}
-          </>
+          </Fragment>
         );
       }}
     />

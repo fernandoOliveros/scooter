@@ -2,6 +2,7 @@ import axios from "axios";
 import loadAbort from "../../utils/load-abort.util"
 import baseUrl from "../../utils/base-url.utils";
 import { IRelViajeRemolqueForm, IViajeForm } from "../../models/viajes/viaje-form.model";
+import api from "../api";
 
 
 
@@ -16,7 +17,7 @@ export const getViajesEmpresa = (idEmpresa: string) => {
 export const createViaje = (dataViaje: IViajeForm) => {
     const controller = loadAbort();
     return {
-        call: axios.post(baseUrl + "viajes/create", dataViaje, { signal: controller.signal, }),
+        call: api.post(baseUrl + "viajes/create", dataViaje, { signal: controller.signal, }),
         controller
     }
 }
