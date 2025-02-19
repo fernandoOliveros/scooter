@@ -75,25 +75,31 @@ function FormOperador({id_Operador = 0 , returnFormOperador}: Props) {
           createrDireccion = await callEndpoint(insertDireccion(data.direccion, new_idOperador));
           createrTelefono = await callEndpoint(insertTelefono(data.telefono, new_idOperador));
           createrContacto = await callEndpoint(insertContacto(data.contacto, new_idOperador));
-          // INSERT DOCUMENTOS OPERADOR
-          await callEndpoint(uploadFilesOperador(data.documentos, new_idOperador));
-          console.log(data.documentos);
+          if(data.documentos.url_CURP?.size && data.documentos.url_ComprobanteDom?.size && data.documentos.url_RFC?.size){
+            // INSERT DOCUMENTOS OPERADOR
+            await callEndpoint(uploadFilesOperador(data.documentos, new_idOperador));
+            console.log(data.documentos);
+          }
         }else{
           await callEndpoint(updateOperador(data.operadorForm, id_Operador));
           await callEndpoint(updateTelefonoOperador(data.telefono, id_Operador));
           await callEndpoint(updateContactoOperador(data.contacto, id_Operador));
           await callEndpoint(updateDireccionOperador(data.direccion, id_Operador));
           //* Verificamos si tenemos IdDocumento para saber si hay un registro
-          if(idDocumento !== 0){
+          if(data.documentos.url_CURP?.size && data.documentos.url_ComprobanteDom?.size && data.documentos.url_RFC?.size){
+            console.log(data.documentos.url_CURP.size);
+            if(idDocumento !== 0){
               //* Actualizamos los archivos
               await callEndpoint(updateFilesOperador(data.documentos, idDocumento, id_Operador));
-          }else{
+            }else{
                 //*: Creamos el registro de los documentos
               await callEndpoint(uploadFilesOperador(data.documentos, id_Operador));
+            }
           }
         }
         returnFormOperador(true); 
       } catch (error) {
+        console.log(error);
         returnFormOperador(false); 
       }
     }

@@ -33,8 +33,6 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
     const TipoViaje = [{id_TipoViaje: 1, st_Descripcion: "Local"}, {id_TipoViaje: 2, st_Descripcion: "Foráneo"}];
 
     //todo: Variables globales
-    const userState = useSelector((store: RootStore) => store.user);
-    const id_Empresa = userState.user.id_Empresa;
     const { callEndpoint } = useFetchAndLoad();
 
     const[dialogUnidad, setDialogUnidad] = useState<boolean>(false);
@@ -42,7 +40,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
     const[dialogOperador, setDialogOperador] = useState<boolean>(false);
     const[dialogCliente, setDialogCliente] = useState<boolean>(false);
 
-    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 1, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, i_km_totales: 1, id_Empresa:  id_Empresa, id_StatusViaje: 1, id_Candado: 1});
+    const [viajeForm, setViajeForm] = useState<IViajeForm>({ folio_int_viaje: 1, id_Cliente: null, id_TipoViaje: null, id_Unidad: null, id_Operador: null, i_km_totales: 1, id_StatusViaje: 1, id_Candado: 1});
     
     // CATÁLOGOS PARA LOS SELECT DE UNIDADES, OPERADORES, REMOLQUES
     //const [clientes, setClientes] = useState<IAutoComplete[]>([]);
@@ -63,11 +61,11 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     useEffect(() => {
         // CALL SERVICES TO CAT
-        const loadUnidad = getUnidades(id_Empresa);
-        const loadOperadores = getOperadoresByEmpresa(id_Empresa);
-        const loadRemolques = getRemolques(id_Empresa);
-        const loadLastFolio = getUltimoFolioViaje(id_Empresa);
-        const loadClientes = getClientesEmpresa(id_Empresa);
+        const loadUnidad = getUnidades();
+        const loadOperadores = getOperadoresByEmpresa();
+        const loadRemolques = getRemolques();
+        const loadLastFolio = getUltimoFolioViaje();
+        const loadClientes = getClientesEmpresa();
 
         const useGetUnidades = async() => {
             try{
@@ -156,7 +154,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     //todo: Refrescamos el catalogo Unidades
     useEffect(() => {
-        const loadUnidad = getUnidades(id_Empresa);
+        const loadUnidad = getUnidades();
         const useGetUnidades = async() => {
             try{
                 const response = await loadUnidad.call;
@@ -173,7 +171,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     //todo: Refrescamos el catalogo Remolques
     useEffect(() => {
-        const loadRemolques = getRemolques(id_Empresa);
+        const loadRemolques = getRemolques();
         const useGetRemolques = async() => {
             try{
                 const response = await loadRemolques.call;
@@ -190,7 +188,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     //todo: Refrescamos el catalogo Remolques
     useEffect(() => {
-        const loadOperadores = getOperadoresByEmpresa(id_Empresa);
+        const loadOperadores = getOperadoresByEmpresa();
         const useGetOperadores = async () => {
             try {
                 const result = await loadOperadores.call;
@@ -208,7 +206,7 @@ const ViajeForm = ({returnFormCreateViaje}: Props) => {
 
     //todo: Refrescamos el catalogo Remolques
     useEffect(() => {
-        const loadClientes2 = getClientesEmpresa(id_Empresa);
+        const loadClientes2 = getClientesEmpresa();
         const useGetClientesEmpresa = async() => {
             try{
                 const response = await loadClientes2.call;

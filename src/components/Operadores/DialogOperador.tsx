@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 import { Fragment } from 'react';
-import OperadorForm from '../../pages/Operadores/Form/OperadorForm';
+// import OperadorForm from '../../pages/Operadores/Form/OperadorForm';
+import FormOperador from '../../pages/Operadores/Form/FormOperador';
 
 
 export interface Props {
@@ -22,7 +23,8 @@ const DialogOperador = ({open, returnCloseDialog, returnOperador}: Props) => {
         <Fragment>
             <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description"  maxWidth={"lg"}>
                 <DialogContent>
-                    <OperadorForm  returnFormOperador={(e) => returnFunction(e)} />
+                    {/* <OperadorForm  returnFormOperador={(e) => returnFunction(e)} /> */}
+                    <FormOperador returnFormOperador={(e) => returnFunction(e)} />
                 </DialogContent>
                 <DialogActions>
                     <Button variant='contained' color='warning'  onClick={() => returnCloseDialog(false)}>Salir sin guardar</Button>
