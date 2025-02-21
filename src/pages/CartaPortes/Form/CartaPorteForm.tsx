@@ -231,7 +231,7 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
   useEffect(() => {
     // services
     const loadViajesActivos = getViajesActivos(id_Empresa);
-    const loadClientes = getClientesEmpresa(id_Empresa);
+    const loadClientes = getClientesEmpresa();
     const loadMonedas = getCatTipoMonedas();
     const loadFormasPago = getCatFormaPago();
     const loadMetodosPago = getCatMetodosPago();

@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IUnidadForm } from '../../../models/unidades/unidad-form.model';
 import { IAutoComplete } from '../../../models/shared/autocomplete.model';
@@ -109,6 +109,8 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                     setValue("id_Candado", data.id_Candado);
                     setValue("id_TipoPermiso", data.id_TipoPermiso);
                     setValue("id_AseguradoraRespCivil",  data.id_AseguradoraRespCivil);
+                    setValue("dec_PesoBrutoVehicular",  data.dec_PesoBrutoVehicular);
+
                     setIdDocumento(data.id_Documento ?? 0);
                 }).catch(error => console.log(error));
                 
@@ -125,6 +127,7 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
 
     const onSubmit: SubmitHandler<IUnidadForm> = async(data, e) => {
         e?.preventDefault();
+        console.log(data);
         try {
             const documentos = getValuesDocs();
             //* Alta Unidad
@@ -288,6 +291,17 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                                 error={errors.date_Ecologico ? true : false}
                                 helperText={errors.date_Ecologico && errors.date_Ecologico.message}
                                 InputLabelProps={{ shrink: true }} name="date_Ecologico" inputProps={{ autoComplete: "off" }}/>
+                            </div>
+                        </div>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                            <div className="form-group">
+                                <TextField className="form-control" variant="outlined" label="Peso vehicular (KGM)" type="number" 
+                                {...register("dec_PesoBrutoVehicular", {
+                                    required: "Campo Requerido",
+                                })}
+                                error={errors.dec_PesoBrutoVehicular ? true : false}
+                                helperText={errors.dec_PesoBrutoVehicular && errors.dec_PesoBrutoVehicular.message}
+                                inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 5000}} />
                             </div>
                         </div>
                     </div>

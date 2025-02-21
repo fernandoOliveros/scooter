@@ -6,4 +6,5 @@ export interface IRemolqueForm {
     st_NumSerie? : string;
     date_VigenciaFM : Date | null;
     id_TipoRemolque : number | null;
+    dec_PesoBrutoVehicular: number | null;
 }

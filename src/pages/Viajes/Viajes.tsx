@@ -40,7 +40,7 @@ const Viajes = () => {
         const routeFull = PrivateRoutes.setUpViaje.split(":");
         let routeClean = routeFull[0];
         console.log(routeFull);
-        navigate("/" + routeClean + idViaje);
+        //7navigate("/" + routeClean + idViaje);
     }
 
     const columns: GridColDef[] = 

@@ -68,6 +68,8 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
                 setValue("st_NumSerie", response.st_NumSerie);
                 setValue("date_VigenciaFM", response.date_VigenciaFM);
                 setValue("id_TipoRemolque", response.id_TipoRemolque);
+                setValue("dec_PesoBrutoVehicular",  response.dec_PesoBrutoVehicular);
+
 
                 //todo: Seteamos el el idDocumento
                 setIdDocumento(response.id_Documento ?? 0);
@@ -95,6 +97,7 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
 
     const onSubmit: SubmitHandler<IRemolqueForm> = async(data, e) => {
         e?.preventDefault();
+        console.log(data);
         try {
             if(!isEditMode){
                 //todo: Creamos el remolque
@@ -189,6 +192,17 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
                                     name='id_TipoRemolque'
                                     placeholder='Selecciona el tipo de Remolque'
                                 />
+                            </div>
+                        </div>
+                        <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
+                            <div className="form-group">
+                                <TextField className="form-control" variant="outlined" label="Peso vehicular (KGM)" type="number" 
+                                {...register("dec_PesoBrutoVehicular", {
+                                    required: "Campo Requerido",
+                                })}
+                                error={errors.dec_PesoBrutoVehicular ? true : false}
+                                helperText={errors.dec_PesoBrutoVehicular && errors.dec_PesoBrutoVehicular.message}
+                                inputProps={{ autoComplete: "off", inputMode: 'numeric', pattern: '[0-9]*' , min: 5000}} />
                             </div>
                         </div>
                         <div className="col-md-4 col-lg-4 col-sm-6 col-xs-12">
