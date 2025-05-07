@@ -3,6 +3,7 @@ import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate } from 'react-router-dom';
 import CartaPorteForm from './Form/CartaPorteForm';
 import Swal from 'sweetalert2';
+import FormCartaPorte from './Form/FormCartaPorte';
 
 const CreateCartaPorte = () => {
     const navigate = useNavigate();
@@ -38,7 +39,8 @@ const CreateCartaPorte = () => {
                     <div className="card-body">
                         <div className='row'>
                             <div className='col-12'>
-                                <CartaPorteForm returnFormCartaPorte={resultFormCartaPorte}/>
+                                {/* <CartaPorteForm returnFormCartaPorte={resultFormCartaPorte}/> */}
+                                <FormCartaPorte />
                             </div>
                         </div>
                     </div>

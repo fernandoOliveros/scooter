@@ -36,29 +36,8 @@ const Viajes = () => {
         return response;
     }
 
-    const congifViaje = (idViaje: any) => {
-        const routeFull = PrivateRoutes.setUpViaje.split(":");
-        let routeClean = routeFull[0];
-        console.log(routeFull);
-        //7navigate("/" + routeClean + idViaje);
-    }
-
     const columns: GridColDef[] = 
     [
-        {
-            field: 'actions',
-            headerName: 'ACC',
-            type: 'actions',
-            width: 40,
-            getActions: (params) => [
-              <GridActionsCellItem
-                icon={<FileCopyIcon />}
-                label="Configurar Viaje"
-                onClick={() => congifViaje(params.id)}
-                showInMenu
-              />,
-            ],
-        },
         { field: 'folio_int_viaje', headerName: 'Folio viaje', width: 200,},
         { field: 'i_km_totales', headerName: 'KM Recorridos', width: 200, sortable: false},
         { field: 'createdAt', headerName: 'Creado', width: 200, valueGetter: (params: GridValueGetterParams) => formatDate(params.row.createdAt), sortable: true },

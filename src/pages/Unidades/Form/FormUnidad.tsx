@@ -127,7 +127,6 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
 
     const onSubmit: SubmitHandler<IUnidadForm> = async(data, e) => {
         e?.preventDefault();
-        console.log(data);
         try {
             const documentos = getValuesDocs();
             //* Alta Unidad
@@ -137,19 +136,26 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                 //todo: Creamos la unidad
                 let result = await callEndpoint(createUnidad(data));
                 //Todo: Creamos el registro de los documentos
-                await callEndpoint(uploadFilesUnidad(documentos, result.data.data.id_Unidad));
+                if(documentos.url_Factura?.size != undefined && documentos.url_PermisoSCT?.size != undefined && documentos.url_TarjetaCirculacion?.size != undefined){
+                    await callEndpoint(uploadFilesUnidad(documentos, result.data.data.id_Unidad));
+                }else{
+                    console.log("NOT LOAD FILES");
+                }
             }else{
                 //* Editamos la unidad
                 await callEndpoint(editUnidad(id_Unidad, data));
                 //* Verificamos si tenemos IdDocumento para saber si hay un registro
-                if(idDocumento !== 0){
-                    //* Actualizamos los archivos
-                    await callEndpoint(updateFilesUnidad(documentos, idDocumento, id_Unidad));
+                if(documentos.url_Factura?.size != undefined && documentos.url_PermisoSCT?.size != undefined && documentos.url_TarjetaCirculacion?.size != undefined){
+                    if(idDocumento !== 0){
+                        //* Actualizamos los archivos
+                        await callEndpoint(updateFilesUnidad(documentos, idDocumento, id_Unidad));
+                    }else{
+                         //*: Creamos el registro de los documentos
+                        await callEndpoint(uploadFilesUnidad(documentos, id_Unidad));
+                    }
                 }else{
-                     //*: Creamos el registro de los documentos
-                    await callEndpoint(uploadFilesUnidad(documentos, id_Unidad));
+                    console.log("NOT LOAD FILES");
                 }
-                
             }
             returnFormUnidad(true);
         } catch (error) { console.log(error); returnFormUnidad(false); }
@@ -402,7 +408,7 @@ function FormUnidad({id_Unidad = 0, returnFormUnidad}: Props) {
                         idDocumento !== 0 ? ( <ViewDocuments id_Documento={idDocumento}/>) : void(0)
                     }
                 </div>
-                <Button variant='contained' color='success' size='medium' type="submit">
+                <Button className='mt-5' variant='contained' color='success' size='medium' type="submit">
                     { isEditMode ? 'Actualizar' : 'Guardar' }
                 </Button>
             </form>

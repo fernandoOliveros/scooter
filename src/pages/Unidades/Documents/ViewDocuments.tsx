@@ -36,7 +36,7 @@ const ViewDocuments = ({id_Documento = 0}: Props) => {
 
     return (
         <Fragment>
-            <h4 className="card-title">Descargar Documentos</h4>
+            <h4 className="card-title mt-5">Descargar Documentos</h4>
             <hr></hr>
             <div className="row">
                 <div className="col-md-4 col-lg-4 col-sm-4 col-xs-12 mb-4">

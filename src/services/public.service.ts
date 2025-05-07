@@ -13,11 +13,11 @@ export const timbrarXmlAndCreate = (id: number, token: string) =>{
 }
 
 
-export const getViajesActivos = (idEmpresa: string) => {
+export const getViajesActivos = (idEmpresa?: string) => {
     const controller = loadAbort(); //Opcion para cancelar solicitud
     let uri = baseUrl + "viajes/readActivosByEmpresa/" + idEmpresa;
     return {
-        call: axios.get(uri, {signal: controller.signal}),
+        call: api.get(uri, {signal: controller.signal}),
         controller
     }
 }

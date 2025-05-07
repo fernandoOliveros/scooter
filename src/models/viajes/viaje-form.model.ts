@@ -5,9 +5,9 @@ export interface IViajeForm {
     id_Unidad : number | null;
     id_Operador : number | null;
     i_km_totales: number ;
-    //id_Empresa : number | null;
     id_StatusViaje : number;
     id_Candado: number;
+    id_Remolque?: number;
 }
 
 export interface multipleRemolques {

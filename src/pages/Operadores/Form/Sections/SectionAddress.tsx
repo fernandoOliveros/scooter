@@ -82,40 +82,40 @@ function SectionAddress() {
         <hr></hr>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                    <TextField id='st_Calle' className="form-control" variant="outlined" label="Calle"  type="text"
+                    <TextField id='st_Calle' className="form-control" variant="outlined" label="Calle" type="text"
                     {...register("direccion.st_Calle", {
                         required: "Campo Requerido",
                     })}
                     error={errors.direccion?.st_Calle ? true : false}
                     helperText={errors.direccion?.st_Calle && errors.direccion?.st_Calle.message?.toString()}
-                    inputProps={{ autoComplete: "off" }} required/>
+                    inputProps={{ autoComplete: "off" }}/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                    <TextField id='st_NoExterior' className="form-control" variant="outlined" label="Número Exterior"  type="text"
+                    <TextField id='st_NoExterior' className="form-control" variant="outlined" label="Número Exterior" type="text"
                     {...register("direccion.st_NoExterior", {
                         required: "Campo Requerido",
                     })}
                     error={errors.direccion?.st_NoExterior ? true : false}
                     helperText={errors.direccion?.st_NoExterior && errors.direccion?.st_NoExterior.message?.toString()}
-                    inputProps={{ autoComplete: "off" }} required/>
+                    inputProps={{ autoComplete: "off" }}/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                    <TextField id='st_NoInterior' className="form-control" variant="outlined" label="Número Interior"  type="text"
+                    <TextField id='st_NoInterior' className="form-control" variant="outlined" label="Número Interior" type="text"
                     {...register("direccion.st_NoInterior", {
                         required: "Campo Requerido",
                     })}
                     error={errors.direccion?.st_NoInterior ? true : false}
                     helperText={errors.direccion?.st_NoInterior && errors.direccion?.st_NoInterior.message?.toString()}
-                    inputProps={{ autoComplete: "off" }} required/>
+                    inputProps={{ autoComplete: "off" }}/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                    <TextField id='c_codigoPostal' className="form-control" variant="outlined" label="Código Postal"  type="text"
+                    <TextField id='c_codigoPostal' className="form-control" variant="outlined" label="Código Postal" type="text"
                     {...register("direccion.c_codigoPostal", {
                         required: "Campo Requerido",
                         maxLength: 5,
@@ -123,7 +123,8 @@ function SectionAddress() {
                     onKeyDown={handleEnterPress}
                     error={errors.direccion?.c_codigoPostal ? true : false}
                     helperText={errors.direccion?.c_codigoPostal && errors.direccion?.c_codigoPostal.message?.toString()}
-                    inputProps={{ autoComplete: "off", maxLength:"5" }} required InputLabelProps={{ shrink: true }}/>
+                    inputProps={{ autoComplete: "off", maxLength:"5" }}
+                    InputLabelProps={{ shrink: true }}/>
                 </div>
             </div>
             <div className='col-md-8 col-lg-8 col-sm-12 col-xs-12'>
@@ -144,11 +145,12 @@ function SectionAddress() {
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
                 <div className="form-group">
-                    <TextField id='st_Municipio' className="form-control" variant="outlined" label="Municipio"  type="text"
+                    <TextField id='st_Municipio' className="form-control" variant="outlined" label="Municipio" type="text"
                     {...viewDireccion("st_Municipio", {
                         required: "Campo Requerido",
                     })}
-                    InputLabelProps={{ shrink: true }} inputProps={{ autoComplete: "off", readOnly:true }} required/>
+                    InputLabelProps={{ shrink: true }} 
+                    inputProps={{ autoComplete: "off", readOnly:true }}/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -157,7 +159,7 @@ function SectionAddress() {
                     {...viewDireccion("st_Localidad", {
                         required: "Campo Requerido",
                     })}
-                    InputLabelProps={{ shrink: true }} inputProps={{ autoComplete: "off", readOnly:true }} required/>
+                    InputLabelProps={{ shrink: true }} inputProps={{ autoComplete: "off", readOnly:true }}/>
                 </div>
             </div>
             <div className="col-md-4 col-lg-4 col-sm-12 col-xs-12">
@@ -166,13 +168,15 @@ function SectionAddress() {
                         {...viewDireccion("st_Estado", {
                         required: "Campo Requerido",
                     })}
-                    inputProps={{ autoComplete: "off", readOnly:true }} required InputLabelProps={{ shrink: true }}/>
+                    inputProps={{ autoComplete: "off", readOnly: true }} 
+                    InputLabelProps={{ shrink: true }}/>
                 </div>
             </div>
             <div className="col-md-12 col-lg-12 col-sm-12 col-xs-12">
                 <div className="form-group">
                     <TextField id='st_RefDomicilio' className="form-control" variant="outlined" label="Referencia" 
-                    type="text"{...register("direccion.st_RefDomicilio")} inputProps={{ autoComplete: "off"}} required/>
+                    type="text"{...register("direccion.st_RefDomicilio")} 
+                    inputProps={{ autoComplete: "off"}}/>
                 </div>
             </div>
         </div>

@@ -97,25 +97,30 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
 
     const onSubmit: SubmitHandler<IRemolqueForm> = async(data, e) => {
         e?.preventDefault();
-        console.log(data);
+             
         try {
             if(!isEditMode){
                 //todo: Creamos el remolque
                 let result = await callEndpoint(createRemolque(data));
-                //todo: Guardamos archivos remolque
-                await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
-            }else{
-                console.log(data);
-                //* Actualizamos remolque
-                const result = await callEndpoint(editRemolque(id_Remolque, data));
-
-                console.log(result);
-                if(idDocumento !== 0){
-                    //* Actualizamos larchivos remolque
-                    await callEndpoint(updateFilesRemolque(documentos, idDocumento, id_Remolque));
+                if(documentos.url_Factura != "" && documentos.url_PermisoSCT != "" && documentos.url_TarjetaCirculacion != ""){
+                    //todo: Guardamos archivos remolque
+                    await callEndpoint(uploadFilesRemolque(documentos,result.data.data.id_Remolque));
                 }else{
-                    //*: guardamos archivos remolques
-                    await callEndpoint(uploadFilesRemolque(documentos, id_Remolque));
+                    console.log("NOT LOAD FILES REMOLQUES");
+                }
+            }else{
+                //* Actualizamos remolque
+                await callEndpoint(editRemolque(id_Remolque, data));
+                if(documentos.url_Factura != "" && documentos.url_PermisoSCT != "" && documentos.url_TarjetaCirculacion != ""){
+                    if(idDocumento !== 0){
+                        //* Actualizamos larchivos remolque
+                        await callEndpoint(updateFilesRemolque(documentos, idDocumento, id_Remolque));
+                    }else{
+                        //*: guardamos archivos remolques
+                        await callEndpoint(uploadFilesRemolque(documentos, id_Remolque));
+                    }
+                }else{
+                    console.log("NOT LOAD FILES REMOLQUES");
                 }
             }
             returnFormRemolque(true);
@@ -262,7 +267,7 @@ function FormRemolque({id_Remolque = 0, returnFormRemolque}: Props) {
                         idDocumento !== 0 ? ( <ViewDocumentsRemolque id_Documento={idDocumento}/>) : void(0)
                     }
                 </div>
-                <Button variant='contained' color='success' size='medium' type="submit">Submit</Button>
+                <Button variant='contained' color='success' size='medium' type="submit">{isEditMode ? "Alta": "Editar"}</Button>
             </form>
         </Fragment>
     )

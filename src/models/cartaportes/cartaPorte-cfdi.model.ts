@@ -1,5 +1,5 @@
 export interface ICartaPorteCfdiForm {
-    id_Empresa : number;
+    id_Empresa? : number;
     id_Moneda : number | null;
     id_FormaPago : number | null;
     id_MetodoPago: number | null;
