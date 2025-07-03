@@ -9,7 +9,7 @@ export interface ICartaPorteDirOrigenForm {
     st_NoInterior : string;
     st_RefDomicilio : string;
     st_RemitenteNombre : string;
-    date_FechaSalida: Date | null;
+    date_FechaSalida: Date;
     st_RemitenteRFC : string;
     c_codigoPostal : string;
 }

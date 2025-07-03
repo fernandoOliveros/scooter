@@ -91,19 +91,19 @@ const productoServicioCfdiEmpty : IProducServicioCartaPorteCfdiForm = {
   id_ClaveProdServCFDI: null,
   id_ClaveUnidadPesoCFDI: null,
   id_ObjetoImp: null,
-  dec_ImporteConcepto: null,
-  dec_ValorUnitarioConcepto: null,
+  dec_ImporteConcepto: 0,
+  dec_ValorUnitarioConcepto: 0,
   st_DescripcionConcepto: null,
   id_ImpuestoTraslado: null,
   id_ImpuestoRetencion: null,
   id_TipoFactorTraslado: null,
   id_TipoFactorRetencion: null,
-  dec_BaseTraslado: null,
-  dec_BaseRetencion: null,
-  dec_ImporteTraslado: null,
-  dec_ImporteRetencion: null,
-  dec_TasaOCuotaTraslado: null,
-  dec_TasaOCuotaRetencion: null,
+  dec_BaseTraslado: 0,
+  dec_BaseRetencion: 0,
+  dec_ImporteTraslado: 0,
+  dec_ImporteRetencion: 0,
+  dec_TasaOCuotaTraslado: 0,
+  dec_TasaOCuotaRetencion: 0,
   i_Cantidad: 1
 }
 
@@ -170,10 +170,10 @@ function CartaPorteForm({ returnFormCartaPorte }: Props) {
     id_TipoComprobante : null,
     id_Viaje : null,
     id_Cliente : null,
-    dec_SubTotal: null,
-    dec_Total: null,
-    dec_TotalImpuestosRetenidos: null,
-    dec_TotalImpuestosTrasladados: null
+    dec_SubTotal: 0,
+    dec_Total: 0,
+    dec_TotalImpuestosRetenidos: 0,
+    dec_TotalImpuestosTrasladados: 0
   });
 
   //todo: Variable general del producto/servicio del cfdi

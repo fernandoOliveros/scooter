@@ -28,6 +28,7 @@ function CartaPortes() {
 
     //todo: FUNCIONES GLOBALES
     const createCartaPorte = () => navigate("crear");
+    const editarCartaPorte = (id: number) => navigate("editar/" + id);
 
     const columns: GridColDef[] = [
         {
@@ -45,7 +46,7 @@ function CartaPortes() {
               <GridActionsCellItem
                 icon={<CodeIcon />}
                 label="Editar"
-                onClick={() => console.log(params.id)}
+                onClick={() => editarCartaPorte(+params.id)}
                 showInMenu
               />,
             ],

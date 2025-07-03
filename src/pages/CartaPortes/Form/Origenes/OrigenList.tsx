@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, memo } from 'react'
 import { ICartaPorteDirOrigenForm } from '../../../../models/cartaportes/cartaPorte-dirOrigen-form.model';
 import { Button, IconButton } from '@mui/material';
 import EditIcon from "@mui/icons-material/Edit";
@@ -12,6 +12,7 @@ interface Props {
 }
 
 function OrigenList({ origenes, onEdit, onRemove, onAdd }: Props) {
+    console.log("OrigenList renderizado");
     return (
       <Fragment>
         <div className="row">
@@ -32,27 +33,37 @@ function OrigenList({ origenes, onEdit, onRemove, onAdd }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {origenes.map((origen, index) => (
-                  <tr key={index}>
-                    <td>{origen.st_RemitenteNombre}</td>
-                    <td>{origen.st_RemitenteRFC}</td>
-                    <td>{origen.st_Calle}</td>
-                    <td>{origen.c_codigoPostal}</td>
-                    <td>
-                        {origen.date_FechaSalida
-                        ? new Date(origen.date_FechaSalida).toLocaleString()
-                        : "-"}
-                    </td>
-                    <td align="right">
-                        <IconButton onClick={() => onEdit(index)} color="primary">
-                            <EditIcon />
-                        </IconButton>
-                        <IconButton onClick={() => onRemove(index)} color="error">
-                            <DeleteIcon />
-                        </IconButton>
-                    </td>
-                  </tr>
-                ))}
+                {
+                  origenes.length == 0 ? 
+                  (
+                    <tr>
+                      <td colSpan={6} align='center'>No hay origenes registrados</td>
+                    </tr>
+                  ) : (
+                    origenes.map((origen, index) => (
+                      <tr key={index}>
+                        <td>{origen.st_RemitenteNombre}</td>
+                        <td>{origen.st_RemitenteRFC}</td>
+                        <td>{origen.st_Calle}</td>
+                        <td>{origen.c_codigoPostal}</td>
+                        <td>
+                            {origen.date_FechaSalida
+                            ? new Date(origen.date_FechaSalida).toLocaleString()
+                            : "-"}
+                        </td>
+                        <td align="right">
+                            <IconButton onClick={() => onEdit(index)} color="primary">
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={() => onRemove(index)} color="error">
+                                <DeleteIcon />
+                            </IconButton>
+                        </td>
+                      </tr>
+                    ))
+                  )
+                  
+                }
               </tbody>
             </table>
           </div>
@@ -61,4 +72,4 @@ function OrigenList({ origenes, onEdit, onRemove, onAdd }: Props) {
     )
 }
 
-export default OrigenList
+export default  memo(OrigenList);

@@ -84,11 +84,11 @@ function OrigenForm ({ defaultValues, onSubmit, onCancel} : Props) {
       }
     };
 
-    const handleEnterPress = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            getColoniaWithCP();
-        }
-    };
+    // const handleEnterPress = (event: React.KeyboardEvent) => {
+    //     if (event.key === 'Enter') {
+    //         getColoniaWithCP();
+    //     }
+    // };
     
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="mt-2">
@@ -167,7 +167,7 @@ function OrigenForm ({ defaultValues, onSubmit, onCancel} : Props) {
                             required: "Campo Requerido",
                             maxLength: 5,
                         })}
-                        onKeyDown={handleEnterPress}
+                        //onKeyDown={handleEnterPress}
                         error={errors.c_codigoPostal ? true : false}
                         helperText={errors.c_codigoPostal && errors.c_codigoPostal.message?.toString()}
                         inputProps={{ autoComplete: "off", maxLength:"5" }}

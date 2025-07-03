@@ -1,7 +1,6 @@
 import { Fragment } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import MenuBar from "../../components/shared/Menu"
-import UnidadForms from './Form/UnidadForm';
 import Swal from 'sweetalert2';
 import FormUnidad from './Form/FormUnidad';
 

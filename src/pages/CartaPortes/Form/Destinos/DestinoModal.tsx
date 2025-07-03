@@ -12,7 +12,7 @@ interface Props {
   
 function DestinoModal({ open, onClose, onSave, defaultValues }: Props) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
         <DialogTitle>{defaultValues ? "Editar Destino" : "Agregar Destino"}</DialogTitle>
         <DialogContent>
             <div className="row">

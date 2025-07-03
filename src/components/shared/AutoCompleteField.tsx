@@ -9,18 +9,19 @@ interface AutocompleteFieldProps<O extends IAutoComplete, TField extends FieldVa
   name: Path<TField>;
   options: O[];
   placeholder?: string;
+  isRequired?: boolean;
 }
 
 export const AutocompleteField = <O extends IAutoComplete, TField extends FieldValues>(
   props: AutocompleteFieldProps<O, TField>
 ) => {
-  const { control, options, name } = props;
+  const { control, options, name, isRequired} = props;
   return (
     <Controller
       name={name}
       control={control}
       rules={{
-        required: "this field is requried"
+        ...(isRequired && { required: "Campo requerido" }) // <- solo aplica la regla si isRequired es true
       }}
       render={({ field, fieldState: { error } }) => {
         const { onChange, value, ref } = field;

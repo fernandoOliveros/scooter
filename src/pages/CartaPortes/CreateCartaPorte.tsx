@@ -1,7 +1,6 @@
 import { Fragment } from 'react'
 import MenuBar from "../../components/shared/Menu"
 import { Link, useNavigate } from 'react-router-dom';
-import CartaPorteForm from './Form/CartaPorteForm';
 import Swal from 'sweetalert2';
 import FormCartaPorte from './Form/FormCartaPorte';
 

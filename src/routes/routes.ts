@@ -17,7 +17,7 @@ export const PrivateRoutes = {
     setUpViaje: "viajes/configurar/:idViaje",
     cartaPorte: 'cartaPorte',
     cartaPorteNew: 'cartaPorte/crear',
-    cartaPorteEdit: 'cartaPorte/editar',
+    cartaPorteEdit: 'cartaPorte/editar/:idCartaPorte',
     gastos: 'gastos',
     factura: 'facturas',
     newFactura: 'facturas/crear'

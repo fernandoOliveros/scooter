@@ -10,6 +10,6 @@ export interface ICartaPorteFormData {
     productCfdi: IProducServicioCartaPorteCfdiForm;
     arrOrigenes: ICartaPorteDirOrigenForm[];
     arrDestinos: ICartaPorteDirDestinoForm[];
-    productoServicio: ICartaPorteProductoServicioForm[];
+    arrProductos: ICartaPorteProductoServicioForm[];
     
 }

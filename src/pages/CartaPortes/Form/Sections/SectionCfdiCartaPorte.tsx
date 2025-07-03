@@ -5,15 +5,13 @@ import { IViajesActivos } from '../../../../models/viajes/viaje.model';
 import { useFormContext, Controller } from 'react-hook-form';
 import { ICartaPorteFormData } from '../../../../models/cartaportes/cartaporte-formData';
 import { AutocompleteField } from '../../../../components/shared/AutoCompleteField';
-import { ICatMoneda, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, ITasaCuota, ITipoComprobante, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../../models/cfdis/cfdi-form.model';
+import { ICatMoneda, IFormasPago, IMetodosPago, IObjetoImpuesto, IProdServicioCFDI, ITasaCuota, ITipoFactor, ITipoImpuestos, IUnidadPesoCFDI, IUsoCFDI } from '../../../../models/cfdis/cfdi-form.model';
 import { getClientesEmpresa } from '../../../../services/clientes/clientes.service';
 import { ICliente } from '../../../../models/clientes/cliente.model';
 import { getCatFormaPago, getCatMetodosPago, getCatObjetoImpuesto, getCatProdServicioCFDI, getCatTipoFactor, getCatTipoImpuestos, getCatTipoMonedas, getCatUsoCFDI } from '../../../../services/cfdi/cfdi.service';
 import { Autocomplete, TextField } from '@mui/material';
 
 function SectionCfdiCartaPorte() {
-
-  // todo: Catalogo para cfdi
   let ITipoComprobanteArray = [
     {
       id_TipoComprobante: 1,
@@ -36,7 +34,6 @@ function SectionCfdiCartaPorte() {
       st_TipoComprobante: 'Nomina'
     }
   ];
-  
   let catTasaCuotaJson: ITasaCuota[] = [
     {
       id_TasaCuotaJson: 1,
@@ -64,7 +61,6 @@ function SectionCfdiCartaPorte() {
       dec_ValorAplica: 0.16
     }
   ];
-
   let catUnidadServicio : IUnidadPesoCFDI[] = [
     {
       id_ClaveUnidadPesoCFDI: 678,
@@ -90,7 +86,7 @@ function SectionCfdiCartaPorte() {
   const [catTipoImpuestos, setCatTipoImpuestos] = useState<IAutoComplete[]>([]);
   const [catObjetoImpuesto, setCatObjetoImpuesto] = useState<IAutoComplete[]>([]);
   const [catTipoFactor, setCatTipoFactor] = useState<IAutoComplete[]>([]);
-  const [catTasaCuota, setCatTasaCuota] = useState<IAutoComplete[]>([]);
+  const [_catTasaCuota, setCatTasaCuota] = useState<IAutoComplete[]>([]);
   
   // Watchs
   const wTipoComprobante = watch("cfdi.id_TipoComprobante");
@@ -106,209 +102,114 @@ function SectionCfdiCartaPorte() {
   const wdec_TasaOCuotaRetencion= watch("productCfdi.dec_TasaOCuotaRetencion");
   const wdec_BaseRetencion= watch('productCfdi.dec_BaseRetencion');
 
-  // init Function
-  useEffect( () => {
-      // services
-      const loadViajesActivos = getViajesActivos();
-      const loadClientes = getClientesEmpresa();
-      const loadMonedas = getCatTipoMonedas();
-      const loadFormasPago = getCatFormaPago();
-      const loadMetodosPago = getCatMetodosPago();
-      const loadProdServicioCfdi = getCatProdServicioCFDI();
-      const loadUsoCfdi = getCatUsoCFDI();
-      const loadTipoImpuestos = getCatTipoImpuestos();
-      const loadObjetoImpuesto = getCatObjetoImpuesto();
-      const loadTipoFactor = getCatTipoFactor();
-  
-      //obtenemos los viajes activos por empresa
-      const _getViajesActivos = () => {
-        loadViajesActivos.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IViajesActivos) => ({
-              id: item.id_Viaje,
-              label: item.folio_int_viaje + " - " + item.st_EconomicoUnidad
-          }));
-          setCatViajesActivos(dataParse);
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
+  // init function
+  useEffect(() => {
+    const fetchCatalogs = async () => {
+      try {
+        const [
+          viajesResp,
+          clientesResp,
+          monedasResp,
+          formasPagoResp,
+          metodosPagoResp,
+          prodServicioResp,
+          usoCfdiResp,
+          tipoImpuestosResp,
+          objetoImpuestoResp,
+          tipoFactorResp,
+        ] = await Promise.all([
+          getViajesActivos().call,
+          getClientesEmpresa().call,
+          getCatTipoMonedas().call,
+          getCatFormaPago().call,
+          getCatMetodosPago().call,
+          getCatProdServicioCFDI().call,
+          getCatUsoCFDI().call,
+          getCatTipoImpuestos().call,
+          getCatObjetoImpuesto().call,
+          getCatTipoFactor().call,
+        ]);
 
-      // Tipo Comprobante
-      const _getTipoComprobante = () => {
-        let dataParse = ITipoComprobanteArray.map( (item) => ({
+        setCatViajesActivos(viajesResp.data.data.map((item: IViajesActivos) => ({
+          id: item.id_Viaje,
+          label: `${item.folio_int_viaje} - ${item.st_EconomicoUnidad}`,
+        })));
+
+        setCatClientes(clientesResp.data.data.map((item: ICliente) => ({
+          id: item.id_Cliente,
+          label: item.st_RazonSocial,
+        })));
+
+        setCatMonedas(monedasResp.data.data.map((item: ICatMoneda) => ({
+          id: item.id_Moneda,
+          label: `${item.c_Moneda} - ${item.st_Descripcion}`,
+        })));
+
+        setCatFormasPago(formasPagoResp.data.data.map((item: IFormasPago) => ({
+          id: item.id_FormaPago,
+          label: `${item.c_FormaPago} - ${item.st_descripcion}`,
+        })));
+
+        setCatMetodosPago(metodosPagoResp.data.data.map((item: IMetodosPago) => ({
+          id: item.id_MetodoPago,
+          label: `${item.c_MetodoPago} - ${item.st_Descripcion}`,
+        })));
+
+        setCatProdServicioCFDI(prodServicioResp.data.data.map((item: IProdServicioCFDI) => ({
+          id: item.id_ClaveProdServCFDI,
+          label: `${item.c_ClaveProdServ} - ${item.Descripcion}`,
+        })));
+
+        setCatUsoCFDI(usoCfdiResp.data.data.map((item: IUsoCFDI) => ({
+          id: item.id_UsoCFDI,
+          label: `${item.c_UsoCFDI} - ${item.st_Descripcion}`,
+        })));
+
+        setCatTipoImpuestos(tipoImpuestosResp.data.data.map((item: ITipoImpuestos) => ({
+          id: item.id_Impuesto,
+          label: `${item.c_Impuesto} - ${item.st_Descripcion}`,
+        })));
+
+        setCatObjetoImpuesto(objetoImpuestoResp.data.data.map((item: IObjetoImpuesto) => ({
+          id: item.id_ObjetoImp,
+          label: `${item.c_ObjetoImp} - ${item.st_descripcion}`,
+        })));
+
+        setCatTipoFactor(tipoFactorResp.data.data.map((item: ITipoFactor) => ({
+          id: item.id_TipoFactor,
+          label: item.c_TipoFactor,
+        })));
+
+        // Los catálogos que no vienen de fetch:
+        setCatTipoComprobante(ITipoComprobanteArray.map(item => ({
           id: item.id_TipoComprobante,
-          label: item.c_TipoDeComprobante + " - " + item.st_TipoComprobante
-        }));
-        setCatTipoComprobante(dataParse);
-      }
+          label: `${item.c_TipoDeComprobante} - ${item.st_TipoComprobante}`,
+        })));
 
-      // Clientes Cfdi
-      const _getClientes =  () => {
-        loadClientes.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: ICliente) => ({
-            id: item.id_Cliente,
-            label: item.st_RazonSocial
-          }));
-          setCatClientes(dataParse);
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-
-      // Tipo moneda
-      const _getMonedas = () => {
-        loadMonedas.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: ICatMoneda) => ({
-            id: item.id_Moneda,
-            label: item.c_Moneda + " - " + item.st_Descripcion
-          }));
-          setCatMonedas(dataParse);
-        }).catch((error: any) => {
-          console.log(error);
-        });
-        
-      }
-
-      const _getFormasPago = () => {
-        loadFormasPago.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IFormasPago) => ({
-            id: item.id_FormaPago,
-            label: item.c_FormaPago + " - " + item.st_descripcion
-          }));
-          setCatFormasPago(dataParse);
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-  
-      const _getMetodosPago = () => {
-        loadMetodosPago.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IMetodosPago) => ({
-            id: item.id_MetodoPago,
-            label: item.c_MetodoPago + " - " + item.st_Descripcion
-          }));
-          setCatMetodosPago(dataParse);
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-  
-      const _getProdServiciosCfdi = () => {
-        loadProdServicioCfdi.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IProdServicioCFDI) => ({
-            id: item.id_ClaveProdServCFDI,
-            label: item.c_ClaveProdServ + " - " + item.Descripcion
-          }));
-          setCatProdServicioCFDI( dataParse );
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-  
-      const _getUnidadPesoCfdi = () => {
-        let dataParse = catUnidadServicio.map( (item) => ({
+        setCatUnidadPesoCFDI(catUnidadServicio.map(item => ({
           id: item.id_ClaveUnidadPesoCFDI,
-          label: item.c_ClaveUnidad + " - " + item.st_Nombre
-        }));
-        setCatUnidadPesoCFDI( dataParse );
-      }
-  
-      const _getUsoCfdi = async() => {
-        loadUsoCfdi.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IUsoCFDI) => ({
-            id: item.id_UsoCFDI,
-            label: item.c_UsoCFDI + " - " + item.st_Descripcion
-          }));
-          setCatUsoCFDI( dataParse );
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
+          label: `${item.c_ClaveUnidad} - ${item.st_Nombre}`,
+        })));
 
-      const _getTipoImpuestos = () => {
-        loadTipoImpuestos.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: ITipoImpuestos) => ({
-            id: item.id_Impuesto,
-            label: item.c_Impuesto + " - " + item.st_Descripcion
-          }));
-          setCatTipoImpuestos( dataParse );
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-
-      const _getObjetoImpuesto = () => {
-        loadObjetoImpuesto.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: IObjetoImpuesto) => ({
-            id: item.id_ObjetoImp,
-            label: item.c_ObjetoImp + " - " + item.st_descripcion
-          }));
-          setCatObjetoImpuesto( dataParse );
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-  
-      const _getTipoFactor = () => {
-        loadTipoFactor.call
-        .then((resp) => {
-          let response = resp.data;
-          let dataParse = response.data.map( (item: ITipoFactor) => ({
-            id: item.id_TipoFactor,
-            label: item.c_TipoFactor
-          }));
-          setCatTipoFactor( dataParse );
-        }).catch((error: any) => {
-          console.log(error);
-        });
-      }
-
-      const _getTasaCuota = () => {
-        let dataParse = catTasaCuotaJson.map( (item: ITasaCuota) => ({
+        setCatTasaCuota(catTasaCuotaJson.map(item => ({
           id: item.id_TasaCuotaJson,
-          label: item.c_TasaCuota
-        }));
-        setCatTasaCuota( dataParse );
+          label: item.c_TasaCuota,
+        })));
+        
+      } catch (error) {
+        console.error('Error cargando catálogos:', error);
       }
-  
-      _getViajesActivos();
-      _getTipoComprobante();
-      _getClientes();
-      _getMonedas();
-      _getFormasPago();
-      _getMetodosPago();
-      _getProdServiciosCfdi();
-      _getUnidadPesoCfdi();
-      _getUsoCfdi();
-      _getTipoImpuestos();
-      _getObjetoImpuesto();
-      _getTipoFactor();
-      _getTasaCuota();
+    };
+    fetchCatalogs();
   },[]);
 
   // CAT - TIPO COMPROBANTE
   useEffect( () => {
     // Si es traslado
-      setValue('cfdi.dec_Total', (wTipoComprobante === 2) ? 0 : null);
-      setValue('cfdi.dec_SubTotal', (wTipoComprobante === 2) ? 0 : null);
+    if(wTipoComprobante === 2){
+      setValue('cfdi.dec_Total', 0);
+      setValue('cfdi.dec_SubTotal',0);
+    }
   },[wTipoComprobante]);
 
   // INPUT VALOR UNITARIO CONCEPTO
@@ -680,4 +581,204 @@ function SectionCfdiCartaPorte() {
   )
 }
 
-export default SectionCfdiCartaPorte
+export default SectionCfdiCartaPorte;
+
+
+// Review Deprecated
+// init Function
+  // useEffect( () => {
+  //     // services
+  //     const loadViajesActivos = getViajesActivos();
+  //     const loadClientes = getClientesEmpresa();
+  //     const loadMonedas = getCatTipoMonedas();
+  //     const loadFormasPago = getCatFormaPago();
+  //     const loadMetodosPago = getCatMetodosPago();
+  //     const loadProdServicioCfdi = getCatProdServicioCFDI();
+  //     const loadUsoCfdi = getCatUsoCFDI();
+  //     const loadTipoImpuestos = getCatTipoImpuestos();
+  //     const loadObjetoImpuesto = getCatObjetoImpuesto();
+  //     const loadTipoFactor = getCatTipoFactor();
+  
+  //     //obtenemos los viajes activos por empresa
+  //     const _getViajesActivos = () => {
+  //       loadViajesActivos.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IViajesActivos) => ({
+  //             id: item.id_Viaje,
+  //             label: item.folio_int_viaje + " - " + item.st_EconomicoUnidad
+  //         }));
+  //         setCatViajesActivos(dataParse);
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+
+  //     // Tipo Comprobante
+  //     const _getTipoComprobante = () => {
+  //       let dataParse = ITipoComprobanteArray.map( (item) => ({
+  //         id: item.id_TipoComprobante,
+  //         label: item.c_TipoDeComprobante + " - " + item.st_TipoComprobante
+  //       }));
+  //       setCatTipoComprobante(dataParse);
+  //     }
+
+  //     // Clientes Cfdi
+  //     const _getClientes =  () => {
+  //       loadClientes.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: ICliente) => ({
+  //           id: item.id_Cliente,
+  //           label: item.st_RazonSocial
+  //         }));
+  //         setCatClientes(dataParse);
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+
+  //     // Tipo moneda
+  //     const _getMonedas = () => {
+  //       loadMonedas.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: ICatMoneda) => ({
+  //           id: item.id_Moneda,
+  //           label: item.c_Moneda + " - " + item.st_Descripcion
+  //         }));
+  //         setCatMonedas(dataParse);
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+        
+  //     }
+
+  //     const _getFormasPago = () => {
+  //       loadFormasPago.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IFormasPago) => ({
+  //           id: item.id_FormaPago,
+  //           label: item.c_FormaPago + " - " + item.st_descripcion
+  //         }));
+  //         setCatFormasPago(dataParse);
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+  
+  //     const _getMetodosPago = () => {
+  //       loadMetodosPago.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IMetodosPago) => ({
+  //           id: item.id_MetodoPago,
+  //           label: item.c_MetodoPago + " - " + item.st_Descripcion
+  //         }));
+  //         setCatMetodosPago(dataParse);
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+  
+  //     const _getProdServiciosCfdi = () => {
+  //       loadProdServicioCfdi.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IProdServicioCFDI) => ({
+  //           id: item.id_ClaveProdServCFDI,
+  //           label: item.c_ClaveProdServ + " - " + item.Descripcion
+  //         }));
+  //         setCatProdServicioCFDI( dataParse );
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+  
+  //     const _getUnidadPesoCfdi = () => {
+  //       let dataParse = catUnidadServicio.map( (item) => ({
+  //         id: item.id_ClaveUnidadPesoCFDI,
+  //         label: item.c_ClaveUnidad + " - " + item.st_Nombre
+  //       }));
+  //       setCatUnidadPesoCFDI( dataParse );
+  //     }
+  
+  //     const _getUsoCfdi = async() => {
+  //       loadUsoCfdi.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IUsoCFDI) => ({
+  //           id: item.id_UsoCFDI,
+  //           label: item.c_UsoCFDI + " - " + item.st_Descripcion
+  //         }));
+  //         setCatUsoCFDI( dataParse );
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+
+  //     const _getTipoImpuestos = () => {
+  //       loadTipoImpuestos.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: ITipoImpuestos) => ({
+  //           id: item.id_Impuesto,
+  //           label: item.c_Impuesto + " - " + item.st_Descripcion
+  //         }));
+  //         setCatTipoImpuestos( dataParse );
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+
+  //     const _getObjetoImpuesto = () => {
+  //       loadObjetoImpuesto.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: IObjetoImpuesto) => ({
+  //           id: item.id_ObjetoImp,
+  //           label: item.c_ObjetoImp + " - " + item.st_descripcion
+  //         }));
+  //         setCatObjetoImpuesto( dataParse );
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+  
+  //     const _getTipoFactor = () => {
+  //       loadTipoFactor.call
+  //       .then((resp) => {
+  //         let response = resp.data;
+  //         let dataParse = response.data.map( (item: ITipoFactor) => ({
+  //           id: item.id_TipoFactor,
+  //           label: item.c_TipoFactor
+  //         }));
+  //         setCatTipoFactor( dataParse );
+  //       }).catch((error: any) => {
+  //         console.log(error);
+  //       });
+  //     }
+
+  //     const _getTasaCuota = () => {
+  //       let dataParse = catTasaCuotaJson.map( (item: ITasaCuota) => ({
+  //         id: item.id_TasaCuotaJson,
+  //         label: item.c_TasaCuota
+  //       }));
+  //       setCatTasaCuota( dataParse );
+  //     }
+  
+  //     _getViajesActivos();
+  //     _getTipoComprobante();
+  //     _getClientes();
+  //     _getMonedas();
+  //     _getFormasPago();
+  //     _getMetodosPago();
+  //     _getProdServiciosCfdi();
+  //     _getUnidadPesoCfdi();
+  //     _getUsoCfdi();
+  //     _getTipoImpuestos();
+  //     _getObjetoImpuesto();
+  //     _getTipoFactor();
+  //     _getTasaCuota();
+  // },[]);

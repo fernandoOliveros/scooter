@@ -6,13 +6,24 @@ import { ICartaPorteForm } from "../../models/cartaportes/cartaPorte-form.model"
 import { ICartaPorteProductoServicioForm } from "../../models/cartaportes/cartaPorte-produtoServicio-form.model";
 import { ICartaPorteDirOrigenForm } from "../../models/cartaportes/cartaPorte-dirOrigen-form.model";
 import { ICartaPorteDirDestinoForm } from "../../models/cartaportes/cartaPorte-dirDestino-form.model";
+import api from "../api";
+import { ICartaPorteFormData } from "../../models/cartaportes/cartaporte-formData";
 
 
 export const getCartaPorteByEmpresa = (idEmpresa: string) => {
     const controller = loadAbort();
     let uri = baseUrl + "cartaporte/readAllByEmpresa/" + idEmpresa;
     return {
-        call: axios.get(uri, { signal: controller.signal }),
+        call: api.get(uri, { signal: controller.signal }),
+        controller
+    }
+}
+
+export const getCartaPorteById = (idCartaPorte: number) => {
+    const controller = loadAbort();
+    let uri = baseUrl + "cartaporte/getCartaPorteV2/" + idCartaPorte;
+    return {
+        call: api.get(uri, { signal: controller.signal }),
         controller
     }
 }
@@ -34,6 +45,14 @@ export const createCartaPorteService = (idCfdi: number, data: ICartaPorteForm) =
     data.id_CFDI = idCfdi;
     return {
         call: axios.post(uri, data, {signal: controller.signal}),
+        controller
+    }
+}
+
+export const createCartsPorteV2 = (data: ICartaPorteFormData) => {
+    const controller = loadAbort();
+    return {
+        call: api.post(baseUrl + "cartaporte/createV2", data, { signal: controller.signal }),
         controller
     }
 }

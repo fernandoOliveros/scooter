@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate} from 'react-router-dom';
 import {  PrivateRoutes } from './routes/routes';
 import AuthGuard from './guards/guard-routes';
+import EditCartaPorte from './pages/CartaPortes/EditCartaPorte';
 
 const LoginScreen = lazy( () => import('./pages/Login/Login'));
 const HomeScreen = lazy( () => import('./pages/Home/Home'));
@@ -79,6 +80,7 @@ function App() {
           {/* CARTA PORTE */}
           <Route path={PrivateRoutes.cartaPorte} element={<CartaPortesScreen />}/>
           <Route path={PrivateRoutes.cartaPorteNew} element={<CreateCartaPorte />}/>
+          <Route path={PrivateRoutes.cartaPorteEdit} element={<EditCartaPorte />}/>
 
           {/* FACTURAS */}
           <Route path={PrivateRoutes.factura} element={<FacturasScreen />}/>
